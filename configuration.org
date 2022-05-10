@@ -55,6 +55,11 @@
     (my/config-load "core.org")
     #+end_src
 
+* [[./elisp.org][Emacs Lisp configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "elisp.org")
+    #+end_src
+
 * [[./style.org][Styling configuration]]
     #+begin_src emacs-lisp
     (my/config-load "style.org")

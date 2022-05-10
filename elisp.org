@@ -1,0 +1,78 @@
+#+TITLE: Emacs Lisp Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+property: header-args:emacs-lisp :results output silent
+
+* Enable lexical binding
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+* Add utility libraries
+** [[https://github.com/magnars/dash.el][dash]] - "a modern list library for emacs"
+   #+begin_src emacs-lisp
+     (use-package dash
+       :config
+       (with-eval-after-load 'info-look
+         (dash-register-info-lookup))
+       (global-dash-fontify-mode))
+   #+end_src
+
+** [[https://github.com/magnars/s.el][s]] - "the long-lost Emacs string manipulation library"
+   #+begin_src emacs-lisp
+     (use-package s)
+   #+end_src
+
+** [[https://github.com/rejeep/f.el][f]] - "Modern API for working with files and directories in Emacs"
+   #+begin_src emacs-lisp
+     (use-package f)
+   #+end_src
+
+** [[http://git.savannah.gnu.org/gitweb/?p=emacs.git;a=blob;f=lisp/emacs-lisp/let-alist.el][let-alist.el]] - slick way of unpacking association lists (=alist=)
+   #+begin_src emacs-lisp
+     (use-package let-alist)
+   #+end_src
+
+* <<<eros>>> ([[https://github.com/xiongtx/eros][github]]): Display evaluation results inline
+  #+begin_src emacs-lisp
+    (use-package eros
+      :hook (emacs-lisp-mode . eros-mode))
+  #+end_src
+
+* <<<macrostep>>> ([[https://github.com/joddie/macrostep][github]]): expand elisp macros
+  #+begin_src emacs-lisp
+    (use-package macrostep
+      :commands macrostep-expand
+      :general
+      (local-leader emacs-lisp-mode-map
+        "M" '(macrostep-expand :which-key "macro expand")
+        ))
+  #+end_src
+
+* Emacs-lisp bindings
+  #+begin_src emacs-lisp
+    (use-package my/emacs-lisp-config
+      :no-require t
+      :straight nil
+      :general
+      ('motion emacs-lisp-mode-map "K" 'helpful-at-point)
+      (local-leader emacs-lisp-mode-map
+        "e"  '(:ignore t :major-modes emacs-lisp-mode :which-key "eval")
+        "ee" '(eval-last-sexp :which-key "expression")
+        "ef" '(eval-defun :which-key "function")
+        "eF" '(load-file :which-key "file")
+        "er" '(eval-region :which-key "region")
+        "eb" '(eval-buffer :which-key "buffer")))
+  #+end_src
+
+* Improving Emacs-lisp
+
+** Add =backward-line= function, for consistency
+  #+begin_src emacs-lisp
+    (defun backward-line (&optional N)
+      "Move N lines backwards (forward if N is negative)."
+      (interactive)
+      (let ((n (if N N 1)))
+        (forward-line (* -1 n))))
+  #+end_src
