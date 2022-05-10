@@ -1,0 +1,76 @@
+#+TITLE: Emacs Configuration (mine)
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:emacs-lisp :results output silent
+
+* Enable lexical binding
+  #+begin_src emacs-lisp
+    ;; -*- lexical-binding: t -*-
+  #+end_src
+
+* Set personal information
+  #+begin_src emacs-lisp
+    (setq user-full-name "Chris Chambers"
+          user-mail-address "magma.chambers@gmail.com"
+          calendar-latitude 51.501476
+          calendar-longitude -0.140634
+          calendar-location-name "London, UK")
+  #+end_src
+
+* Set file paths
+  #+begin_src emacs-lisp
+    (setq my/notes-directory (file-truename "~/Dropbox/notes")
+          my/ebooks-directory (file-truename "~/Ebooks"))
+  #+end_src
+
+* Bootstrap config-related functions
+   #+begin_src emacs-lisp
+     (setq config-file (expand-file-name
+                        (concat user-emacs-directory "configuration.org")))
+   #+end_src
+
+   #+begin_src emacs-lisp
+    (defun config-edit ()
+    (interactive)
+    (find-file config-file))
+   #+end_src
+
+   #+begin_src emacs-lisp
+    (defun config-reload ()
+       (interactive)
+       (org-babel-load-file config-file))
+   #+end_src
+
+ #+begin_src emacs-lisp
+   (defun my/config-load (name)
+     "Used for loading other org config files from `configuration.org'"
+     (interactive)
+     (org-babel-load-file (expand-file-name name user-emacs-directory)))
+ #+end_src
+
+* [[./core.org][Core configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "core.org")
+    #+end_src
+
+* [[./style.org][Styling configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "style.org")
+    #+end_src
+
+* [[./programming.org][Programming configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "programming.org")
+    #+end_src
+
+* [[./orgmode.org][Orgmode-related configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "orgmode.org")
+    #+end_src
+
+* [[./misc.org][Misc configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "misc.org")
+    #+end_src

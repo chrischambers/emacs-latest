@@ -1,0 +1,28 @@
+.DS_Store
+
+auto-save-list/
+.cache/
+ltximg/
+.sx/
+elpa/
+straight/
+transient/
+url/
+
+# save-hist
+history
+
+# org-roam
+org-roam.db
+
+# projectile
+projectile-bookmarks.eld
+
+.emacs.desktop
+network-security.data
+places
+recentf
+
+configuration.el
+mail.el
+custom.el

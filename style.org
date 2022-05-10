@@ -1,0 +1,48 @@
+#+TITLE: Style Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+property: header-args:emacs-lisp :results output silent
+
+* Enable lexical binding
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+* Doom Theme
+  #+begin_src emacs-lisp
+    (use-package doom-themes
+      :custom
+      (doom-themes-enable-bold t)
+      (doom-themes-enable-italic t)
+      :config
+      (load-theme 'doom-dracula t))
+  #+end_src
+
+* Mode-line via [[https://github.com/TheBB/spaceline][spaceline]]
+  #+begin_src emacs-lisp
+    (use-package spaceline
+      ;; :defer 2
+      :config
+      (require 'spaceline-config)
+      (setq powerline-default-separator 'wave)
+      (spaceline-toggle-minor-modes-off)
+      (spaceline-spacemacs-theme))
+  #+end_src
+
+* UI preferences
+** Prettify symbols
+  #+begin_src emacs-lisp
+    (use-package prettify-symbols
+      :straight nil
+      :hook
+      (after-init . global-prettify-symbols-mode)
+      (org-mode . prettify-todo-indicators)
+      :preface
+      (defun prettify-todo-indicators ()
+        (push '("TODO"  . ?✏) prettify-symbols-alist)
+        (push '("DONE"  . ?✓) prettify-symbols-alist)
+        (push '("CANCELLED"  . ?✘) prettify-symbols-alist)
+        (push '("SOMEDAY-MAYBE"  . ??) prettify-symbols-alist)
+        (push '("IDEA"  . ?💡) prettify-symbols-alist)))
+  #+end_src

@@ -1,0 +1,55 @@
+#+TITLE: Misc Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+property: header-args:emacs-lisp :results output silent
+
+* Enable lexical binding
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+* Silence compiler warnings
+  These can be pretty disruptive with native-compilation enabled:
+
+  #+begin_src emacs-lisp
+    (when (>= emacs-major-version 28)
+      (setq native-comp-async-report-warnings-errors nil)
+      (setq comp-async-report-warnings-errors nil))
+    (setq warning-minimum-level :error)
+  #+end_src
+
+* Add [[https://github.com/domtronn/all-the-icons.el][all-the-icons]]
+    #+begin_src emacs-lisp
+      (use-package all-the-icons
+        :defer 0.5)
+    #+end_src
+
+* Site-lisp
+  #+begin_src emacs-lisp
+    (add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
+  #+end_src
+
+* Display line numbers globally (if emacs supports it)
+    #+begin_src emacs-lisp
+      (when (version<= "26.0.50" emacs-version )
+        ;; (global-display-line-numbers-mode)
+        (setq-default display-line-numbers-width 4))
+    #+end_src
+
+* Display global fill indicator (if emacs supports it)
+  #+begin_src emacs-lisp
+    (when (version<= "27.0.0" emacs-version )
+      ;; (global-display-fill-column-indicator-mode)
+      (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
+      (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode))
+  #+end_src
+
+** ...but avoid using =display-fill-column-indicator-mode= when =variable-pitch-mode= is active
+   #+begin_src emacs-lisp
+     (defun display-fill-column-indicator--turn-off ()
+       (interactive)
+       (display-fill-column-indicator-mode 0))
+
+     (add-hook 'buffer-face-mode-hook #'display-fill-column-indicator--turn-off)
+   #+end_src
