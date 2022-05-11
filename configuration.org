@@ -65,6 +65,11 @@
     (my/config-load "style.org")
     #+end_src
 
+* [[./completion.org][Completion configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "completion.org")
+    #+end_src
+
 * [[./programming.org][Programming configuration]]
     #+begin_src emacs-lisp
     (my/config-load "programming.org")

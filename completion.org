@@ -1,0 +1,192 @@
+#+TITLE: Completion Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:emacs-lisp :results output silent
+
+* Enable lexical binding
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+* COMMENT <<<selectrum>>> ([[https://github.com/raxod502/selectrum][github]])
+
+  #+begin_src emacs-lisp
+    (use-package selectrum
+      :init
+      (selectrum-mode)
+      :after orderless
+      :custom
+      ;; Optimizations (source: https://github.com/raxod502/selectrum)
+      (selectrum-highlight-candidates-function #'orderless-highlight-matches)
+      (orderless-skip-highlighting (lambda () selectrum-is-active))
+      :general
+      ('insert selectrum-minibuffer-map
+       "C-<return>"    'selectrum-submit-exact-input
+       "C-o"		'embark-export
+       "C-n"		'next-line-or-history-element
+       "C-p"		'previous-line-or-history-element))
+  #+end_src
+
+* <<<vertico>>> ([[https://github.com/minad/vertico][github]])
+  #+begin_src emacs-lisp
+    (use-package vertico
+      :init
+      ;; Do not allow the cursor in the minibuffer prompt
+      (setq minibuffer-prompt-properties
+            '(read-only t cursor-intangible t face minibuffer-prompt))
+      (vertico-mode)
+      :hook
+      (minibuffer-setup-hook . cursor-intangible-mode)
+      :custom
+      (vertico-cycle t)
+      (completion-cycle-threshold 5)
+      ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+      ;; Vertico commands are hidden in normal buffers.
+      (read-extended-command-predicate #'command-completion-default-include-p)
+      :general
+      ('insert vertico-map
+       "C-<return>"     #'vertico-exit-input ; though you should favour M-RET, that's the default
+       "M-<tab>"        #'minibuffer-complete
+       "C-o"            #'embark-export
+       "C-."            #'embark-act
+       "C-f"            #'vertico-scroll-up
+       "C-b"            #'vertico-scroll-down
+       "C-?"            #'minibuffer-completion-help
+       "C-n"            #'next-line-or-history-element
+       "C-p"            #'previous-line-or-history-element))
+  #+end_src
+
+* Completion: <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
+  #+begin_quote
+  The way completion styles work, when one style cannot match anything, Emacs
+  tries the next one on the list, until one of them yields results. As such, it
+  is easy to activate Orderless on demand, either by separating input groups
+  with spaces or passing one of the style dispatchers that are acceptable
+
+  -- Source: [[https://protesilaos.com/emacs/dotemacs#h:5c060e2e-231d-4896-a5d2-b3fb4134764e][GNU Emacs | Protesilaos Stavrou]]
+  #+end_quote
+
+  #+begin_important
+  To open multiple files via globbing, you need:
+  - partial-completion enabled, and
+  - to move the cursor up to the minibuffer prompt (generally by pressing =C-p=)
+    once you've written the glob expression
+  #+end_important
+
+ #+begin_src emacs-lisp
+   (use-package orderless
+     :preface
+     (defun my/orderless-style-dispatcher-template (s delim symbol)
+       (let ((n (->> s
+                     (s-chop-suffix delim)
+                     (s-chop-prefix delim))))
+         (when (not (s-equals? n s))
+             `(,symbol . ,n))))
+
+     (defun literal-with-= (s _index _total)
+       (my/orderless-style-dispatcher-template s "=" 'orderless-literal))
+
+     (defun flex-with-~ (s _index _total)
+       (my/orderless-style-dispatcher-template s "~" 'orderless-flex))
+
+     :custom
+     (completion-styles '(basic partial-completion substring flex orderless))
+     (completion-ignore-case t)
+     (completion-category-defaults nil)
+     (orderless-component-separator "[ _-]+")
+     (orderless-style-dispatchers '(literal-with-= flex-with-~))
+     (orderless-matching-styles
+      '(orderless-literal
+        orderless-prefixes
+        orderless-initialism
+        orderless-flex
+        orderless-regexp
+        )))
+ #+end_src
+
+* <<<embark>>> ([[https://github.com/oantolin/embark/][github]])
+  #+begin_src emacs-lisp
+    (use-package embark
+      :general
+      ('(motion normal)
+        "M-." 'embark-dwim
+        "C-." 'embark-act))
+  #+end_src
+
+* <<<consult>>> ([[https://github.com/minad/consult][github]])
+
+ #+begin_src emacs-lisp
+   (use-package consult
+     :init
+     ;; (fset 'multi-occur #'consult-multi-occur)
+     :custom
+     (consult-preview-key (list :debounce 0.5 'any))
+     :config
+     (setq consult-narrow-key "<")
+     :general
+     ;; ('(insert motion) "C-c C-o" 'consult-multi-occur)
+     (leader
+       ;; "SPC" '(consult-complex-command :which-key "M-x")
+       "bb" '(consult-buffer :which-key "switch buffer")
+       "pb" '(consult-project-buffer :which-key "switch buffer")
+       "fr" '(consult-recent-file :which-key "recent")
+       "lk" '(consult-yank-pop :which-key "kill-ring")
+       "lr" '(consult-register :which-key "register")
+       "S"  '(:ignore t :which-key "search")
+       "Sr" '(consult-ripgrep :which-key "ripgrep")
+       "Sg" '(consult-git-grep :which-key "git-grep")
+       "Sf" '(consult-find :which-key "find")
+       "Sl" '(consult-locate :which-key "locate")
+
+       "."  '(consult-complex-command :which-key "repeat command")
+       ))
+ #+end_src
+
+* <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
+** All-the-icons completion ([[https://github.com/iyefrat/all-the-icons-completion][source]])
+   #+begin_src emacs-lisp
+     (use-package all-the-icons-completion
+       :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
+   #+end_src
+
+  #+begin_src emacs-lisp
+    (use-package marginalia
+      :config
+      (marginalia-mode))
+  #+end_src
+
+* <<<company>>> ([[https://company-mode.github.io/][github]])/([[https://www.emacswiki.org/emacs/CompanyMode][wiki]]) Completion
+  #+begin_src emacs-lisp
+    (use-package company
+      :preface
+      (defun exit-company-normal-mode (&optional arguments)
+	(interactive)
+	(progn (company-abort) (evil-force-normal-state)))
+      :demand t
+      :custom
+      (company-idle-delay 0.3)
+      (company-minimum-prefix-length 2)
+      :config
+      (global-company-mode t)
+      :general
+      (:keymaps
+       '(company-active-map company-search-map)
+       "<escape>" 'exit-company-normal-mode
+       "C-w"      'evil-delete-backward-word
+       "C-j"      'company-select-next
+       "C-k"      'company-select-previous
+       "C-n"      'company-select-next
+       "C-p"      'company-select-previous
+       "C-l"      'company-complete-selection
+       ;; "RET"      'company-complete-selection
+       ;; "<tab>"    'company-complete-selection
+       ;; "C-/"   'company-search-candidates
+       "C-/"      'company-filter-candidates
+       "C-h"      'company-show-doc-buffer)
+      )
+
+    (use-package company-box
+      :hook (company-mode . company-box-mode))
+  #+end_src

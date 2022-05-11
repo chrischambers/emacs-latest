@@ -20,16 +20,23 @@
       (load-theme 'doom-dracula t))
   #+end_src
 
-* Mode-line via [[https://github.com/TheBB/spaceline][spaceline]]
-  #+begin_src emacs-lisp
-    (use-package spaceline
-      ;; :defer 2
-      :config
-      (require 'spaceline-config)
-      (setq powerline-default-separator 'wave)
-      (spaceline-toggle-minor-modes-off)
-      (spaceline-spacemacs-theme))
-  #+end_src
+* Modeline
+** COMMENT spaceline ([[https://github.com/TheBB/spaceline][source]])
+   #+begin_src emacs-lisp
+     (use-package spaceline
+       ;; :defer 2
+       :config
+       (require 'spaceline-config)
+       (setq powerline-default-separator 'wave)
+       (spaceline-toggle-minor-modes-off)
+       (spaceline-spacemacs-theme))
+   #+end_src
+
+** doom-modeline ([[https://github.com/seagle0128/doom-modeline][source]])
+   #+begin_src emacs-lisp
+     (use-package doom-modeline
+       :hook (after-init . doom-modeline-mode))
+   #+end_src
 
 * UI preferences
 ** Prettify symbols
