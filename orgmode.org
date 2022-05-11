@@ -9,7 +9,7 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* Core org configuration
+* org
   #+begin_src emacs-lisp
     (use-package org
       :preface
@@ -337,277 +337,305 @@
        (org-table-electric-header-mode))
    #+end_src
 
-** <<<org-agenda>>>
+* <<<org-agenda>>>
+  #+begin_src emacs-lisp
+    (use-package org-agenda
+      :straight nil
+      :custom
+      (org-agenda-todo-list-sublevels t) ; default
+      (org-agenda-start-on-weekday nil)
+      (org-agenda-span 12)
+      (org-agenda-start-day "-6d")
+      (org-agenda-restore-windows-after-quit t)
+      :general
+      ;; org-super-agenda copies the org-agenda-mode-map for its headings - you
+      ;; need to manually override the emacs bindings with nicer evil equivalents.
+      ;; see:
+      ;; https://github.com/alphapapa/org-ql/issues/67
+      (org-agenda-mode-map
+       "j" 'org-agenda-next-line
+       "k" 'org-agenda-previous-line)
+      (local-leader org-agenda-mode-map
+        "c" '(org-agenda-columns :which-key "columns")
+        "f" '(org-agenda-follow-mode :which-key "follow")))
+  #+end_src
+
+** <<<org-super-agenda>>> ([[https://github.com/alphapapa/org-super-agenda][github]])
    #+begin_src emacs-lisp
-     (use-package org-agenda
-       :straight nil
+     (use-package org-super-agenda
+       :after org-agenda
+       :straight (org-super-agenda :type git :host github :repo "alphapapa/org-super-agenda")
+       :hook (org-agenda-mode . org-super-agenda-mode)
        :custom
-       (org-agenda-todo-list-sublevels t) ; default
-       (org-agenda-start-on-weekday nil)
-       (org-agenda-span 12)
-       (org-agenda-start-day "-6d")
-       (org-agenda-restore-windows-after-quit t)
-       :general
-       ;; org-super-agenda copies the org-agenda-mode-map for its headings - you
-       ;; need to manually override the emacs bindings with nicer evil equivalents.
-       ;; see:
-       ;; https://github.com/alphapapa/org-ql/issues/67
-       (org-agenda-mode-map
-        "j" 'org-agenda-next-line
-        "k" 'org-agenda-previous-line)
-       (local-leader org-agenda-mode-map
-         "c" '(org-agenda-columns :which-key "columns")
-         "f" '(org-agenda-follow-mode :which-key "follow")))
+       (org-super-agenda-keep-order t)
+       (org-super-agenda-groups
+            '((:log t)  ; Automatically named "Log"
+              (:habit t)
+              (:name "Schedule"
+                     :time-grid t)
+              (:name "Today"
+                     :scheduled today)
+              (:name "Due today"
+                     :deadline today)
+              (:name "Overdue"
+                     :deadline past)
+              (:name "Due soon"
+                     :deadline future)
+              (:name "Unimportant"
+                     :todo ("SOMEDAY" "MAYBE" "CHECK" "TO-READ" "TO-WATCH")
+                     :order 100)
+              (:name "Waiting..."
+                     :todo "WAITING"
+                     :order 98)
+              (:name "Scheduled earlier"
+                     :scheduled past))))
    #+end_src
 
-*** <<<org-super-agenda>>> ([[https://github.com/alphapapa/org-super-agenda][github]])
-    #+begin_src emacs-lisp
-      (use-package org-super-agenda
-        :after org-agenda
-        :straight (org-super-agenda :type git :host github :repo "alphapapa/org-super-agenda")
-        :hook (org-agenda-mode . org-super-agenda-mode)
-        :custom
-        (org-super-agenda-keep-order t)
-        (org-super-agenda-groups
-             '((:log t)  ; Automatically named "Log"
-               (:habit t)
-               (:name "Schedule"
-                      :time-grid t)
-               (:name "Today"
-                      :scheduled today)
-               (:name "Due today"
-                      :deadline today)
-               (:name "Overdue"
-                      :deadline past)
-               (:name "Due soon"
-                      :deadline future)
-               (:name "Unimportant"
-                      :todo ("SOMEDAY" "MAYBE" "CHECK" "TO-READ" "TO-WATCH")
-                      :order 100)
-               (:name "Waiting..."
-                      :todo "WAITING"
-                      :order 98)
-               (:name "Scheduled earlier"
-                      :scheduled past))))
+** agenda files
+*** +Limited Subset+
+   : #+begin_src emacs-lisp
+   :   (setq org-agenda-files
+   :         `(
+   :           ,org-directory
+   :           ;; ,(concat org-directory "/" "2-areas" "/" "family")
+   :           ,(concat org-directory "/" "journals")
+   :           ))
+   : #+end_src
+
+*** +All files?+
+   : #+begin_src emacs-lisp
+   :   (setq org-agenda-files (directory-files-recursively org-directory "\\.org$"))
+   : #+end_src
+
+*** Intelligently Selected Files
+   #+begin_src emacs-lisp
+     (with-eval-after-load 'org
+     (require 'f)
+     (require 's)
+     (require 'dash)
+
+     (defcustom org-agenda-blacklist '("#old" "archive.org$")
+       "patterns to exclude from org-agenda path names")
+
+     (defvar org-todo-states (-map (lambda (s) (car (s-split "(" s)))
+                                   (seq-drop (nth 0 org-todo-keywords) 1))
+       "org-todo-keywords without the suffixes")
+
+     (defvar org-agenda-todo-regex
+       (let* ((prepend-star (lambda (entry) (concat "\\* " entry)))
+              (interpolate-|-char (lambda (cur acc) (concat acc "\\|" cur)))
+              (headlines (-map prepend-star org-todo-states))
+              (pattern (-reduce interpolate-|-char headlines)))
+         pattern)
+       "Regex which filters all TODO keywords")
+
+     (defun org-agenda-find-files-with (regex)
+       "Yields a fresh array with all files containing todos which match REGEX.
+
+     Uses grep to discover all files containing anything stored in org-agenda-todo-regex."
+       (-reject #'file-directory-p
+                (split-string
+                 (shell-command-to-string
+                  (concat "grep --include=\"*.org\" -rl -e '" regex (concat "' " org-directory)))
+                 "\n")))
+
+     (defun s-matches-any? (regexes s)
+       "True if any of the patterns match s"
+       (pcase regexes
+         (`(,head . ,tail) (or (s-match head s) (s-matches-any? tail s)))
+         (_ nil)))
+
+     (defun my/org-agenda-blacklist-match (string)
+       "True when string is a match against any entry in the org-agenda-blacklist"
+       (s-matches-any? org-agenda-blacklist string))
+
+     (defun my/org-agenda-sort (files)
+       "Sorts agenda files appropriately."
+       (let* ((decorated (-map (lambda (f) (cons (f-filename f) f)) files))
+              (sorted (sort decorated (lambda (p1 p2) (string< (car p1) (car p2)))))
+              (undecorated (-map #'cdr sorted)))
+        undecorated))
+
+     (defun my/org-agenda-file-filter (files)
+       (let ((files (-reject #'my/org-agenda-blacklist-match files)))
+        (pcase-let*
+            ((`(,root-files ,files)
+              (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/" "[^/]*\.org$")) f)) files))
+             (`(,project-files ,files)
+              (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/1-projects/" ".*\.org$")) f)) files)))
+          (-flatten (-map #'my/org-agenda-sort (list root-files project-files files))))))
+
+     (setq org-agenda-files
+            (my/org-agenda-file-filter
+             (org-agenda-find-files-with org-agenda-todo-regex))))
+   #+end_src
+
+* <<<org-protocol>>> ([[https://github.com/bastibe/org-journal][github]])
+  #+begin_src emacs-lisp
+    (server-start)
+    (require 'org-protocol)
+  #+end_src
+
+* <<<org-journal>>> ([[https://github.com/bastibe/org-journal][github]])
+  #+begin_src emacs-lisp
+    (use-package org-journal
+      :custom
+      (org-journal-dir (concat org-directory "/" "journals"))
+      (org-journal-file-format "%Y-%m-%d.org")
+      (org-journal-carryover-items "/!-DONE-CANCELLED")
+      :general
+      (local-leader org-journal-mode-map
+        "p" '(org-journal-previous-entry :which-key "prev")
+        "n" '(org-journal-next-entry :which-key "next")
+        "c" '(org-journal-new-entry :which-key "create")
+        "/" '(org-journal-search :which-key "search")
+        )
+      (leader
+        "j" '(org-journal-new-entry :which-key "journal")))
+  #+end_src
+
+* <<<org roam>>>: Superior backlinking and hyperlinking
+  #+begin_src emacs-lisp
+    (use-package emacsql-sqlite)
+
+    (use-package org-roam
+      :after org
+      :config
+      (if IS-MAC
+	;; gapplin = 'open -a Gapplin "$@"') (with shebang)
+	;; (customize-set-variable 'org-roam-graph-viewer (executable-find "gapplin"))
+	(customize-set-variable 'org-roam-graph-viewer (executable-find "firefox"))
+	(customize-set-variable 'org-roam-graph-viewer (executable-find "chromium")))
+      ;; (custom-set-faces '(org-roam-link ((t (:inherit org-link :foreground "#61bfff")))))
+      :init
+      (setq org-roam-directory org-directory)
+      (setq my/org-capture-templates (concat org-roam-directory "/" "templates/"))
+      (setq my/default-template (concat my/org-capture-templates "default.org"))
+      :custom
+      (org-default-properties (append org-default-properties '("ROAM_ALIASES" "DRIlL_CARD_TYPE" "filetags")))
+      (org-roam-completion-everywhere t)
+      (org-roam-capture-templates
+       `(("d" "default" plain (file ,(concat my/org-capture-templates "default.org"))
+	  :if-new (file+head "memex/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)
+	 ("q" "quote" plain (file ,(concat my/org-capture-templates "quote.org"))
+	  :if-new (file+head "memex/#quotes/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)
+	 ("p" "person" plain (file ,(concat my/org-capture-templates "default.org"))
+	  :if-new (file+head "memex/#people/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)
+
+	 ("c" "category theory" plain (file ,(concat my/org-capture-templates "category_theory.org"))
+	  :if-new (file+head "memex/#category_theory/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)
+	 ("l" "language")
+	 ("ln" "natural language" plain (file ,(concat my/org-capture-templates "default.org"))
+	  :if-new (file+head "memex/#languages/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)
+	 ("lp" "programming language" plain (file ,(concat my/org-capture-templates "programming_language.org"))
+	  :if-new (file+head "memex/#programming_languages/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)
+	 ("t" "trail" plain (file ,(concat my/org-capture-templates "trail.org"))
+	  :if-new (file+head "memex/##trails/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)
+	 ("b" "book" plain (file ,(concat my/org-capture-templates "default.org"))
+	  :if-new (file+head "sources/${slug}.org" "#+title: ${title}\n")
+	  :unnarrowed t)))
+      :config
+      (org-roam-db-autosync-mode)
+      (add-to-list 'display-buffer-alist
+		   '("\\*org-roam\\*"
+		     (display-buffer-in-direction)
+		     (direction . right)
+		     (window-width . 0.45)
+		     (window-height . fit-window-to-buffer)))
+
+      :general
+      (leader "fn" '(org-roam-node-find :which-key "node (roam)"))
+      (general-def 'insert org-mode-map
+	"C-l" 'org-roam-node-insert :which-key "insert roam link")
+      (local-leader org-mode-map
+	"w"   '(:ignore t :major-modes org-mode :which-key "wiki (roam)")
+	"wb"   '(org-roam-buffer-toggle :which-key "backlinks (roam)")
+	"wg"   '(org-roam-graph :which-key "graph")
+	"wi"    '(org-roam-jump-to-index :which-key "index")
+	"wa"   '(:ignore t :major-modes org-mode :which-key "aliases")
+	"waa"   '(org-roam-alias-add :which-key "add")
+	"war"   '(org-roam-alias-remove :which-key "remove")
+	"wr"   '(:ignore t :major-modes org-mode :which-key "refs")
+	"wra"   '(org-roam-ref-add :which-key "add")
+	"wrr"   '(org-roam-ref-remove :which-key "remove")))
     #+end_src
 
-*** agenda files
-**** +Limited Subset+
-    : #+begin_src emacs-lisp
-    :   (setq org-agenda-files
-    :         `(
-    :           ,org-directory
-    :           ;; ,(concat org-directory "/" "2-areas" "/" "family")
-    :           ,(concat org-directory "/" "journals")
-    :           ))
-    : #+end_src
-
-**** +All files?+
-    : #+begin_src emacs-lisp
-    :   (setq org-agenda-files (directory-files-recursively org-directory "\\.org$"))
-    : #+end_src
-
-**** Intelligently Selected Files
-    #+begin_src emacs-lisp
-      (with-eval-after-load 'org
-      (require 'f)
-      (require 's)
-      (require 'dash)
-
-      (defcustom org-agenda-blacklist '("#old" "archive.org$")
-        "patterns to exclude from org-agenda path names")
-
-      (defvar org-todo-states (-map (lambda (s) (car (s-split "(" s)))
-                                    (seq-drop (nth 0 org-todo-keywords) 1))
-        "org-todo-keywords without the suffixes")
-
-      (defvar org-agenda-todo-regex
-        (let* ((prepend-star (lambda (entry) (concat "\\* " entry)))
-               (interpolate-|-char (lambda (cur acc) (concat acc "\\|" cur)))
-               (headlines (-map prepend-star org-todo-states))
-               (pattern (-reduce interpolate-|-char headlines)))
-          pattern)
-        "Regex which filters all TODO keywords")
-
-      (defun org-agenda-find-files-with (regex)
-        "Yields a fresh array with all files containing todos which match REGEX.
-
-      Uses grep to discover all files containing anything stored in org-agenda-todo-regex."
-        (-reject #'file-directory-p
-                 (split-string
-                  (shell-command-to-string
-                   (concat "grep --include=\"*.org\" -rl -e '" regex (concat "' " org-directory)))
-                  "\n")))
-
-      (defun s-matches-any? (regexes s)
-        "True if any of the patterns match s"
-        (pcase regexes
-          (`(,head . ,tail) (or (s-match head s) (s-matches-any? tail s)))
-          (_ nil)))
-
-      (defun my/org-agenda-blacklist-match (string)
-        "True when string is a match against any entry in the org-agenda-blacklist"
-        (s-matches-any? org-agenda-blacklist string))
-
-      (defun my/org-agenda-sort (files)
-        "Sorts agenda files appropriately."
-        (let* ((decorated (-map (lambda (f) (cons (f-filename f) f)) files))
-               (sorted (sort decorated (lambda (p1 p2) (string< (car p1) (car p2)))))
-               (undecorated (-map #'cdr sorted)))
-         undecorated))
-
-      (defun my/org-agenda-file-filter (files)
-        (let ((files (-reject #'my/org-agenda-blacklist-match files)))
-         (pcase-let*
-             ((`(,root-files ,files)
-               (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/" "[^/]*\.org$")) f)) files))
-              (`(,project-files ,files)
-               (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/1-projects/" ".*\.org$")) f)) files)))
-           (-flatten (-map #'my/org-agenda-sort (list root-files project-files files))))))
-
-      (setq org-agenda-files
-             (my/org-agenda-file-filter
-              (org-agenda-find-files-with org-agenda-todo-regex))))
-    #+end_src
-
-** <<<org-protocol>>> ([[https://github.com/bastibe/org-journal][github]])
+** COMMENT Org-roam Refactoring Funxtions
    #+begin_src emacs-lisp
-     (server-start)
-     (require 'org-protocol)
-   #+end_src
-
-** <<<org-journal>>> ([[https://github.com/bastibe/org-journal][github]])
-   #+begin_src emacs-lisp
-     (use-package org-journal
-       :custom
-       (org-journal-dir (concat org-directory "/" "journals"))
-       (org-journal-file-format "%Y-%m-%d.org")
-       (org-journal-carryover-items "/!-DONE-CANCELLED")
-       :general
-       (local-leader org-journal-mode-map
-         "p" '(org-journal-previous-entry :which-key "prev")
-         "n" '(org-journal-next-entry :which-key "next")
-         "c" '(org-journal-new-entry :which-key "create")
-         "/" '(org-journal-search :which-key "search")
-         )
-       (leader
-         "j" '(org-journal-new-entry :which-key "journal")
-         ))
-   #+end_src
-
-** <<<org roam>>>: Superior backlinking and hyperlinking
-   #+begin_src emacs-lisp
-     (use-package emacsql-sqlite)
-
-     (use-package org-roam
-       :after org
-       :hook (after-init . org-roam-mode)
-       :config
-       (if IS-MAC
-         ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
-         ;; (customize-set-variable 'org-roam-graph-viewer (executable-find "gapplin"))
-         (customize-set-variable 'org-roam-graph-viewer (executable-find "firefox"))
-         (customize-set-variable 'org-roam-graph-viewer (executable-find "chromium")))
-       ;; (custom-set-faces '(org-roam-link ((t (:inherit org-link :foreground "#61bfff")))))
-       :init
-       (setq org-roam-directory org-directory)
-       (setq my/org-capture-templates (concat org-roam-directory "/" "templates/"))
-       (setq my/default-template (concat my/org-capture-templates "default.org"))
-       :custom
-       (org-default-properties (append org-default-properties '("ROAM_ALIASES" "DRIlL_CARD_TYPE" "filetags")))
-       (org-roam-completion-everywhere t)
-       (org-roam-capture-templates
-        `(("d" "default" plain (file ,(concat my/org-capture-templates "default.org"))
-           :if-new (file+head "memex/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("q" "quote" plain (file ,(concat my/org-capture-templates "quote.org"))
-           :if-new (file+head "memex/#quotes/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("p" "person" plain (file ,(concat my/org-capture-templates "default.org"))
-           :if-new (file+head "memex/#people/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-
-          ("c" "category theory" plain (file ,(concat my/org-capture-templates "category_theory.org"))
-           :if-new (file+head "memex/#category_theory/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("l" "language")
-          ("ln" "natural language" plain (file ,(concat my/org-capture-templates "default.org"))
-           :if-new (file+head "memex/#languages/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("lp" "programming language" plain (file ,(concat my/org-capture-templates "programming_language.org"))
-           :if-new (file+head "memex/#programming_languages/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("t" "trail" plain (file ,(concat my/org-capture-templates "trail.org"))
-           :if-new (file+head "memex/##trails/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("b" "book" plain (file ,(concat my/org-capture-templates "default.org"))
-           :if-new (file+head "sources/${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)))
-       :config
-       (org-roam-db-autosync-mode)
-
+     (with-eval-after-load 'org-roam
        (defun my/conditional-kill-buffer-for-file (file)
-         "Kill buffer for FILE if it's not modified: otherwise, throw error."
-         (interactive "f")
-         (when-let ((buffer (find-buffer-visiting file)))
-           (if (buffer-modified-p buffer)
-               (error (format "Error: buffer '%s' has not been saved."
-                              (buffer-name buffer)))
-             (kill-buffer buffer))))
+	 "Kill buffer for FILE if it's not modified: otherwise, throw error."
+	 (interactive "f")
+	 (when-let ((buffer (find-buffer-visiting file)))
+	   (if (buffer-modified-p buffer)
+	       (error (format "Error: buffer '%s' has not been saved."
+			      (buffer-name buffer)))
+	     (kill-buffer buffer))))
 
        (defun my--memex-relocate (old-file filename &optional new-root)
-         (let* ((new-root (concat org-roam-directory "/memex/"))
-                (new-file (concat (read-directory-name "> " new-root) filename)))
-           (f-move old-file new-file)
-           (find-file new-file)
-           (vc-refresh-state)
-           (org-roam-db-sync)
-           (message (format "Migrated '%s' to %s." filename new-file))))
+	 (let* ((new-root (concat org-roam-directory "/memex/"))
+		(new-file (concat (read-directory-name "> " new-root) filename)))
+	   (f-move old-file new-file)
+	   (find-file new-file)
+	   (vc-refresh-state)
+	   (org-roam-db-sync)
+	   (message (format "Migrated '%s' to %s." filename new-file))))
 
        (defun my/promote-node ()
-         "Moves the file for the selected node from the old hierarchy into
+	 "Moves the file for the selected node from the old hierarchy into
      the current memex."
-         (interactive)
-         (let* ((old-root (concat org-roam-directory "/#old/"))
-                (matches? (lambda (node)
-                            (f-descendant-of? (org-roam-node-file node) old-root)))
-                (node (org-roam-node-read "" matches?))
-                (old-file (org-roam-node-file node))
-                (filename (f-filename old-file)))
-           (my/conditional-kill-buffer-for-file old-file)
-           (my--memex-relocate old-file filename)))
+	 (interactive)
+	 (let* ((old-root (concat org-roam-directory "/#old/"))
+		(matches? (lambda (node)
+			    (f-descendant-of? (org-roam-node-file node) old-root)))
+		(node (org-roam-node-read "" matches?))
+		(old-file (org-roam-node-file node))
+		(filename (f-filename old-file)))
+	   (my/conditional-kill-buffer-for-file old-file)
+	   (my--memex-relocate old-file filename)))
 
        (defun my/promote-buffer (buffer-name)
-         "Moves the file for the selected buffer from the old hierarchy
+	 "Moves the file for the selected buffer from the old hierarchy
      into the current memex."
-         (interactive "b")
-         (let* ((old-root (concat org-roam-directory "/#old/"))
-                (new-root (concat org-roam-directory "/memex/"))
-                (buffer (get-buffer buffer-name))
-                (buffer-path (buffer-file-name buffer)))
-           (when (not (f-descendant-of? buffer-path old-root))
-             (error (concat buffer-name
-                            " is not located under the old notes hierarchy.")))
-           (my/conditional-kill-buffer-for-file buffer-path)
-           (my--memex-relocate buffer-path buffer-name)))
+	 (interactive "b")
+	 (let* ((old-root (concat org-roam-directory "/#old/"))
+		(new-root (concat org-roam-directory "/memex/"))
+		(buffer (get-buffer buffer-name))
+		(buffer-path (buffer-file-name buffer)))
+	   (when (not (f-descendant-of? buffer-path old-root))
+	     (error (concat buffer-name
+			    " is not located under the old notes hierarchy.")))
+	   (my/conditional-kill-buffer-for-file buffer-path)
+	   (my--memex-relocate buffer-path buffer-name))))
+   #+end_src
 
+** COMMENT =org-roam-node-find= Display Style
+   #+begin_src emacs-lisp
+     (with-eval-after-load 'org-roam
        (cl-defmethod org-roam-node-icon ((node org-roam-node))
-         (let ((path (org-roam-node-file node)))
-           (cond
-            ((s-matches? "#old" path) "🕰️")
-            ((s-matches? "##trails" path) "️🌐")
-            ((s-matches? "#category_theory" path) "♾️")
-            ((s-matches? "#data_structures" path) "️🔋")
-            ((s-matches? "#languages" path) "💬")
-            ((s-matches? "#people" path) "️👤")
-            ((s-matches? "#programming_languages" path) "💾")
-            ((s-matches? "#quotes" path) "️💬")
-            )))
+	 (let ((path (org-roam-node-file node)))
+	   (cond
+	    ((s-matches? "#old" path) "🕰️")
+	    ((s-matches? "##trails" path) "️🌐")
+	    ((s-matches? "#category_theory" path) "♾️")
+	    ((s-matches? "#data_structures" path) "️🔋")
+	    ((s-matches? "#languages" path) "💬")
+	    ((s-matches? "#people" path) "️👤")
+	    ((s-matches? "#programming_languages" path) "💾")
+	    ((s-matches? "#quotes" path) "️💬")
+	    )))
 
        (cl-defmethod org-roam-node-relpath ((node org-roam-node))
-         (let* ((node-path (org-roam-node-file node))
-                (node-rel-path (file-relative-name node-path org-roam-directory)))
-           node-rel-path))
+	 (let* ((node-path (org-roam-node-file node))
+		(node-rel-path (file-relative-name node-path org-roam-directory)))
+	   node-rel-path))
 
        ;; (setq org-roam-node-display-template (concat "${icon:3}${title:50}"))
        ;; (setq org-roam-node-display-template
@@ -619,110 +647,87 @@
        ;; (setq org-roam-node-annotation-function
        ;;     (lambda (node) (marginalia-annotate-file (org-roam-node-file node))))
        (setq org-roam-node-annotation-function
-           (lambda (node) (org-roam-node-relpath node)))
-
-       (add-to-list 'display-buffer-alist
-                    '("\\*org-roam\\*"
-                      (display-buffer-in-direction)
-                      (direction . right)
-                      (window-width . 0.45)
-                      (window-height . fit-window-to-buffer)))
-
-       :general
-       (leader "fn" '(org-roam-node-find :which-key "node (roam)"))
-       (general-def 'insert org-mode-map
-         "C-l" 'org-roam-node-insert :which-key "insert roam link")
-       (local-leader org-mode-map
-         "w"   '(:ignore t :major-modes org-mode :which-key "wiki (roam)")
-         "wb"   '(org-roam-buffer-toggle :which-key "backlinks (roam)")
-         "wg"   '(org-roam-graph :which-key "graph")
-         "wi"    '(org-roam-jump-to-index :which-key "index")
-         "wa"   '(:ignore t :major-modes org-mode :which-key "aliases")
-         "waa"   '(org-roam-alias-add :which-key "add")
-         "war"   '(org-roam-alias-remove :which-key "remove")
-         "wr"   '(:ignore t :major-modes org-mode :which-key "refs")
-         "wra"   '(org-roam-ref-add :which-key "add")
-         "wrr"   '(org-roam-ref-remove :which-key "remove")))
+	     (lambda (node) (org-roam-node-relpath node))))
    #+end_src
 
-** <<<org-ref>>> ([[https://github.com/jkitchin/org-ref][github]])
-   #+begin_src emacs-lisp
-     (use-package ivy-bibtex
-       :custom
-       (bibtex-completion-bibliography (concat my/ebooks-directory "/" "references.bib"))
-       (bibtex-completion-library-path my/ebooks-directory)
-       (bibtex-completion-pdf-field "file")
-       (bibtex-completion-notes-path org-directory)
-       (org-file-apps (alist-set "\\.pdf\\'" 'emacs org-file-apps)))
+* <<<org-ref>>> ([[https://github.com/jkitchin/org-ref][github]])
+  #+begin_src emacs-lisp
+    (use-package ivy-bibtex
+      :custom
+      (bibtex-completion-bibliography (concat my/ebooks-directory "/" "references.bib"))
+      (bibtex-completion-library-path my/ebooks-directory)
+      (bibtex-completion-pdf-field "file")
+      (bibtex-completion-notes-path org-directory)
+      (org-file-apps (alist-set "\\.pdf\\'" 'emacs org-file-apps)))
 
-     (use-package org-ref
-       :straight (org-ref :type git :host github :repo "jkitchin/org-ref")
-       ;; :custom
-       ;; (reftex-default-bibliography '("~/org/bibliography/references.bib")) ??
-       :config
-       (require 'org-ref-ivy)
-       :general
-       (local-leader org-mode-map
-         "c"   '(org-ref-insert-link-hydra/body :which-key "cite"))
-       (local-leader bibtex-mode-map
-         "b"   '(org-ref-bibtex-hydra/body :which-key "bibliography")
-         ))
-   #+end_src
+    (use-package org-ref
+      :straight (org-ref :type git :host github :repo "jkitchin/org-ref")
+      ;; :custom
+      ;; (reftex-default-bibliography '("~/org/bibliography/references.bib")) ??
+      :config
+      (require 'org-ref-ivy)
+      :general
+      (local-leader org-mode-map
+        "c"   '(org-ref-insert-link-hydra/body :which-key "cite"))
+      (local-leader bibtex-mode-map
+        "b"   '(org-ref-bibtex-hydra/body :which-key "bibliography")
+        ))
+  #+end_src
 
-** <<<org-roam-bibtex>>> ([[https://github.com/org-roam/org-roam-bibtex][github]])
-   #+begin_src emacs-lisp
-     (use-package org-roam-bibtex
-       :after org-roam
-       :custom
-       (orb-roam-ref-format "org-ref-v3")
-       :config
-       (require 'org-ref)
-       (org-roam-bibtex-mode t))
-   #+end_src
+* <<<org-roam-bibtex>>> ([[https://github.com/org-roam/org-roam-bibtex][github]])
+  #+begin_src emacs-lisp
+    (use-package org-roam-bibtex
+      :after org-roam
+      :custom
+      (orb-roam-ref-format "org-ref-v3")
+      :config
+      (require 'org-ref)
+      (org-roam-bibtex-mode t))
+  #+end_src
 
-** <<<org-noter>>> ([[https://github.com/weirdNox/org-noter][github]])
-   #+begin_src emacs-lisp
-     (use-package org-noter
-       :preface
-       (defun my/org-noter-precise-note ()
-         (interactive)
-         (if (use-region-p)
-             (org-noter-insert-precise-note)
-           (progn
-             (evil-visual-line)
-             (org-noter-insert-precise-note))))
+* <<<org-noter>>> ([[https://github.com/weirdNox/org-noter][github]])
+  #+begin_src emacs-lisp
+    (use-package org-noter
+      :preface
+      (defun my/org-noter-precise-note ()
+        (interactive)
+        (if (use-region-p)
+            (org-noter-insert-precise-note)
+          (progn
+            (evil-visual-line)
+            (org-noter-insert-precise-note))))
 
-       (defun workaround-org-noter-keybinding-issue-doc ()
-         (interactive "p")
-         (evil-local-set-key 'normal "J"         'org-noter-sync-next-note)
-         (evil-local-set-key 'normal  "K"        'org-noter-sync-prev-note)
-         (evil-local-set-key 'normal "i"         'my/org-noter-precise-note)
-         (evil-local-set-key 'normal "q"         'org-noter-kill-session)
-         (evil-local-set-key 'normal (kbd "C-]") 'org-noter-sync-current-note))
+      (defun workaround-org-noter-keybinding-issue-doc ()
+        (interactive "p")
+        (evil-local-set-key 'normal "J"         'org-noter-sync-next-note)
+        (evil-local-set-key 'normal  "K"        'org-noter-sync-prev-note)
+        (evil-local-set-key 'normal "i"         'my/org-noter-precise-note)
+        (evil-local-set-key 'normal "q"         'org-noter-kill-session)
+        (evil-local-set-key 'normal (kbd "C-]") 'org-noter-sync-current-note))
 
-       (defun workaround-org-noter-keybinding-issue-notes ()
-         (interactive "p")
-         (evil-local-set-key 'normal "J"           'org-noter-sync-next-note)
-         (evil-local-set-key 'normal "K"           'org-noter-sync-prev-note)
-         (evil-local-set-key 'normal (kbd "C-]")   'org-noter-sync-current-note))
-       :custom
-       (org-noter-default-notes-file-names nil)
-       (org-noter-notes-search-path (list (concat org-directory "/sources")))
-       :hook
-       (org-noter-notes-mode .  workaround-org-noter-keybinding-issue-notes)
-       (org-noter-doc-mode .  workaround-org-noter-keybinding-issue-doc)
-       (org-noter-insert-heading-hook . org-id-get-create)
-       :config
-       (require 'org-noter-pdftools)
-       (my/keymap-fix-with-evil-mode 'org-noter-notes-mode)
-       (my/keymap-fix-with-evil-mode 'org-noter-doc-mode)
-       ;; :general
-       ;; ('(normal motion) '(org-noter-notes-mode-map org-noter-doc-mode-map)
-       ;;          "J"   'org-noter-sync-next-note
-       ;;          "K"   'org-noter-sync-prev-note
-       ;;          "C-]" 'org-noter-sync-current-note)
-       )
-   #+end_src
+      (defun workaround-org-noter-keybinding-issue-notes ()
+        (interactive "p")
+        (evil-local-set-key 'normal "J"           'org-noter-sync-next-note)
+        (evil-local-set-key 'normal "K"           'org-noter-sync-prev-note)
+        (evil-local-set-key 'normal (kbd "C-]")   'org-noter-sync-current-note))
+      :custom
+      (org-noter-default-notes-file-names nil)
+      (org-noter-notes-search-path (list (concat org-directory "/sources")))
+      :hook
+      (org-noter-notes-mode .  workaround-org-noter-keybinding-issue-notes)
+      (org-noter-doc-mode .  workaround-org-noter-keybinding-issue-doc)
+      (org-noter-insert-heading-hook . org-id-get-create)
+      :config
+      (require 'org-noter-pdftools)
+      (my/keymap-fix-with-evil-mode 'org-noter-notes-mode)
+      (my/keymap-fix-with-evil-mode 'org-noter-doc-mode)
+      ;; :general
+      ;; ('(normal motion) '(org-noter-notes-mode-map org-noter-doc-mode-map)
+      ;;          "J"   'org-noter-sync-next-note
+      ;;          "K"   'org-noter-sync-prev-note
+      ;;          "C-]" 'org-noter-sync-current-note)
+      )
+  #+end_src
 
 * Org and .pdf/.epub/.mobi Integration
 ** PDF
@@ -753,6 +758,7 @@
 ** <<<org-pdftools>>> ([[https://github.com/fuxialexander/org-pdftools][github]])
    #+begin_src emacs-lisp
      (use-package org-pdftools
+       :after org pdf-tools
        :hook (org-mode . org-pdftools-setup-link))
 
      (use-package org-noter-pdftools
