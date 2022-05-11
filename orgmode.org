@@ -319,6 +319,7 @@
         ))
    #+end_src
 
+*** Ditaa config
    #+begin_src emacs-lisp
      (customize-set-variable 'org-ditaa-jar-path (concat user-emacs-directory "ditaa.jar"))
    #+end_src
@@ -499,7 +500,7 @@
      (use-package emacsql-sqlite)
 
      (use-package org-roam
-       :after org projectile
+       :after org
        :hook (after-init . org-roam-mode)
        :config
        (if IS-MAC
@@ -609,14 +610,14 @@
            node-rel-path))
 
        ;; (setq org-roam-node-display-template (concat "${icon:3}${title:50}"))
-       (setq org-roam-node-display-template
-           (concat "${icon:3}${title:50} " (propertize "${tags:30}" 'face 'org-tag)))
+       ;; (setq org-roam-node-display-template
+       ;;     (concat "${icon:3}${title:50} " (propertize "${tags:30}" 'face 'org-tag)))
        ;; (setq org-roam-node-display-template
        ;;     (concat "${icon:3}${title:50}${relpath:40}" (propertize "${tags:30}" 'face 'org-tag)))
        ;; (setq org-roam-node-annotation-function
        ;;     (lambda (node) (marginalia--time (org-roam-node-file-mtime node))))
-       (setq org-roam-node-annotation-function
-           (lambda (node) (marginalia-annotate-file (org-roam-node-file node))))
+       ;; (setq org-roam-node-annotation-function
+       ;;     (lambda (node) (marginalia-annotate-file (org-roam-node-file node))))
        (setq org-roam-node-annotation-function
            (lambda (node) (org-roam-node-relpath node)))
 
@@ -723,6 +724,32 @@
        )
    #+end_src
 
+* Org and .pdf/.epub/.mobi Integration
+** PDF
+   #+begin_src emacs-lisp
+     (use-package pdf-tools
+       :straight (pdf-tools :type git :host github :repo "vedang/pdf-tools")
+       :custom
+       ;; more fine-grained zooming
+       (pdf-view-resize-factor 1.1)
+
+       :config
+       ;; Install dependencies:
+       (my/keymap-fix-with-evil-mode 'pdf-view-mode)
+       (pdf-tools-install t t t)
+       ;; open pdfs scaled to fit page
+       (setq-default pdf-view-display-size 'fit-page))
+   #+end_src
+
+** Epub
+   #+begin_src emacs-lisp
+     (use-package esxml)
+     (use-package nov.el
+       :config
+       (my/keymap-fix-with-evil-mode 'nov-mode)
+       :mode ("\\.\\(epub\\|mobi\\)\\'" . nov-mode))
+   #+end_src
+
 ** <<<org-pdftools>>> ([[https://github.com/fuxialexander/org-pdftools][github]])
    #+begin_src emacs-lisp
      (use-package org-pdftools
@@ -733,31 +760,31 @@
        :config
        ;; Add a function to ensure precise note is inserted
        (defun org-noter-pdftools-insert-precise-note (&optional toggle-no-questions)
-         (interactive "P")
-         (org-noter--with-valid-session
-          (let ((org-noter-insert-note-no-questions (if toggle-no-questions
-                                                        (not org-noter-insert-note-no-questions)
-                                                      org-noter-insert-note-no-questions))
-                (org-pdftools-use-isearch-link t)
-                (org-pdftools-use-freepointer-annot t))
-            (org-noter-insert-note (org-noter--get-precise-info)))))
+	 (interactive "P")
+	 (org-noter--with-valid-session
+	  (let ((org-noter-insert-note-no-questions (if toggle-no-questions
+							(not org-noter-insert-note-no-questions)
+						      org-noter-insert-note-no-questions))
+		(org-pdftools-use-isearch-link t)
+		(org-pdftools-use-freepointer-annot t))
+	    (org-noter-insert-note (org-noter--get-precise-info)))))
 
        ;; fix https://github.com/weirdNox/org-noter/pull/93/commits/f8349ae7575e599f375de1be6be2d0d5de4e6cbf
        (defun org-noter-set-start-location (&optional arg)
-         "When opening a session with this document, go to the current location.
+	 "When opening a session with this document, go to the current location.
      With a prefix ARG, remove start location."
-         (interactive "P")
-         (org-noter--with-valid-session
-          (let ((inhibit-read-only t)
-                (ast (org-noter--parse-root))
-                (location (org-noter--doc-approx-location (when (called-interactively-p 'any) 'interactive))))
-            (with-current-buffer (org-noter--session-notes-buffer session)
-              (org-with-wide-buffer
-               (goto-char (org-element-property :begin ast))
-               (if arg
-                   (org-entry-delete nil org-noter-property-note-location)
-                 (org-entry-put nil org-noter-property-note-location
-                                (org-noter--pretty-print-location location))))))))
+	 (interactive "P")
+	 (org-noter--with-valid-session
+	  (let ((inhibit-read-only t)
+		(ast (org-noter--parse-root))
+		(location (org-noter--doc-approx-location (when (called-interactively-p 'any) 'interactive))))
+	    (with-current-buffer (org-noter--session-notes-buffer session)
+	      (org-with-wide-buffer
+	       (goto-char (org-element-property :begin ast))
+	       (if arg
+		   (org-entry-delete nil org-noter-property-note-location)
+		 (org-entry-put nil org-noter-property-note-location
+				(org-noter--pretty-print-location location))))))))
        (with-eval-after-load 'pdf-annot
-         (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
-  #+end_src
+	 (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+   #+end_src

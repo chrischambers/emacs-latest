@@ -290,3 +290,34 @@ you can work with.
        (evil-collection-init)
        (global-evil-collection-unimpaired-mode 0))
    #+end_src
+
+** Provide function for fixing interaction between (minor) mode and evil
+   #+begin_src emacs-lisp
+     (defun my/keymap-fix-with-evil-mode (mode &optional hook map)
+       "Allows (minor) mode to use evil as a base, but its keybindings take precedence.
+
+     Solution derived from: https://github.com/emacs-evil/evil/issues/511
+     "
+       (let* ((base (symbol-name mode))
+	      (hook (if hook hook (intern (concat base "-hook"))))
+	      (map (if map map (intern (concat base "-map")))))
+
+	 (evil-set-initial-state mode 'normal)
+	 (eval-after-load mode
+	   '(progn
+	      ;; module's keybindings should have stronger priority than
+	      ;; normal-mode keybindings:
+	      (evil-make-overriding-map map 'normal)
+	      ;; force evil keymaps to update after module loaded:
+	      (add-hook hook #'evil-normalize-keymaps)))))
+   #+end_src
+
+* <<<recentf>>>: Operate on recent files
+  #+begin_src emacs-lisp
+    (use-package recentf
+      :straight nil
+      :hook (after-init . recentf-mode)
+      :custom
+      (recentf-exclude '("emacs\.d/elpa" "/bookmarks$" "/\.cache"))
+      (recentf-max-saved-items 100))
+  #+end_src
