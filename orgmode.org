@@ -2,6 +2,7 @@
 #+AUTHOR: Chris Chambers
 #+EMAIL: magma.chambers@gmail.com
 #+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
 #+property: header-args:emacs-lisp :results output silent
 
 * Enable lexical binding
@@ -567,7 +568,7 @@
 	"wrr"   '(org-roam-ref-remove :which-key "remove")))
     #+end_src
 
-** COMMENT Org-roam Refactoring Funxtions
+** Org-roam Refactoring Funxtions
    #+begin_src emacs-lisp
      (with-eval-after-load 'org-roam
        (defun my/conditional-kill-buffer-for-file (file)
@@ -616,7 +617,7 @@
 	   (my--memex-relocate buffer-path buffer-name))))
    #+end_src
 
-** COMMENT =org-roam-node-find= Display Style
+** =org-roam-node-find= Display Style
    #+begin_src emacs-lisp
      (with-eval-after-load 'org-roam
        (cl-defmethod org-roam-node-icon ((node org-roam-node))
