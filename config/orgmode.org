@@ -271,29 +271,6 @@
 
      (leader "fN" '(my/find-notes-file :which-key "notes")))
    #+end_src
-** Customise org-todo keywords
-  #+begin_src emacs-lisp
-    (customize-set-variable 'org-todo-keywords
-          '((sequence
-             "TODO(t!)"
-             "IDEA(i!)"
-             "FIXME(f!)"
-             "NEXT(n!)"
-             "IN-PROGRESS(p!)"
-             "BLOCKED(b@/!)"
-             "TO-DELEGATE(g@/!)"
-             "DELEGATED(D@/!)"
-             "FOLLOWUP(F@/!)"
-             "TICKLE(T!)"
-             "THOUGHT(?!)"
-             "SOMEDAY-MAYBE(s!)"
-             "|"
-
-             "CANCELLED(c@/!)"
-             "DONE(d!)"
-             )))
-  #+end_src
-
 ** Use a =:LOGBOOK:= drawer to contain changes to =TODO= states
    #+begin_src emacs-lisp
      (customize-set-variable 'org-log-into-drawer "LOGBOOK")
@@ -344,6 +321,45 @@
     (org-link-set-parameters "https" :face '(:foreground "#61bfff" :underline t))
   #+end_src
 
+* Custom TODOs
+** Customise org-todo keywords
+  #+begin_src emacs-lisp
+    (customize-set-variable 'org-todo-keywords
+          '((sequence
+             "TODO(t!)"
+             "IDEA(i!)"
+             "FIXME(f!)"
+             "NEXT(n!)"
+             "IN-PROGRESS(p!)"
+             "BLOCKED(b@/!)"
+             "TO-DELEGATE(g@/!)"
+             "DELEGATED(D@/!)"
+             "FOLLOWUP(F@/!)"
+             "TICKLE(T!)"
+             "THOUGHT(?!)"
+             "SOMEDAY-MAYBE(s!)"
+             "|"
+
+             "CANCELLED(c@/!)"
+             "DONE(d!)"
+             )))
+  #+end_src
+
+** Prettify TODO symbols
+  #+begin_src emacs-lisp
+    (use-package prettify-symbols
+      :straight nil
+      :hook
+      (after-init . global-prettify-symbols-mode)
+      (org-mode . prettify-todo-indicators)
+      :preface
+      (defun prettify-todo-indicators ()
+        (push '("TODO"  . ?✏) prettify-symbols-alist)
+        (push '("DONE"  . ?✓) prettify-symbols-alist)
+        (push '("CANCELLED"  . ?✘) prettify-symbols-alist)
+        (push '("SOMEDAY-MAYBE"  . ??) prettify-symbols-alist)
+        (push '("IDEA"  . ?💡) prettify-symbols-alist)))
+  #+end_src
 * <<<org-agenda>>>
   #+begin_src emacs-lisp
     (use-package org-agenda
