@@ -801,3 +801,40 @@
        (with-eval-after-load 'pdf-annot
 	 (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
    #+end_src
+
+* <<<org-drill>>> ([[https://gitlab.com/phillord/org-drill/][gitlab]])
+  #+begin_src emacs-lisp
+    (use-package org-drill
+     :after org dash s
+     :commands (org-drill
+                org-drill-cram
+                org-drill-directory
+                org-drill-tree)
+     :custom
+     (org-drill-use-visible-cloze-face-p t)
+     :config
+     (setq org-drill-blacklist
+           (-map (lambda (fname) (expand-file-name (concat org-directory "/" fname)))
+                 '("#old"
+                   "archive.org")))
+
+     (defun org-drill-notes ()
+         "org-drill over all files containing :drill: (except those whose
+    prefixes match org-drill-blacklist)"
+         (interactive)
+         (let*
+             ((-compare-fn (-flip #'s-prefix?))
+              (all-files (s-lines (shell-command-to-string
+                                   (format "rg ':drill:' %s -l" org-directory))))
+              (files (-difference all-files org-drill-blacklist))
+              (files (-remove #'s-blank? files)))
+           (org-drill files)))
+
+     :general
+     (local-leader org-mode-map
+         "D"  '(:ignore t :major-modes org-mode :which-key "drill")
+         "Dc" '(org-drill-cram :which-key "cram")
+         "Dw" '(org-drill :which-key "window")
+         "Dr" '(org-drill-resume :which-key "resume")
+         "Dn" '(org-drill-notes :which-key "notes")))
+        #+end_src
