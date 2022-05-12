@@ -10,16 +10,6 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-
-* Highlight programming flags (e.g. TODO/FIXME)
-  #+begin_src emacs-lisp
-    (defun my/programming-highlight-terms ()
-      (font-lock-add-keywords
-       nil
-       '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t))))
-
-    (add-hook 'prog-mode-hook #'my/programming-highlight-terms)
-  #+end_src
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
    #+begin_src emacs-lisp
@@ -70,6 +60,35 @@
          ","  '(rtog/toggle-repl :which-key "REPL")))
    #+end_src
 
+* Visual aids
+** Highlight programming flags (e.g. TODO/FIXME)
+   #+begin_src emacs-lisp
+     (defun my/programming-highlight-terms ()
+       (font-lock-add-keywords
+        nil
+        '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t))))
+
+     (add-hook 'prog-mode-hook #'my/programming-highlight-terms)
+   #+end_src
+** Use [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]] to colour parmeters uniquely
+   #+begin_src emacs-lisp
+     (use-package color-identifiers-mode
+       :hook (after-init . global-color-identifiers-mode))
+   #+end_src
+
+** Use [[https://github.com/fanael/rainbow-delimiters][<<<rainbow-delimiters>>>]] to colour matching parentheses
+   #+begin_src emacs-lisp
+     (use-package rainbow-delimiters
+       :hook ((prog-mode . rainbow-delimiters-mode)
+              (geiser-repl-mode . rainbow-delimiters-mode)
+              (ielm-mode . rainbow-delimiters-mode)))
+   #+end_src
+
+** Display hex colour strings in the correct colour via [[https://elpa.gnu.org/packages/rainbow-mode.html][rainbow mode]]
+   #+begin_src emacs-lisp
+     (use-package rainbow-mode
+       :hook (prog-mode . rainbow-mode))
+   #+end_src
 * Version Control / VCS
 ** [[https://magit.vc/][<<<Magit>>>]] - Git integration ([[https://github.com/emacs-evil/evil-magit][github]])
    Add a binding for =magit-status=, and enable various vim-style write
@@ -113,7 +132,7 @@
        :init (abridge-diff-mode 1))
    #+end_src
 
-* LSP
+* LSP / Language Server Protocol
   #+begin_src emacs-lisp
     (use-package lsp-mode
       :commands (lsp lsp-deferred)

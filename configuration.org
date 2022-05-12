@@ -70,7 +70,7 @@
     (my/config-load "config/completion.org")
     #+end_src
 
-* [[./config/filetypes.org][Completion configuration]]
+* [[./config/filetypes.org][Filetype configuration]]
     #+begin_src emacs-lisp
     (my/config-load "config/filetypes.org")
     #+end_src
@@ -80,7 +80,7 @@
     (my/config-load "config/programming.org")
     #+end_src
 
-* [[./config/orgmode.org][Orgmode-related configuration]]
+* [[./config/orgmode.org][Orgmode configuration]]
     #+begin_src emacs-lisp
     (my/config-load "config/orgmode.org")
     #+end_src

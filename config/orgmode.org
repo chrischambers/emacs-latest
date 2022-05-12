@@ -845,7 +845,7 @@
     (require 'table)
   #+end_src
 
-* <<<Org-transclusion>>> ([[https://github.com/nobiot/org-transclusion][github]])
+* <<<org-transclusion>>> ([[https://github.com/nobiot/org-transclusion][github]])
   #+begin_src emacs-lisp
     (use-package org-transclusion
       :after org
