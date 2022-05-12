@@ -131,7 +131,6 @@
      (leader
        ;; "SPC" '(consult-complex-command :which-key "M-x")
        "bb" '(consult-buffer :which-key "switch buffer")
-       "pb" '(consult-project-buffer :which-key "switch buffer")
        "fr" '(consult-recent-file :which-key "recent")
        "lk" '(consult-yank-pop :which-key "kill-ring")
        "lr" '(consult-register :which-key "register")
@@ -143,6 +142,12 @@
 
        "."  '(consult-complex-command :which-key "repeat command")
        ))
+ #+end_src
+
+ #+begin_src emacs-lisp
+   (with-eval-after-load
+       'projectile 'consult
+       (leader "pb" '(consult-project-buffer :which-key "switch buffer")))
  #+end_src
 
 * <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
