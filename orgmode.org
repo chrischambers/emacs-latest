@@ -469,7 +469,7 @@
             ((`(,root-files ,files)
               (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/" "[^/]*\.org$")) f)) files))
              (`(,project-files ,files)
-              (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/1-projects/" ".*\.org$")) f)) files)))
+              (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/projects/" ".*\.org$")) f)) files)))
           (-flatten (-map #'my/org-agenda-sort (list root-files project-files files))))))
 
      (setq org-agenda-files
