@@ -5,21 +5,13 @@
 #+startup: align shrink inlineimages latexpreview content
 #+property: header-args:emacs-lisp :results output silent
 
-This should ideally be the absolute bare minimum required to bootstrap an emacs
-you can work with.
+Dependencies for other types of configuration, as well as key config settings
+which aren't absolutely necessary, but are very important.
 
 * Enable lexical binding
 #+begin_src emacs-lisp
   ;; -*- lexical-binding: t -*-
 #+end_src
-
-* Use [[https://github.com/hrs/sensible-defaults.el][sensible-defaults]]
-  #+begin_src emacs-lisp
-    (load-file (concat user-emacs-directory "sensible-defaults.el"))
-    (sensible-defaults/use-all-settings)
-    (sensible-defaults/use-all-keybindings)
-    (sensible-defaults/backup-to-temp-directory)
-  #+end_src
 
 * Text-wrapping
 ** Wrap paragraphs (fill) automatically
@@ -33,152 +25,6 @@ you can work with.
     #+begin_src emacs-lisp
     (set-default 'truncate-lines t)
     #+end_src
-
-* Favour unix line-endings
-  #+begin_src emacs-lisp
-    (set-buffer-file-coding-system 'unix 't)
-  #+end_src
-
-* <<<which-key>>> ([[https://github.com/justbur/emacs-which-key][github]]): Display leader/prefix hints
-  #+begin_src emacs-lisp
-    (use-package which-key
-      :config
-      ;; (which-key-setup-side-window-right-bottom)
-      (which-key-mode 1)
-      :custom
-      (which-key-sort-order 'which-key-key-order-alpha)
-      (which-key-idle-delay 0.4)
-      ;; (which-key-show-operator-state-maps t)
-      (which-key-allow-evil-operators t))
-  #+end_src
-
-* Useful functions
-** Kill other buffers (like Bufonly)
-   #+begin_src emacs-lisp
-     (defun kill-other-buffers ()
-       "Kill all other buffers."
-       (interactive)
-       (mapc 'kill-buffer
-             (delq (current-buffer)
-                   (org-remove-if-not 'buffer-file-name (buffer-list)))))
-   #+end_src
-
-* <<<general>>> ([[https://github.com/noctuid/general.el][github]]): Evil key binding helper
-  #+begin_src emacs-lisp
-    (use-package general
-      :after which-key
-      :config
-      (general-override-mode 1)
-
-      (general-create-definer leader
-        :states '(normal visual insert motion emacs)
-        :keymaps 'override
-        :prefix "SPC"
-        :non-normal-prefix "C-SPC")
-
-      (general-create-definer local-leader
-        :states '(normal visual insert motion emacs)
-        :keymaps 'override
-        :prefix ","
-        :non-normal-prefix "C-,")
-
-      (general-define-key
-       :keymaps 'key-translation-map
-       "ESC" (kbd "C-g"))
-
-      (winner-mode)
-      (leader
-        ""     nil
-        ;; "c"   (general-simulate-key "C-c" :which-key "C-c")
-        "c"   '(org-capture :which-key "capture")
-        ":"   'eval-expression
-        "SPC" '(execute-extended-command :which-key "M-x")
-        "."   '(repeat-complex-command :which-key "repeat command")
-
-        ;; Workspace operations
-        "TAB"   '(:ignore t :which-key "workspaces")
-
-        ;; Application operations
-        "a"   '(:ignore t :which-key "applications")
-        "ad"  '(dired :which-key "dired")
-        "ac"  'calendar
-        "aa"  '(org-agenda :which-key "agenda")
-
-        ;; Buffer operations
-        "b"   '(:ignore t :which-key "buffer")
-        ;; "bb"  '(ibuffer :which-key "switch buffer")
-        "bb"  '(switch-to-buffer :which-key "switch buffer")
-        "bd"  'kill-this-buffer
-        "bp"  'previous-buffer
-        "b["  'previous-buffer
-        "bn"  'next-buffer
-        "b]"  'next-buffer
-        "bo"  'kill-other-buffers
-        "bq"  'kill-buffer-and-window
-        ;; "bR"  'rename-file-and-buffer
-        "br"  'revert-buffer
-
-        ;; Diff-related operations
-        "d" '(:ignore t :which-key "diff")
-
-        ;; Emacs operations
-        "e"   '(:ignore t :which-key "emacs")
-        "ee"  'config-edit
-        "er"  'config-reload
-        "ep"  '(find-library :which-key "package-edit")
-        "el"  '(load-library :which-key "package-load")
-
-        ;; File operations
-        "f"   '(:ignore t :which-key "file")
-        "ff"  '(find-file :which-key "find")
-        "fr"  '(recentf-open-files :which-key "recent")
-        ;; "fF"  '(find-file-noselect :which-key "find (without updating recent files)")
-
-        ;; Insert operations
-        "i"   '(:ignore t :which-key "insert")
-        ;; The below binding is very useful for inserting ZERO WIDTH SPACE, which
-        ;; is useful for escaping org-mode markup:
-        "ic"  '(insert-char :which-key "character")
-        "it"  '(org-time-stamp :which-key "timestamp")
-
-        ;; List operations
-        "l"   '(:ignore t :which-key "list")
-        "lp"  'list-packages
-
-        ;; Major Mode Operations
-        ;; "m"   '(:ignore t :which-key "major-mode")
-        ;; "m"   (general-simulate-key "," :which-key "major-mode")
-
-        ;; Project operations
-        "p"   '(:ignore t :which-key "project")
-
-        ;; Quit operations
-        "q"   '(:ignore t :which-key "quit")
-        "qq"  '(kill-emacs :which-key "quit")
-        "qz"  'delete-frame
-
-        ;; View operations
-        "v"   '(:ignore t :which-key "view")
-        "vw"  '(toggle-truncate-lines :which-key "wrap lines (toggle)")
-
-        ;; Window operations
-        "w"   '(:ignore t :which-key "window")
-        "wm"  'maximize-window
-        "w/"  'split-window-horizontally
-        "wv"  'split-window-vertically
-        "wm"  'maximize-window
-        "wu"  'winner-undo
-        "ww"  'other-window
-        "wd"  'delete-window
-        "wD"  'delete-other-windows
-
-        "y"   '(org-store-link :which-key "yank link"))
-
-      (local-leader
-        ""     nil
-        ;; ","   '(ivy-switch-buffer :which-key "ivy-switch-buffer")
-        "."   '(evil-buffer :which-key "previous buffer")))
-  #+end_src
 
 * Startup message (timestamp)
   #+begin_src emacs-lisp
@@ -258,28 +104,7 @@ you can work with.
                 )))
   #+end_src
 
-* OSX-specific options
-  Right option-key should be pass-through (not meta), to allow typing ~#~, for
-  example:
-  #+begin_src emacs-lisp
-    (setq mac-right-option-modifier 'none)
-  #+end_src
-
-* <<<evil>>> ([[https://github.com/emacs-evil/evil][github]]): Vim-style keybindings
-  #+begin_src emacs-lisp
-    (use-package evil
-      :demand
-      :init
-      ;; Necessary for evil-collection
-      (setq evil-want-keybinding nil)
-      :custom
-      (evil-undo-system 'undo-redo)
-      :config
-      ;; For some reason this needs to be set here:
-      (customize-set-variable 'evil-want-Y-yank-to-eol t)
-      (evil-mode 1))
-  #+end_src
-
+* Evil Extended
 ** Use [[https://github.com/emacs-evil/evil-collection/blob/master/readme.org][evil-collection]], which provides evil-friendly bindings for many major modes
    #+begin_src emacs-lisp
      (use-package evil-collection
@@ -338,3 +163,38 @@ you can work with.
       :config
       (projectile-mode +1))
    #+end_src
+
+* Improving Emacs via Elisp Extensions
+** Add utility libraries
+*** [[https://github.com/magnars/dash.el][dash]] - "a modern list library for emacs"
+    #+begin_src emacs-lisp
+      (use-package dash
+	:config
+	(with-eval-after-load 'info-look
+          (dash-register-info-lookup))
+	(global-dash-fontify-mode))
+    #+end_src
+
+*** [[https://github.com/magnars/s.el][s]] - "the long-lost Emacs string manipulation library"
+    #+begin_src emacs-lisp
+      (use-package s)
+    #+end_src
+
+*** [[https://github.com/rejeep/f.el][f]] - "Modern API for working with files and directories in Emacs"
+    #+begin_src emacs-lisp
+      (use-package f)
+    #+end_src
+
+*** [[http://git.savannah.gnu.org/gitweb/?p=emacs.git;a=blob;f=lisp/emacs-lisp/let-alist.el][let-alist.el]] - slick way of unpacking association lists (=alist=)
+    #+begin_src emacs-lisp
+      (use-package let-alist)
+    #+end_src
+
+** Add =backward-line= function, for consistency
+  #+begin_src emacs-lisp
+    (defun backward-line (&optional N)
+      "Move N lines backwards (forward if N is negative)."
+      (interactive)
+      (let ((n (if N N 1)))
+        (forward-line (* -1 n))))
+  #+end_src

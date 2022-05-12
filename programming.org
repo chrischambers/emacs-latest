@@ -9,3 +9,36 @@
 #+begin_src emacs-lisp
   ;; -*- lexical-binding: t -*-
 #+end_src
+
+
+* Emacs-Lisp
+** Bindings
+   #+begin_src emacs-lisp
+     (use-package my/emacs-lisp-config
+       :no-require t
+       :straight nil
+       :general
+       ('motion emacs-lisp-mode-map "K" 'helpful-at-point)
+       (local-leader emacs-lisp-mode-map
+         "e"  '(:ignore t :major-modes emacs-lisp-mode :which-key "eval")
+         "ee" '(eval-last-sexp :which-key "expression")
+         "ef" '(eval-defun :which-key "function")
+         "eF" '(load-file :which-key "file")
+         "er" '(eval-region :which-key "region")
+         "eb" '(eval-buffer :which-key "buffer")))
+   #+end_src
+** <<<eros>>> ([[https://github.com/xiongtx/eros][github]]): Display evaluation results inline
+   #+begin_src emacs-lisp
+     (use-package eros
+       :hook (emacs-lisp-mode . eros-mode))
+   #+end_src
+
+** <<<macrostep>>> ([[https://github.com/joddie/macrostep][github]]): expand elisp macros
+   #+begin_src emacs-lisp
+     (use-package macrostep
+       :commands macrostep-expand
+       :general
+       (local-leader emacs-lisp-mode-map
+         "M" '(macrostep-expand :which-key "macro expand")
+         ))
+   #+end_src
