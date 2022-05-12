@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Important block
+# key: important
+# --
+#+begin_important
+$1
+#+end_important

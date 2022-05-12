@@ -1,0 +1,5 @@
+# key: i
+# name: import library
+# --
+:- use_module(library($1)).
+$0

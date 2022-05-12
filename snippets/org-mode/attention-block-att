@@ -1,0 +1,5 @@
+# type: command
+# key: att
+# name: Attention block (shorthand)
+# --
+(yas-expand-snippet (yas-lookup-snippet "Attention block"))

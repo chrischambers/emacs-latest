@@ -1,0 +1,13 @@
+# key: ts
+# name: test-suite
+# --
+(require rackunit)
+(require rackunit/spec)
+
+(define ${1:specs}
+  (test-suite
+   "${2:Specifications}"
+   $0))
+
+(require rackunit/text-ui)
+(run-tests $1)

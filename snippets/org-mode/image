@@ -1,0 +1,8 @@
+# key: img
+# name: image
+# --
+
+#+attr_org: ${1::width 630}
+#+caption: $2
+[[./${3:path/to/file.png}]]
+$0

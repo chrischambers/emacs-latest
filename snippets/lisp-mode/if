@@ -1,0 +1,4 @@
+# key: if
+# name: if
+# --
+(if ${1:condition} ${2:consequent} ${3:alternative})

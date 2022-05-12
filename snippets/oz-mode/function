@@ -1,0 +1,6 @@
+# key: def
+# name: function
+# --
+fun {${1:$}$2}
+	$0
+end

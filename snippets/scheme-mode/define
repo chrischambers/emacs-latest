@@ -1,0 +1,9 @@
+# key: def
+# name: define
+# --
+;; ${1:[X] N [N -> X] -> [List-of X]}
+;; ${2:documentation}
+(define ($3)
+	${4:#false}
+	)
+	$0

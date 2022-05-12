@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: check-equal
+# key: ce
+# --
+(check-equal? $1 $2)$0

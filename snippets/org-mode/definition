@@ -1,0 +1,8 @@
+# key: def
+# name: Definition
+# --
+* $1
+	$1
+
+** Definition
+	$0

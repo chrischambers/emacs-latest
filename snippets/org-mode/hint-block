@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Hint block
+# key: hint
+# --
+#+begin_hint
+$1
+#+end_hint

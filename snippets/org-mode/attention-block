@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Attention block
+# key: attention
+# --
+#+begin_attention
+$1
+#+end_attention

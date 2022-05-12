@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: operator (infix)
+# key: op
+# --
+:- op(600, xfx, $1).
+
+$1(_, _)$0.

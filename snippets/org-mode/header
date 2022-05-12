@@ -1,0 +1,12 @@
+# key: head
+# name: Header
+# --
+#+title: $1
+#+author: ${2:`user-full-name`}
+#+email: ${3:`user-mail-address`}
+#+date: [${4:`(format-time-string "%Y-%m-%d")`}]
+#+language: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+setupfile: ~/.emacs.d/babel-export-themes/read-the-docs.setup
+
+$0

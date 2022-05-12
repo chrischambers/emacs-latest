@@ -1,0 +1,4 @@
+# key: b
+# name: browse
+# --
+{Browse $1}$0

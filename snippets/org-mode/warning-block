@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Warning block
+# key: warn
+# --
+#+begin_warning
+$1
+#+end_warning

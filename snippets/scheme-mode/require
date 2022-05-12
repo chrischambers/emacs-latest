@@ -1,0 +1,5 @@
+# key: req
+# name: Require
+# --
+(require ${1:rackunit})
+$0

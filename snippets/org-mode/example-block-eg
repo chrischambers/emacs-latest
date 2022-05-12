@@ -1,0 +1,5 @@
+# type: command
+# key: eg
+# name: Example block (shorthand)
+# --
+(yas-expand-snippet (yas-lookup-snippet "Example block"))

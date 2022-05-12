@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: roam alias header
+# key: ra
+# --
+#+roam_alias: "$1"$0

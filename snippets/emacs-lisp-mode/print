@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: print
+# key: p
+# --
+(message "%${2:s}" $1)$0

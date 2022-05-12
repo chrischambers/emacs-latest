@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: defn
+# key: defn
+# --
+(defn ${1:fname}
+        "${2:Use markdown (esp. backticks around args) for docstrings.}"
+        [${3:args}]
+        $4)

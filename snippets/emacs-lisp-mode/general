@@ -1,0 +1,5 @@
+# key: gen
+# name: general
+# --
+(general-def '${1:motion} ${2:foo-mode}-map
+	"<tab>" '(${3:wibble} :which-key "$3"))

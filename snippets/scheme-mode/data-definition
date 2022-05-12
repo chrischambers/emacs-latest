@@ -1,0 +1,8 @@
+# key: dd
+# name: data-definition
+# --
+;; A ${1:posn} is a struct:
+;;   ($1 $2)
+;; Where:
+;; - $2
+(struct $1 [$2] #:transparent)

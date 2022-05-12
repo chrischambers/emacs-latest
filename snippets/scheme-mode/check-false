@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: check-false
+# key: cf
+# --
+(check-false $1)$0

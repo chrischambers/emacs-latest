@@ -1,0 +1,4 @@
+# key: inc
+# name: Include
+# --
+#+INCLUDE: "${1:PATH}" ${2:example/export/src} ${3:src_language?} ${4:minlevel: $5}

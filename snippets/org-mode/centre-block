@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# key: centre
+# name: Centre block
+# --
+#+begin_center
+$1
+#+end_center

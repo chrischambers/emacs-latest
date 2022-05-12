@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: operator (prefix)
+# key: pop
+# --
+:- op(900, fx, $1).
+
+$1(_)$0.

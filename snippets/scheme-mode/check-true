@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: check-true
+# key: ct
+# --
+(check-true $1)$0

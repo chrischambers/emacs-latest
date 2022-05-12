@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: someday-maybe
+# key: sm
+# --
+* SOMEDAY-MAYBE $1

@@ -1,0 +1,9 @@
+# key: module
+# name: module
+# --
+module $1
+(
+	$2
+)
+where
+$0

@@ -1,0 +1,5 @@
+# type: command
+# key: imp
+# name: Important block (shorthand)
+# --
+(yas-expand-snippet (yas-lookup-snippet "Important block"))

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: check-exception
+# key: cx
+# --
+(check-exn ${2:exn:fail?} (lambda () ($1)))$0
