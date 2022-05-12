@@ -10,7 +10,7 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* org
+* <<<org>>> / <<<orgmode>>>
   #+begin_src emacs-lisp
     (use-package org
       :preface
@@ -737,9 +737,10 @@
   #+end_src
 
 * Org and .pdf/.epub/.mobi Integration
-** PDF
+** <<<PDF>>>
    #+begin_src emacs-lisp
      (use-package pdf-tools
+       :defer 1
        :straight (pdf-tools :type git :host github :repo "vedang/pdf-tools")
        :custom
        ;; more fine-grained zooming
@@ -753,7 +754,7 @@
        (setq-default pdf-view-display-size 'fit-page))
    #+end_src
 
-** Epub
+** <<<Nov.el>>>: <<<Epub>>> and <<<Mobi>>> viewing within Emacs
    #+begin_src emacs-lisp
      (use-package esxml)
      (use-package nov.el

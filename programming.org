@@ -10,7 +10,6 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-
 * Emacs-Lisp
 ** Bindings
    #+begin_src emacs-lisp

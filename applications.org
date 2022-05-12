@@ -1,0 +1,11 @@
+#+TITLE: Application Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:emacs-lisp :results output silent
+
+* Enable lexical binding
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
