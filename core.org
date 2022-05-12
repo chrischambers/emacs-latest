@@ -207,10 +207,10 @@ you can work with.
       (set-window-scroll-bars (minibuffer-window) nil nil)
     #+end_src
 
-*** Highlight the current line:
-    : #+begin_src emacs-lisp
-    :   (global-hl-line-mode 1)
-    : #+end_src
+*** COMMENT Highlight the current line
+    #+begin_src emacs-lisp
+      (global-hl-line-mode 1)
+    #+end_src
 
 *** Set fonts
      #+begin_src emacs-lisp
@@ -313,7 +313,7 @@ you can work with.
 	      (add-hook hook #'evil-normalize-keymaps)))))
    #+end_src
 
-* <<<recentf>>>: Operate on recent files
+* <<<recentf>>>: Operate on recent files easily
   #+begin_src emacs-lisp
     (use-package recentf
       :straight nil
@@ -321,4 +321,11 @@ you can work with.
       :custom
       (recentf-exclude '("emacs\.d/elpa" "/bookmarks$" "/\.cache"))
       (recentf-max-saved-items 100))
+  #+end_src
+
+* <<<savehist>>>: Perhist history across emacs sessions
+  #+begin_src emacs-lisp
+    (use-package savehist
+      :init
+      (savehist-mode))
   #+end_src

@@ -338,6 +338,12 @@
        (org-table-electric-header-mode))
    #+end_src
 
+** Org external links styled differently
+  #+begin_src emacs-lisp
+    (org-link-set-parameters "http" :face '(:foreground "tomato" :underline t))
+    (org-link-set-parameters "https" :face '(:foreground "#61bfff" :underline t))
+  #+end_src
+
 * <<<org-agenda>>>
   #+begin_src emacs-lisp
     (use-package org-agenda
