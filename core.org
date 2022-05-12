@@ -329,3 +329,12 @@ you can work with.
       :init
       (savehist-mode))
   #+end_src
+
+* <<<projectile>>>: Project-related helpers ([[https://projectile.mx/][docs]]/[[https://github.com/bbatsov/projectile][source]])
+  #+begin_src emacs-lisp
+    (use-package projectile
+      :defer 1
+      :general (leader "p" '(projectile-command-map :which-key "projects"))
+      :config
+      (projectile-mode +1))
+   #+end_src

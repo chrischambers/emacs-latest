@@ -58,7 +58,7 @@
        "C-p"            #'previous-line-or-history-element))
   #+end_src
 
-* Completion: <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
+* <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
   #+begin_quote
   The way completion styles work, when one style cannot match anything, Emacs
   tries the next one on the list, until one of them yields results. As such, it
@@ -91,17 +91,18 @@
      (defun flex-with-~ (s _index _total)
        (my/orderless-style-dispatcher-template s "~" 'orderless-flex))
 
+     (defun regexp-with-! (s _index _total)
+       (my/orderless-style-dispatcher-template s "!" 'orderless-regexp))
      :custom
-     (completion-styles '(basic partial-completion substring flex orderless))
+     (completion-styles '(partial-completion flex orderless))
      (completion-ignore-case t)
      (completion-category-defaults nil)
      (orderless-component-separator "[ _-]+")
-     (orderless-style-dispatchers '(literal-with-= flex-with-~))
+     (orderless-style-dispatchers '(literal-with-= flex-with-~ regexp-with-!))
      (orderless-matching-styles
       '(orderless-literal
         orderless-prefixes
         orderless-initialism
-        orderless-flex
         orderless-regexp
         )))
  #+end_src
@@ -157,7 +158,7 @@
       (marginalia-mode))
   #+end_src
 
-* <<<company>>> ([[https://company-mode.github.io/][github]])/([[https://www.emacswiki.org/emacs/CompanyMode][wiki]]) Completion
+* <<<company>>> ([[https://company-mode.github.io/][github]])/([[https://www.emacswiki.org/emacs/CompanyMode][wiki]])
   #+begin_src emacs-lisp
     (use-package company
       :preface
