@@ -1,0 +1,74 @@
+#+TITLE: Filetype Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:emacs-lisp :results output silent
+
+* <<<conf-mode>>>: Config files
+  #+begin_src emacs-lisp
+    (use-package conf-mode
+      :mode ("\\.git.*$"
+             "dot_.*"
+             "\\.rc$"
+             "\\.conf$"
+             "git.*\\.symlink$"
+             "rc\\.symlink$"
+             "conf\\.symlink$"))
+  #+end_src
+
+* <<<logview>>>: Log files
+  #+begin_src emacs-lisp
+    (use-package logview
+      :commands logview-mode
+      :mode
+      ("\\.log\\(?:\\.[0-9]+\\)?\\'" . logview-mode)
+      ("syslog\\(?:\\.[0-9]+\\)?\\'" . logview-mode))
+  #+end_src
+
+* Markup Formats
+** JSON
+   #+begin_src emacs-lisp
+     (use-package json-mode
+       :mode ("\\.json$"))
+   #+end_src
+
+** YAML
+   : #+begin_src emacs-lisp
+   :   (use-package yaml-mode
+   :     :mode ("\\.yaml\\'" "\\.yml\\'"))
+   : #+end_src
+
+   #+begin_src emacs-lisp
+     (use-package ansible
+       :straight (emacs-ansible
+                  :host github
+                  :repo "k1LoW/emacs-ansible"
+                  ;; The following prevents pulling in the entire ansible codebase:
+                  :nonrecursive t))
+
+     (use-package ansible-doc)
+
+     (use-package company-ansible
+       :config
+       (add-company-backend 'company-ansible))
+
+     (use-package poly-ansible
+       :mode ("\\.ya?ml\\'" . poly-ansible-mode))
+   #+end_src
+
+** CSV
+   #+begin_src emacs-lisp
+     (use-package csv-mode
+       :mode ("\\.csv$")
+       :config
+       (setq csv-separators '("," ";" ":" " ")))
+   #+end_src
+
+** TODO Markdown
+   Github markdown format.
+
+   : #+begin_src emacs-lisp
+   :   (use-package ox-gfm
+   :     :after ox)
+   : #+end_src

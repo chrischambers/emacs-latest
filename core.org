@@ -174,6 +174,162 @@ which aren't absolutely necessary, but are very important.
 	      (add-hook hook #'evil-normalize-keymaps)))))
    #+end_src
 
+** Emulate =vim-surround= with <<<evil-surround>>> ([[https://github.com/emacs-evil/evil-surround][github]])
+   #+begin_src emacs-lisp
+     (use-package evil-surround
+       :preface
+       ;; Source: https://github.com/emacs-evil/evil-surround
+       (defmacro define-and-bind-quoted-text-object (name key start-regex end-regex)
+	 "Create new evil text objects so that we can change/delete
+     the appropriate delimiters."
+	 (let ((inner-name (make-symbol (concat "evil-inner-" name)))
+	       (outer-name (make-symbol (concat "evil-a-" name))))
+	   `(progn
+	      (evil-define-text-object ,inner-name (count &optional beg end type)
+		(evil-select-paren ,start-regex ,end-regex beg end type count nil))
+	      (evil-define-text-object ,outer-name (count &optional beg end type)
+		(evil-select-paren ,start-regex ,end-regex beg end type count t))
+	      (define-key evil-inner-text-objects-map ,key #',inner-name)
+	      (define-key evil-outer-text-objects-map ,key #',outer-name))))
+       :after evil
+       :config
+       ;; Handle org-mode markup delimiters:
+       (define-and-bind-quoted-text-object "pipe" "|" "|" "|")
+       (define-and-bind-quoted-text-object "equals" "=" "=" "=")
+       (define-and-bind-quoted-text-object "slash" "/" "/" "/")
+       (define-and-bind-quoted-text-object "plus" "+" "+" "+")
+       (define-and-bind-quoted-text-object "asterisk" "*" "*" "*")
+       ;; sometimes your have to escape the regex
+       (define-and-bind-quoted-text-object "dollar" "$" "\\$" "\\$")
+       (global-evil-surround-mode 1))
+   #+end_src
+*** TODO Consider [[https://github.com/nivekuil/corral][corral]] instead? ([[https://github.com/cmacrae/.emacs.d#corral][Callum's snippet]])
+
+** Enable [[https://github.com/bling/evil-visualstar][<<<evil-visualstar>>>]]
+   Provides ability to highlight a region and then hit =*= or =#= to forward/backward
+   search, respectively:
+
+   #+begin_src emacs-lisp
+     (use-package evil-visualstar
+       :after evil
+       :config (global-evil-visualstar-mode 1))
+   #+end_src
+
+** Enable <<<evil-numbers>>> ([[https://github.com/cofi/evil-numbers][github]])
+   #+begin_src emacs-lisp
+     (use-package evil-numbers
+       :general
+       ('motion '(text-mode-map prog-mode-map)
+	"+" 'evil-numbers/inc-at-pt
+	"-" 'evil-numbers/dec-at-pt))
+   #+end_src
+
+*** Increment/decrement timestamp or number at point in org-mode
+   #+begin_src emacs-lisp
+     (with-eval-after-load
+         'org 'evil-numbers
+         (defun my/inc-timestamp-or-number (amount)
+           "Increments the timestamp or number at point."
+           (interactive "p")
+           (if (org-at-timestamp-p 'lax)
+               (org-timestamp-up-day amount)
+             (evil-numbers/inc-at-pt amount nil)))
+
+         (defun my/dec-timestamp-or-number (amount)
+           "Decrements the timestamp or number at point."
+           (interactive "p")
+           (if (org-at-timestamp-p 'lax)
+               (org-timestamp-down-day amount)
+             (evil-numbers/dec-at-pt amount nil)))
+
+         (general-def 'motion org-mode-map
+           "+" 'my/inc-timestamp-or-number
+           "-" 'my/dec-timestamp-or-number))
+   #+end_src
+
+** Provide function for fixing interaction between (minor) mode and evil
+   #+begin_src emacs-lisp
+     (defun my/keymap-fix-with-evil-mode (mode &optional hook map)
+       "Allows (minor) mode to use evil as a base, but its keybindings take precedence.
+
+     Solution derived from: https://github.com/emacs-evil/evil/issues/511
+     "
+       (let* ((base (symbol-name mode))
+	      (hook (if hook hook (intern (concat base "-hook"))))
+	      (map (if map map (intern (concat base "-map")))))
+
+	 (evil-set-initial-state mode 'normal)
+	 (eval-after-load mode
+	   '(progn
+	      ;; module's keybindings should have stronger priority than
+	      ;; normal-mode keybindings:
+	      (evil-make-overriding-map map 'normal)
+	      ;; force evil keymaps to update after module loaded:
+	      (add-hook hook #'evil-normalize-keymaps)))))
+   #+end_src
+** Evil ex commands
+   View a list of all commands by inspecting =evil-ex-commands=.
+
+    #+begin_src emacs-lisp
+      (defun evil-ex-define-local-cmds (hook mapping)
+        "Wrapper function for defining a mode-specific set of ex-commands."
+        (interactive)
+        (add-hook
+	 hook
+	 (lambda ()
+	   ;; make a local copy of the evil-ex-commands to overwrite:
+	   (unless (local-variable-p 'evil-ex-commands)
+	     (setq-local evil-ex-commands (copy-alist evil-ex-commands)))
+	   (mapc (lambda (args) (apply 'evil-ex-define-cmd args)) mapping))))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (evil-ex-define-local-cmds
+       'snippet-mode-hook
+       '(("wq[uit]" yas-load-snippet-buffer-and-close)
+	 ("w[rite]" yas-load-snippet-buffer)
+	 ("x[it]"   yas-load-snippet-buffer-and-close)
+	 ("exi[t]"  yas-load-snippet-buffer-and-close)))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (evil-ex-define-local-cmds
+       'org-src-mode-hook
+       '(("wq[uit]" org-edit-src-exit)
+	 ("w[rite]" org-edit-src-exit)
+	 ("x[it]"   org-edit-src-exit)
+	 ("exi[t]"  org-edit-src-abort)))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (evil-ex-define-local-cmds
+       'magit-mode-hook
+       '(("wq[uit]" with-editor-finish)
+	 ("w[rite]" with-editor-finish)
+	 ("x[it]"   with-editor-finish)
+	 ("exi[t]"  with-editor-finish)))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (evil-ex-define-local-cmds
+       'message-mode-hook
+       '(("wq[uit]" message-send-and-exit)
+	 ("w[rite]" message-send-and-exit)
+	 ("x[it]"   message-send-and-exit)
+	 ("exi[t]"  message-kill-buffer)
+	 ("q[uit]"  message-kill-buffer)))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (evil-ex-define-local-cmds
+       'org-capture-mode-hook
+       '(("wq[uit]" org-capture-finalize)
+	 ("w[rite]" org-capture-finalize)
+	 ("x[it]"   org-capture-finalize)
+	 ("exi[t]"  org-capture-kill)
+	 ("q[uit]"  org-capture-kill)))
+    #+end_src
+
 * <<<recentf>>>: Operate on recent files easily
   #+begin_src emacs-lisp
     (use-package recentf
@@ -240,3 +396,230 @@ which aren't absolutely necessary, but are very important.
       (let ((n (if N N 1)))
         (forward-line (* -1 n))))
   #+end_src
+
+** Better narrowing
+   Main function stolen from [[https://github.com/zamansky/using-emacs/blob/master/myinit.org][Mike Zamansky]]:
+
+    #+begin_src emacs-lisp
+      (use-package better-narrowing
+        :no-require t
+        :straight nil
+        :preface
+        (defun my/narrow-or-widen-dwim (p)
+	  "If the buffer is narrowed, it widens. Otherwise, it narrows intelligently.
+      Intelligently means: region, org-src-block, org-subtree, or defun,
+      whichever applies first.
+      Narrowing to org-src-block actually calls `org-edit-src-code'.
+
+      With prefix P, don't widen, just narrow even if buffer is already
+      narrowed."
+	  (interactive "P")
+	  (declare (interactive-only))
+	  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+	        ((region-active-p)
+		 (narrow-to-region (region-beginning) (region-end)))
+	        ((derived-mode-p 'org-mode)
+		 ;; `org-edit-src-code' is not a real narrowing command.
+		 ;; Remove this first conditional if you don't want it.
+		 (cond ((ignore-errors (org-edit-src-code))
+		        (delete-other-windows))
+		       ((org-at-block-p)
+		        (org-narrow-to-block))
+		       (t (org-narrow-to-subtree))))
+	        (t (narrow-to-defun))))
+        :general
+        (leader "n" '(my/narrow-or-widen-dwim :which-key "narrow/widen")))
+    #+end_src
+
+* Better jumper ([[https://github.com/gilbertw1/better-jumper][github]])
+  #+begin_src emacs-lisp
+    (use-package better-jumper
+      :config
+      (require 'better-jumper)
+      (better-jumper-mode +1)
+      :general (motion
+        "C-o" 'better-jumper-jump-backward
+        "C-i" 'better-jumper-jump-forward))
+  #+end_src
+
+* Emoji
+  Handled natively in Emacs 29:
+  #+begin_src emacs-lisp
+    (use-package emoji
+      :straight nil
+      :no-require t
+      :general
+      (leader
+        "ie"  '(:ignore t :which-key "emoji")
+        "iei" '(emoji-insert :which-key "insert")
+        "iee" '(emoji-insert :which-key "insert")
+        "ied" '(emoji-describe :which-key "describe")
+        "iel" '(emoji-list :which-key "list")
+        "ier" '(emoji-recent :which-key "recent")
+        "ies" '(emoji-search :which-key "search")))
+  #+end_src
+
+*** COMMENT Render emojis via [[https://github.com/iqbalansari/emacs-emojify][emojify]]
+    #+begin_src emacs-lisp
+      (use-package emojify
+        :hook (after-init . global-emojify-mode)
+        :custom
+        (emojify-point-entered-behaviour 'uncover)
+        :general
+        (leader
+          "ie"  '(emojify-insert-emoji :which-key "emoji")
+          "he"  '(emojify-describe-emoji :which-key "describe emoji")
+          "hE"  '(emojify-apropos-emoji :which-key "apropos emoji")
+          "ve"  '(global-emojify-mode :which-key "emoji")))
+    #+end_src
+
+* Save view/point location of previously opened files
+  #+begin_src emacs-lisp
+    (save-place-mode t)
+  #+end_src
+
+* Info configuration
+  #+begin_src emacs-lisp
+    (use-package info
+      :no-require t
+      :straight nil
+      :preface
+      (defun remove-unwanted-info-modes ()
+        (evil-collection-unimpaired-mode 0) ; Allows [ and ] for navigation
+        (display-fill-column-indicator-mode 0))
+      :hook (Info-mode . remove-unwanted-info-modes)
+      :general
+      ;; Unfortunately, there seems to be no way to set =SPC= to 'Info-scroll-up.
+      ;; Toggling =general-override-mode= is global.
+      ('normal Info-mode-map
+               "C-f" 'Info-scroll-up
+               "C-b" 'Info-scroll-down
+               "m"   'Info-menu
+               "t"   'Info-top-node
+               "?"   'Info-help)
+      (local-leader Info-mode-map
+        "SPC" '(Info-scroll-up :which-key "forward")
+        "n"   '(Info-next :which-key "next")
+        "p"   '(Info-prev :which-key "previous")))
+  #+end_src
+
+* Recursive mini-buffers
+  #+begin_src emacs-lisp
+    (customize-set-variable 'enable-recursive-minibuffers t)
+  #+end_src
+
+* <<<so-long-mode>>>: Handle minified files/files with very long line-length gracefully
+  Emacs performs badly with very long lines (e.g. minified JSON)
+
+  #+begin_src emacs-lisp
+    (global-so-long-mode t)
+  #+end_src
+
+* <<<avy>>> ([[https://github.com/abo-abo/avy][github]]) Quick cursor movement
+  There's a great explanation of the way to use avy [[http://pragmaticemacs.com/emacs/super-efficient-movement-using-avy/][here]].
+
+  #+begin_src emacs-lisp
+    (use-package avy
+      :custom
+      (avy-background nil)
+      :general
+      ('insert "M-s" 'avy-goto-word-1)
+      ('normal
+       ;; "s" 'avy-goto-word-1
+       "s"   'avy-goto-char
+       "gs"  'avy-goto-char-2
+       ;; "S" 'avy-goto-char-timer
+       "S"   'avy-goto-line))
+  #+end_src
+
+* <<<yasnippet>>>: Snippet expansion
+  #+begin_src emacs-lisp
+    (use-package yasnippet
+      :init
+      (yas-global-mode 1)
+      :after company company-box
+      :preface
+      (defun company-mode/backend-with-yas (backend)
+	(if (and (listp backend) (member 'company-yasnippet backend))
+	    backend
+	  (append (if (consp backend) backend (list backend))
+		  '(:with company-yasnippet))))
+
+      (defun add-company-backend (backend)
+	"Inserts a backend onto company-backend, enabling yasnippet completion where appropriate."
+	(push (company-mode/backend-with-yas backend) company-backends))
+      :custom
+      (company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+      :general
+      (leader
+	"s"   '(:ignore t :which-key "snippets")
+	"si"  '(yas-insert-snippet :which-key "insert")
+	"se"  '(yas-visit-snippet-file :which-key "edit")
+	"sc"  '(yas-new-snippet :which-key "create")
+	))
+  #+end_src
+
+* <<<ripgrep>>>
+    (use-package ripgrep)
+
+* Window management
+** <<<switch-window>>> ([[https://github.com/dimitri/switch-window][github]])
+   Improves =C-w w=:
+   - When there are 2 windows in the frame, it behaves as usual,
+   - Howecver, If thee are greater than two windows, it displays letter hints
+     for jumping around, like =vimperator=, =ace-windows=, etc.
+
+   #+begin_src emacs-lisp
+     (use-package switch-window
+       :config
+       (setq switch-window-input-style 'minibuffer)
+       (setq switch-window-increase 4)
+       (setq switch-window-threshold 2)
+       (setq switch-window-shortcut-style 'qwerty)
+       (setq switch-window-qwerty-shortcuts
+             '("a" "s" "d" "f" "j" "k" "l" "i" "o"))
+       :bind
+       ([remap other-window] . switch-window)
+       :general
+       ('(normal motion) "C-w w" 'other-window)
+       )
+   #+end_src
+
+* Improved help/discoverability
+** Prettier and more useful help display via [[https://github.com/Wilfred/helpful][=Helpful=]]
+   The =helpful= package provides, among other things, more context in Help
+   buffers.
+
+   #+begin_src emacs-lisp
+     (use-package helpful
+       ;; :ensure help-fns+
+       :general
+       (leader
+	 "h"   '(:ignore t :which-key "help")
+	 "ha"  '(apropos-command :which-key "apropos-command")
+	 "hb"  '(describe-bindings :which-key "describe-bindings")
+
+	 ;; The following is apparently useful for looking at
+	 ;; interactive-functions exclusively:
+	 "hc"  'helpful-command
+	 "hf"  '(helpful-callable :which-key "describe-function")
+	 "hi"  '(info :which-key "info")
+
+	 ;; "default" is the main face youll want to inspect:
+	 ;;"hF"  '(faces :which-key "describe-faces (fonts)")
+	 "hk"  '(helpful-key :which-key "describe-key")
+	 "hK"  'describe-keymap
+	 "hm"  'describe-mode
+	 "hp"  'describe-package
+	 "hv"  '(describe-variable :which-key "describe-variable")
+	 "h."  'helpful-at-point
+	 )
+       ("C-h f" '(helpful-callable :which-key "describe-function"))
+       ("C-h k" '(helpful-key :which-key "describe-key"))
+       )
+   #+end_src
+
+** Useful keybinding for =describe-keymap=
+   #+begin_src emacs-lisp
+     (general-def "C-h C-k" 'describe-keymap)
+   #+end_src

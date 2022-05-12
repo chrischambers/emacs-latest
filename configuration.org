@@ -70,6 +70,11 @@
     (my/config-load "completion.org")
     #+end_src
 
+* [[./filetypes.org][Completion configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "filetypes.org")
+    #+end_src
+
 * [[./programming.org][Programming configuration]]
     #+begin_src emacs-lisp
     (my/config-load "programming.org")
@@ -84,3 +89,47 @@
     #+begin_src emacs-lisp
     (my/config-load "applications.org")
     #+end_src
+
+* [[./mail.org][Mail configuration]]
+    #+begin_src emacs-lisp
+    (my/config-load "mail.org")
+    #+end_src
+
+* Misc
+** <<<flyspell>>>: Spell-checker
+   #+begin_src emacs-lisp
+     (use-package flyspell
+       :hook
+       ((prog-mode . flyspell-prog-mode)
+        (text-mode . flyspell-mode)
+        (gfm-mode . flyspell-mode)
+        (git-commit-mode . flyspell-mode)
+        (mu4e-compose-mode . flyspell-mode))
+       :custom
+       (ispell-dictionary "british")
+       (ispell-personal-dictionary (concat user-emacs-directory "dictionary.txt"))
+       ;; Apparently a major performance gain:
+       (flyspell-issue-message-flag nil))
+   #+end_src
+
+*** <<<whitespace-cleanup-mode>>> ([[https://github.com/purcell/whitespace-cleanup-mode][github]]): Intelligently remove extra whitespace
+
+    #+begin_quote
+    whitespace-cleanup-mode is a minor mode which calls whitespace-cleanup before
+    saving the current buffer, but only if the whitespace in the buffer was
+    initially clean. It determines this by quickly checking to see if
+    whitespace-cleanup would have any effect on the buffer.
+    #+end_quote
+
+    #+begin_src emacs-lisp
+      (use-package whitespace-cleanup-mode
+        :hook (after-init . global-whitespace-cleanup-mode))
+    #+end_src
+
+** wordnut
+   #+begin_src emacs-lisp
+     (use-package wordnut
+       :general
+       (leader
+         "vd" '(wordnut-lookup-current-word :which-key "dictionary")))
+   #+end_src

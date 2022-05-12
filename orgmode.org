@@ -839,3 +839,17 @@
          "Dr" '(org-drill-resume :which-key "resume")
          "Dn" '(org-drill-notes :which-key "notes")))
         #+end_src
+
+* =table.el= ([[https://www.emacswiki.org/emacs/TableMode][emacswiki]])
+  #+begin_src emacs-lisp
+    (require 'table)
+  #+end_src
+
+* <<<Org-transclusion>>> ([[https://github.com/nobiot/org-transclusion][github]])
+  #+begin_src emacs-lisp
+    (use-package org-transclusion
+      :after org
+      :hook (org-mode . org-transclusion-mode)
+      :general
+      (leader "X" '(org-transclusion-make-from-link :which-key "transclude")))
+  #+end_src

@@ -10,17 +10,138 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* Doom Theme
+* Theme
+** Doom Themes
   #+begin_src emacs-lisp
     (use-package doom-themes
-      :custom
-      (doom-themes-enable-bold t)
-      (doom-themes-enable-italic t)
       :config
-      (load-theme 'doom-dracula t))
+      ;; (load-theme 'doom-dracula t)
+      ;; Apparently, improves org-mode's native fontification:
+      (doom-themes-org-config))
   #+end_src
 
+** Poet Theme
+  #+begin_src emacs-lisp
+    (use-package poet-theme)
+  #+end_src
+
+** Nano Theme
+  #+begin_src emacs-lisp
+    (use-package nano-theme
+      :straight (nano-theme :host github :repo "rougier/nano-theme"))
+  #+end_src
+
+** Custom Theme Selector
+   [[https://emacs.stackexchange.com/questions/24088/make-a-function-to-toggle-themes][Make a function to toggle themes - Emacs Stack Exchange]]
+
+   #+begin_src emacs-lisp
+     (use-package theme-cycler
+       :no-require t
+       :straight nil
+       :after doom-themes
+       :demand
+       :preface
+       (defun disable-all-themes ()
+         "disable all active themes."
+         (dolist (i custom-enabled-themes) (disable-theme i)))
+       (defcustom my/themes (custom-available-themes) "The themes to cycle through")
+       (defcustom my/themes-index 0 "Initial index of my/themes")
+       :custom
+       (my/themes '(doom-dracula modus-operandi poet nano))
+       :config
+       (defadvice load-theme (before disable-themes-first activate)
+         (disable-all-themes))
+
+       (defun my/select-theme (f)
+         (interactive)
+         (let ((themes-length (length my/themes))
+               (index (funcall f my/themes-index)))
+           (setq my/themes-index (% (+ index themes-length) themes-length))
+           (my/load-indexed-theme)))
+
+       (defun my/next-theme ()
+         "Moves to next theme in list."
+         (interactive)
+         (my/select-theme '1+))
+
+       (defun my/previous-theme ()
+         "Moves to previous theme in list."
+         (interactive)
+         (my/select-theme '1-))
+
+       (defun my/load-indexed-theme ()
+         (let ((selected-theme (nth my/themes-index my/themes)))
+           (message (concat "loading theme: " (symbol-name selected-theme)))
+           (load-theme selected-theme t)))
+
+       (load-theme (nth my/themes-index my/themes) t)
+       :general
+       (leader
+         "T"  '(:ignore t :which-key "theme")
+         "Tp" '(my/previous-theme :which-key "previous")
+         "Tn" '(my/next-theme :which-key "next")))
+   #+end_src
+
+** Fix $LaTeX$ background on Theme Change
+   Thanks to hlissner - from [[https://github.com/hlissner/emacs-solaire-mode/issues/24][this issue]]:
+
+   #+begin_src emacs-lisp
+     (defun +org-update-latex-preview-background-color (&rest _)
+     (setq-default
+         org-format-latex-options
+         (plist-put org-format-latex-options
+                 :background
+                 (face-attribute (or (cadr (assq 'default face-remapping-alist))
+                                     'default)
+                                 :background nil t))))
+     (advice-add #'load-theme :after #'+org-update-latex-preview-background-color)
+   #+end_src
+
 * Modeline
+** COMMENT Minimalist mode-line
+   Source: [[https://github.com/mwfogleman/.emacs.d/blob/master/michael.org][Tasshin Fogleman (Building a Second Brain)]]
+
+    #+begin_src emacs-lisp
+      (setq-default mode-line-format
+       '("%e" ; print error message about full memory.
+         mode-line-front-space
+         ;; mode-line-mule-info
+         ;; mode-line-client
+         ;; mode-line-modified
+         ;; mode-line-remote
+         ;; mode-line-frame-identification
+         mode-line-buffer-identification
+         "   "
+         ;; mode-line-position
+         evil-mode-line-tag
+         ;; (vc-mode vc-mode)
+         ;; "  "
+         ;; mode-line-modes
+         "   "
+         ;; mode-line-misc-info
+         ;; battery-mode-line-string
+         mode-line-end-spaces))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (use-package less-chrome
+        :straight nil
+        :no-require t
+        :init
+        (setq-default mode-line-format nil)
+        :hook (after-init . window-divider-mode)
+        :custom-face
+        (vertical-border ((t (:foreground "gray80"))))
+        :custom
+        (window-divider-default-places t)
+        (window-divider-default-bottom-width 1)
+        (window-divider-default-right-width 1))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (require 'nano-faces)
+      (require 'nano-modeline)
+    #+end_src
 ** COMMENT spaceline ([[https://github.com/TheBB/spaceline][source]])
    #+begin_src emacs-lisp
      (use-package spaceline

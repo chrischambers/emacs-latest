@@ -1,0 +1,469 @@
+#+TITLE: Mail Configuration (newb)
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+property: header-args:emacs-lisp :results output silent
+
+* Enable lexical binding
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+- [[https://wwwtech.de/articles/2016/jul/my-personal-mail-setup][Christian Kruse email setup]]
+- [[https://www.reddit.com/r/emacs/comments/bfsck6/mu4e_for_dummies/][Reddit: mu4e for dummies]]
+- [[https://rakhim.org/fastmail-setup-with-emacs-mu4e-and-mbsync-on-macos/][Fastmail setup with Emacs, mu4e and mbsync on macOS]]
+- [[https://gist.github.com/areina/3879626][Manage your gmail account in emacs with mu4e]]
+- [[http://frostyx.cz/posts/synchronize-your-2fa-gmail-with-mbsync][FrostyX: Synchronize your 2FA Gmail with mbsync]]
+- [[https://github.com/daviwil/dotfiles/blob/master/Mail.org][System Crafters: mu4e]]
+- [[https://wiki.archlinux.org/title/Isync][Archwiki: Isync]]
+- [[https://github.com/munen/emacs.d/blob/master/configuration.org#mail][Alain: mu4e]]
+- [[https://alhassy.github.io/emacs.d/index.html#Using-Gnus-for-Gmail][Gnus for gmail]]
+- [[https://github.com/zamansky/using-emacs/blob/master/mu4econfig-sample.el][Mike Zamansky: mu4e]]
+- [[https://getpocket.com/read/3351615483][Setting Up neomutt with notmuch, gmail(lieer) and gpg signing]]
+- [[https://github.com/djcb/mu/blob/master/www/cheatsheet.md][mu/cheatsheet.md at master · djcb/mu · GitHub]]
+- [[https://github.com/rougier/mu4e-dashboard][GitHub - rougier/mu4e-dashboard: A dashboard for mu4e (mu for emacs)]]
+- [[https://christiantietze.de/posts/2021/05/notmuch-email-modus-themes/][Notmuch Mail and Compatible Emacs Theme Updates • Christian Tietze]]
+- [[https://www.youtube.com/watch?v=wuSPssykPtE][Hey.com Workflows in Notmuch / Emacs. (A Demo) - YouTube]]
+
+* Testing Mail Stuff
+** MU4E
+    #+begin_src emacs-lisp
+      (use-package mu4e
+      :no-require t
+      :straight nil
+      :load-path "/usr/local/share/emacs/site-lisp/mu/mu4e"
+      ;; :defer 10
+      :config
+
+      ;; Load org-mode integration
+      (require 'mu4e)
+      (require 'org-mu4e)
+
+      ;; Refresh mail using isync every 10 minutes
+      (setq mu4e-update-interval (* 10 60))
+      (setq mu4e-get-mail-command "mbsync -a")
+      (setq mu4e-maildir "~/Mail")
+
+      ;; Use Ivy for mu4e completions (maildir folders, etc)
+      ;; (setq mu4e-completing-read-function #'ivy-completing-read)
+
+      ;; Make sure that moving a message (like to Trash) causes the
+      ;; message to get a new file name.  This helps to avoid the
+      ;; dreaded "UID is N beyond highest assigned" error.
+      ;; See this link for more info: https://stackoverflow.com/a/43461973
+      (setq mu4e-change-filenames-when-moving t)
+
+      ;; Set up contexts for email accounts
+      ;; Every smtp account requires a corresponding entry in ~/.authinfo.gpg
+      (setq mu4e-contexts
+	      `(,(make-mu4e-context
+		  :name "Gmail"
+		  :match-func (lambda (msg) (when msg
+				      (string-prefix-p "/gmail" (mu4e-message-field msg :maildir))))
+		  :vars '((user-full-name . "Chris Chambers")
+			  (user-mail-address . "magma.chambers@gmail.com")
+			  (mu4e-sent-folder . "/gmail/Sent")
+			  (mu4e-trash-folder . "/gmail/Trash")
+			  (mu4e-drafts-folder . "/gmail/Drafts")
+			  (mu4e-refile-folder . "/gmail/All")
+			  (smtpmail-smtp-server . "smtp.gmail.com")
+			  (mu4e-sent-messages-behavior . delete)))
+	      ,(make-mu4e-context
+		  :name "Runbox"
+		  :match-func (lambda (msg) (when msg
+				      (string-prefix-p "/runbox" (mu4e-message-field msg :maildir))))
+		  :vars '((user-full-name . "Chris Chambers")
+			  (user-mail-address . "msg@chrischambers.me")
+			  (mu4e-sent-folder . "/runbox/Sent")
+			  (mu4e-trash-folder . "/runbox/Trash")
+			  (mu4e-drafts-folder . "/runbox/Drafts")
+			  (mu4e-refile-folder . "/runbox/Archive")
+			  (smtpmail-smtp-server . "mail.runbox.com")
+			  (mu4e-sent-messages-behavior . sent)))))
+      (setq mu4e-context-policy 'pick-first)
+      (setq mu4e-view-show-addresses 't)
+
+      ;; Composing mail
+      (setq mu4e-compose-dont-reply-to-self t)
+
+      ;; Use mu4e for sending e-mail
+      (setq mail-user-agent 'mu4e-user-agent)
+      (setq mu4e-maildir-shortcuts
+	    '(("/gmail/All"   . ?i)
+	      ("/runbox/Inbox"  . ?g)
+	      ("/gmail/Sent"    . ?s)
+	      ("/gmail/Trash"   . ?t)))
+      ;; don't keep message buffers around
+      (setq message-kill-buffer-on-exit t)
+      ;; (mu4e t)
+
+      (add-to-list 'mu4e-view-actions
+		  '("View in browser" . mu4e-action-view-in-browser) t)
+      :general
+      (leader "am" '(mu4e :which-key "mu4e")))
+    #+end_src
+
+** TODO the flagged face styles the entire line - you want the same strike-through effect for =trash=
+** TODO Fix brittle =:load-path= configuration below - only works on OSX, and if notmuch version matches
+** notmuch
+    #+begin_src emacs-lisp
+      (use-package notmuch
+        :straight nil
+        :load-path "/usr/local/Cellar/notmuch/0.35/share/emacs/"
+        :preface
+        (defcustom my/notmuch-maildir
+          (expand-file-name "~/Mail/")
+          "The maildir used by notmuch.")
+        (defcustom my/notmuch-folder
+          (concat my/notmuch-maildir ".notmuch/")
+          "The actual notmuch folder.")
+        (defcustom my/notmuch-hooks-location
+          (concat my/notmuch-folder "hooks/")
+          "The location of the hooks used by notmuch.")
+
+        ;; Source: https://emacs.stackexchange.com/questions/63436/is-there-some-way-to-view-the-html-part-of-an-email-in-an-external-browser-or-as
+        (defun notmuch-show-view-html+ ()
+          "Open the text/html part of the current message using
+      `notmuch-show-view-part'."
+          (interactive)
+          (save-excursion
+            (goto-char
+             (prop-match-beginning
+              (text-property-search-forward
+               :notmuch-part
+               "text/html"
+               (lambda (value notmuch-part)
+                 (equal (plist-get notmuch-part :content-type)
+                        value)))))
+            (notmuch-show-view-part)))
+
+        (defun my/notmuch-tree-toggle-delete ()
+          "Toggle deleted tag for message."
+          (interactive)
+          (evil-collection-notmuch-toggle-tag "trash" "tree"))
+
+        (defun my/notmuch-search-toggle-delete ()
+          "Toggle deleted tag for message."
+          (interactive)
+          (evil-collection-notmuch-toggle-tag "trash" "search" 'notmuch-search-next-thread))
+
+        (defun my/notmuch-search-get-from ()
+          "A helper function to find the email address for the given email."
+          (let ((notmuch-addr-sexp (car
+                                    (notmuch-call-notmuch-sexp "address"
+                                                               "--format=sexp"
+                                                               "--format-version=1"
+                                                               "--output=sender"
+                                                               (notmuch-search-find-thread-id)))))
+            (plist-get notmuch-addr-sexp :name-addr)))
+
+        (defun my/notmuch-tree-get-from ()
+          "A helper function to find the email address for the given email.
+      Assumes `notmuch-tree-mode'."
+          (plist-get (notmuch-tree-get-prop :headers) :From))
+
+        (defun my/notmuch-get-from ()
+          "Find the From email address for the email at point."
+          (car (notmuch-clean-address
+                (cond
+                 ((eq major-mode 'notmuch-show-mode)
+                  (notmuch-show-get-from))
+                 ((eq major-mode 'notmuch-tree-mode)
+                  (my/notmuch-tree-get-from))
+                 ((eq major-mode 'notmuch-search-mode)
+                  (my/notmuch-search-get-from))
+                 ((t nil))))))
+
+        (defun my/notmuch-create-gmail-filter-from-current-sender ()
+          "Open gmail's create-filter dialogue, pre-populating current notmuch sender."
+          (interactive)
+          (browse-url (format
+                       "https://mail.google.com/mail/u/0/#create-filter/from=%s"
+                       (url-encode-url (my/notmuch-get-from)))))
+
+        (defun notmuch-tree-filter (query)
+          "Filter or LIMIT the current tree results based on an additional query string.
+
+      Runs a new tree-search matching only messages that match both the
+      current search results AND the additional query string provided."
+          (interactive (list (notmuch-read-query "Filter search: ")))
+          (let ((grouped-query (notmuch-group-disjunctive-query-string query))
+                (grouped-original-query (notmuch-group-disjunctive-query-string
+                                         notmuch-tree-basic-query)))
+            (notmuch-tree (if (string= grouped-original-query "*")
+                              grouped-query
+                            (concat grouped-original-query " and " grouped-query))
+                          notmuch-search-oldest-first)))
+
+        (defun my/notmuch-filter-by-from ()
+          "Filter the current search/tree view to show all emails sent from the sender of the current thread."
+          (interactive)
+          (let ((f (if (eq major-mode 'notmuch-tree-mode)
+                       'notmuch-tree-filter
+                     'notmuch-search-filter)))
+            (funcall f (concat "from:" (my/notmuch-get-from)))))
+
+        (defun my/notmuch-search-by-from (&optional no-display)
+          "Show all emails sent from the sender of the current thread.
+      NO-DISPLAY is sent forward to `notmuch-search'."
+          (interactive)
+          (notmuch-search (concat "from:" (my/notmuch-get-from))
+                          notmuch-search-oldest-first
+                          nil
+                          nil
+                          no-display))
+
+        (defun my/notmuch-from ()
+          (interactive)
+          (let ((f (if (eq major-mode 'notmuch-tree-mode)
+                       'notmuch-tree
+                     'notmuch-search)))
+            (funcall f (concat "from:" (my/notmuch-get-from)))))
+
+        (defun my/notmuch-tag-current-sender (tag-changes &optional beg end refresh)
+          "Apply TAG-CHANGES to all emails from the sender of the current thread.
+      BEG and END provide the region, but are ignored. They are defined
+      since `notmuch-search-interactive-tag-changes' returns them. If
+      REFRESH is true, refresh the buffer from which we started the
+      search."
+          (interactive (notmuch-search-interactive-tag-changes))
+          (let ((this-buf (current-buffer)))
+            (my/notmuch-search-by-from t)
+            ;; This is a dirty hack since I can't find a way to run a
+            ;; temporary hook on `notmuch-search' completion. So instead of
+            ;; waiting on the search to complete in the background and then
+            ;; making tag-changes on it, I will just sleep for a short amount
+            ;; of time. This is generally good enough and works, but is not
+            ;; guaranteed to work every time. I'm fine with this.
+            (sleep-for 0.5)
+            (notmuch-search-tag-all tag-changes)
+            (when refresh
+              (set-buffer this-buf)
+              (notmuch-refresh-this-buffer))))
+
+        (defun my/notmuch-add-addr-to-db (addr db)
+          "Add the email address ADDR to the db-file DB."
+          (append-to-file (format "%s\n" addr) nil db))
+
+        (defun my/notmuch-edit-screened ()
+          (interactive)
+          (find-file (format "%s/screened.db" my/notmuch-folder)))
+        (defun my/notmuch-edit-spam ()
+          (interactive)
+          (find-file (format "%s/spam.db" my/notmuch-folder)))
+        (defun my/notmuch-edit-papertrail ()
+          (interactive)
+          (find-file (format "%s/paper-trail.db" my/notmuch-folder)))
+        (defun my/notmuch-edit-feeds ()
+          (interactive)
+          (find-file (format "%s/feeds.db" my/notmuch-folder)))
+
+        (defun my/notmuch-move-sender-to-screened ()
+          "For the email at point, move the sender of that email to Screened Emails.
+      This means:
+      1. All new email should have the tag =unscreened= removed, and thus show up in the inbox.
+      2. All existing email should be updated to remove the tag =unscreened=."
+          (interactive)
+          (my/notmuch-add-addr-to-db (my/notmuch-get-from)
+                                     (format "%s/screened.db" my/notmuch-folder))
+          (my/notmuch-tag-current-sender '("-unscreened") nil nil t))
+
+        (defun my/notmuch-move-sender-to-spam ()
+          "For the email at point, move the sender of that email to spam.
+      This means:
+      1. All new email should go to =spam= and skip the inbox altogether.
+      2. All existing email should be updated with the tag =spam=.
+      3. All existing email should be removed from the inbox."
+          (interactive)
+          (my/notmuch-add-addr-to-db (my/notmuch-get-from)
+                                     (format "%s/spam.db" my/notmuch-folder))
+          (my/notmuch-tag-current-sender '("+spam" "+trash" "-inbox" "-unread" "-unscreened")))
+
+        (defun my/notmuch-tag-prompt (prompt prefix)
+          (s-chop-prefix prefix (completing-read
+           prompt
+           (-filter (lambda (s) (s-starts-with? prefix s)) (notmuch-tag-completions))
+           nil nil nil 'notmuch-select-tag-history)))
+
+        (defun my/notmuch-move-sender-to-feeds (tag-name)
+          "For the email at point, move the sender of that email to the feed.
+      This means:
+      1. All new email should go to the feed and skip the inbox altogether.
+      2. All existing email should be updated with the tags =feeds= and
+         =feeds/TAG-NAME=.
+      3. All existing email should be removed from the inbox."
+          (interactive (list (my/notmuch-tag-prompt "Feeds: " "feeds/")))
+          (my/notmuch-add-addr-to-db (format "%s %s"
+                                             tag-name
+                                             (my/notmuch-get-from))
+                                     (format "%s/feeds.db" my/notmuch-folder))
+          (let ((tag-string (format "+feeds/%s" tag-name)))
+            (my/notmuch-tag-current-sender (list tag-string "+feeds" "-inbox"))))
+
+        (defun my/notmuch-move-sender-to-papertrail (tag-name)
+          "For the email at point, move the sender of that email to the papertrail.
+      This means:
+      1. All new email should go to the papertrail and skip the inbox altogether.
+      2. All existing email should be updated with the tags =paper-trail= and
+         =paper-trail/TAG-NAME=.
+      3. All existing email should be removed from the inbox."
+          (interactive (list (my/notmuch-tag-prompt "Paper Trail: " "paper-trail/")))
+          (my/notmuch-add-addr-to-db (format "%s %s"
+                                             tag-name
+                                             (my/notmuch-get-from))
+                                     (format "%s/paper-trail.db" my/notmuch-folder))
+          (let ((tag-string (format "+paper-trail/%s" tag-name)))
+            (my/notmuch-tag-current-sender (list tag-string "+paper-trail" "-inbox"))))
+
+        :commands notmuch-hello notmuch-tree
+        :hook (message-setup . mml-secure-sign-pgpmime)
+        :custom
+        (notmuch-search-oldest-first nil)
+        (notmuch-hello-auto-refresh t)
+        (notmuch-fcc-dirs
+         '(("magma.chambers@gmail.com" . "gmail/Sent")
+           ("[^@]+@chrischambers.me" . "runbox/Sent")
+           ("[^@]+@runbox.com" . "runbox/Sent")))
+        (notmuch-hello-thousands-separator ",")
+        ;; (notmuch-search-result-format
+        ;;  '(("date" . "%12s  ")
+        ;;    ("count" . "%-7s  ")
+        ;;    ("authors" . "%-20s  ")
+        ;;    ("subject" . "%-50s  ")
+        ;;    ("tags" . "(%s)")))
+        (notmuch-saved-searches
+         '((:name "Inbox"
+                  :query "tag:inbox and tag:unread and not tag:unscreened"
+                  :key "i"
+                  :search-type tree)
+           (:name "Already Seen"
+                  :query "tag:inbox and not tag:unread and not tag:unscreened"
+                  :key "a"
+                  :search-type tree)
+           (:name "Unscreened"
+                  :query "tag:unscreened"
+                  :key "u"
+                  :search-type tree)
+           (:name "Feeds"
+                  :query "tag:feeds"
+                  :key "f"
+                  :search-type tree)
+           (:name "Paper Trail"
+                  :query "tag:paper-trail"
+                  :key "p"
+                  :search-type tree)
+           (:name "Starred"
+                  :query "tag:flagged"
+                  :key "s"
+                  :search-type tree)
+           (:name "Sent"
+                  :query "tag:sent"
+                  :key "t"
+                  :search-type tree)
+           (:name "Drafts"
+                  :query "tag:draft"
+                  :key "d")
+           (:name "Trash"
+                  :query "tag:trash"
+                  :key "T")
+           (:name "Spam"
+                  :query "tag:spam"
+                  :key "S")))
+
+        (notmuch-tagging-keys
+         '(("a" notmuch-archive-tags "Archive")
+           ("u" notmuch-show-mark-read-tags "Mark read")
+           ("f"
+            ("+flagged")
+            "Flag")
+           ("s"
+            ("+spam" "-inbox")
+            "Mark as spam")
+           ("d"
+            ("+trash" "-inbox")
+            "Delete")))
+
+        ;; Ask which email to send from - try and infer from header:
+        (mail-specify-envelope-from t)
+        (message-sendmail-envelope-from 'header)
+        (mail-envelope-from 'header)
+        (notmuch-always-prompt-for-sender t)
+        :config
+        (my/keymap-fix-with-evil-mode 'notmuch-hello-mode)
+
+        ;; Integrate with org-mode:
+        (with-eval-after-load 'org
+          (add-to-list 'org-modules 'ol-notmuch)
+          (require 'ol-notmuch))
+
+        ;; (customize-set-variable 'notmuch-tagging-keys
+        ;; 	(--map-first (equal (car it) "d")
+        ;; 		     '("d" ("+trash" "-inbox") "Delete")
+        ;; 		     notmuch-tagging-keys))
+        (add-to-list 'notmuch-tag-formats
+                     '("trash" (propertize tag 'face 'my/notmuch-trash-tag)))
+        (defface my/notmuch-trash-tag
+          '((default)
+            (((class color) (min-colors 88) (background light))
+             :foreground "#70480f")
+            (((class color) (min-colors 88) (background dark))
+             :foreground "#c4d030"))
+          "Face for the 'trash' tag in Notmuch.")
+        :general
+        ([remap evil-collection-notmuch-tree-toggle-delete] #'my/notmuch-tree-toggle-delete)
+        ([remap evil-collection-notmuch-search-toggle-delete] #'my/notmuch-search-toggle-delete)
+        (leader "an" '(notmuch-hello :which-key "notmuch"))
+        (notmuch-common-keymap
+         "j"       'evil-next-line
+         "J"       'notmuch-jump-search)
+        ('(motion normal insert) notmuch-hello-mode-map
+         "TAB"     'widget-forward
+         "S-TAB"   'widget-backward
+         "RET"     'evil-collection-notmuch-hello-ret)
+        ('(motion normal) '(notmuch-search-mode-map notmuch-tree-mode-map)
+         "f"       'my/notmuch-filter-by-from
+         "F"       'my/notmuch-search-by-from)
+        (local-leader '(notmuch-search-mode-map notmuch-tree-mode-map)
+          "g"      '(my/notmuch-create-gmail-filter-from-current-sender :which-key "gmail-filter")
+          "e"      '(:ignore t :which-key "edit...")
+          "ef"     '(my/notmuch-edit-feeds :which-key "feeds")
+          "ep"     '(my/notmuch-edit-papertrail :which-key "papertrail")
+          "es"     '(my/notmuch-edit-screened :which-key "screened")
+          "eS"     '(my/notmuch-edit-spam :which-key "spam")
+          "m"      '(:ignore t :which-key "move to...")
+          "mf"     '(my/notmuch-move-sender-to-feeds :which-key "feeds")
+          "mp"     '(my/notmuch-move-sender-to-papertrail :which-key "papertrail")
+          "ms"     '(my/notmuch-move-sender-to-screened :which-key "screened")
+          "mS"     '(my/notmuch-move-sender-to-spam :which-key "spam"))
+        (local-leader notmuch-show-mode-map
+          "x"      '(notmuch-show-view-html+ :which-key "view in browser")))
+    #+end_src
+
+** Sending mail
+    #+begin_src emacs-lisp
+      (use-package sendmail
+	:no-require t
+	:custom
+	  (message-send-mail-function 'smtpmail-send-it)
+	  (smtpmail-default-smtp-server "smtp.gmail.com")
+	  (smtpmail-smtp-server "smtp.gmail.com")
+	  (smtpmail-stream-type 'ssl)
+	  (smtpmail-smtp-service 465)
+	  (smtpmail-queue-mail nil)
+	  :general
+	  (local-leader '(notmuch-message-mode-map message-mode-map)
+	    "s" '(mml-secure-message-sign :which-key "sign")
+	    "e" '(mml-secure-message-encrypt :which-key "encrypt")
+	    "b" '(mml-secure-message-sign-encrypt :which-key "sign + encrypt")))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (use-package mml-sec
+	:no-require t
+	:straight nil
+	:custom
+	(mml-secure-openpgp-encrypt-to-self t)
+	(mml-secure-openpgp-sign-with-sender t)
+	(mml-secure-smime-encrypt-to-self t)
+	(mml-secure-smime-sign-with-sender t))
+    #+end_src

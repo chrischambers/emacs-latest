@@ -9,3 +9,219 @@
 #+begin_src emacs-lisp
   ;; -*- lexical-binding: t -*-
 #+end_src
+
+* <<<elfeed>>>
+  #+begin_src emacs-lisp
+    (use-package elfeed
+      :custom
+      (elfeed-feeds '("https://blog.tecosaur.com/tmio/rss.xml")))
+  #+end_src
+
+* <<<calibredb>>> ([[https://github.com/chenyanming/calibredb.el][github]])
+  #+begin_src emacs-lisp
+    (use-package calibredb
+      :init
+      (setq calibredb-root-dir my/ebooks-directory)
+      :custom
+      (calibredb-format-all-the-icons t)
+      (calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
+      (calibredb-library-alist `((,calibredb-root-dir)))
+      (calibredb-virtual-library-alist '(("1. Development - work" . "work \\(pdf\\|epub\\)")
+                                           ("2. Read it later" . "Readit epub")
+                                           ("3. Development - rust" . "rust")))
+      :config
+      (my/keymap-fix-with-evil-mode 'calibredb-search-mode)
+      (my/keymap-fix-with-evil-mode 'calibredb-edit-annotation-mode)
+      (my/keymap-fix-with-evil-mode 'calibredb-show-mode)
+      :general
+      ;; https://github.com/chenyanming/calibredb.el/issues/29
+      ('(motion normal) calibredb-search-mode-map
+               "q"          'calibredb-search-quit
+               "n"          'calibredb-virtual-library-next
+               "N"          'calibredb-library-next
+               "p"          'calibredb-virtual-library-previous
+               "P"          'calibredb-library-previous
+               "l"          'calibredb-virtual-library-list
+               "o"          'calibredb-find-file
+               "O"          'calibredb-find-file-other-frame
+               "V"          'calibredb-open-file-with-default-tool
+               "v"          'calibredb-view
+               "d"          'calibredb-remove
+               "D"          'calibredb-remove-marked-items
+               "m"          'calibredb-mark-and-forward
+               "s"          'calibredb-set-metadata-dispatch
+               "e"          'calibredb-export-dispatch
+               "a"          'calibredb-add
+               "."          'calibredb-open-dired
+               ","          'calibredb-quick-look
+               "y"          'calibredb-yank-dispatch
+               "u"          'calibredb-unmark-and-forward
+               "DEL"        'calibredb-unmark-and-backward
+               "s"          'calibredb-set-metadata-dispatch
+               "?"          'calibredb-dispatch
+               "/"          'calibredb-search-live-filter
+               "j"          'calibredb-next-entry
+               "k"          'calibredb-previous-entry
+               "M-f"        'calibredb-toggle-favorite-at-point
+               "M-x"        'calibredb-toggle-archive-at-point
+               "M-h"        'calibredb-toggle-highlight-at-point
+               "M-n"        'calibredb-show-next-entry
+               "M-p"        'calibredb-show-previous-entry
+               "R"          'calibredb-search-clear-filter
+               "r"          'calibredb-search-refresh-and-clear-filter
+               "<backtab>"  'calibredb-toggle-view
+               "<tab>"      'calibredb-toggle-view-at-point
+               "TAB"        'calibredb-toggle-view-at-point
+               "RET"        'calibredb-find-file)
+      (leader "aC" '(calibredb :which-key "calibre")))
+  #+end_src
+
+* <<<ERC>>>: Emacs IRC
+  #+begin_src emacs-lisp
+    (use-package erc
+      :preface
+      (defun my/erc-connect ()
+        "The mechanism by which you want to connect to erc/irc."
+        (interactive)
+        (erc-tls :server "irc.libera.chat" :port 6697 :nick "Paraselene"))
+      :straight nil
+      :custom
+      (erc-prompt-for-password nil)
+      (erc-hide-list '("PART" "QUIT" "JOIN"))
+      :config
+      (setq erc-autojoin-channels-alist '(("libera.chat"
+                                          "#clojure"
+                                          "#emacs"
+                                          "#sed"
+                                          "#org-mode"
+                                          "#nixos"
+                                          "#nix-darwin"))
+           erc-server "irc.libera.chat"
+           erc-port 6697
+           erc-nick "Paraselene")
+      :general
+      (leader "ai" '(my/erc-connect :which-key "irc")))
+
+  #+end_src
+
+  #+begin_src emacs-lisp
+  (use-package erc-hl-nicks)
+  #+end_src
+** SOMEDAY-MAYBE [[https://github.com/minad/consult/wiki#erc-buffers][Consult: ERC]]
+
+* <<<EWW>>>: Emacs Web Wowser (Browser)
+  #+begin_src emacs-lisp
+    (setq shr-max-width 70)
+    (setq shr-use-colors nil)
+    (setq shr-bullet "- ")
+  #+end_src
+
+  : #+begin_src emacs-lisp
+  : (setq shr-color-visible-luminance-min 70
+  :    shr-use-colors nil  ;; Don't use colors in text/html stuff
+  :    shr-width 90 ;; Notmuch weirdly indents stuff, so using window with often results in weird word-wrapping
+  :    shr-use-fonts nil) ;; I don't like proportional fonts
+  : #+end_src
+
+  #+begin_src emacs-lisp
+    (use-package eww-lnum
+      :after eww
+      :general
+      ('motion eww-mode-map
+               "f" 'eww-lnum-follow
+               "F" 'eww-lnum-universal))
+  #+end_src
+
+* <<<dired>>>: File-system browser
+
+  This snippet prevents =dired= from proliferating buffers as you navigate the
+  file tree:
+
+  #+begin_src emacs-lisp
+    (require 'dired)
+    (general-define-key
+     :states '(normal)
+     :keymaps 'dired-mode-map
+     "RET" 'dired-find-alternate-file
+     "^" (lambda () (interactive) (find-alternate-file "..")))
+  #+end_src
+
+* <<<treemacs>>>: ([[https://github.com/Alexander-Miller/treemacs][github]]) file drawer
+  #+begin_src emacs-lisp
+    (use-package treemacs
+      :init
+      :custom
+      (treemacs-width 30)
+      (treemacs-tag-follow-delay 0.5)
+      :config
+      ;; slightly lower the size of treemacs icons
+      (treemacs-resize-icons 18)
+
+      (treemacs-tag-follow-mode t)
+      (treemacs-filewatch-mode t)
+      (treemacs-fringe-indicator-mode 'always)
+
+      (pcase (cons (not (null (executable-find "git")))
+                   (not (null treemacs-python-executable)))
+        (`(t . t)
+         (treemacs-git-mode 'extended))
+        (`(t . _)
+         (treemacs-git-mode 'simple)))
+
+      (define-inline my/treemacs-ignore-pycache (file _)
+        (declare (side-effect-free t) (pure t))
+        (inline-letevals (file)
+          (inline-quote
+           (string-equal ,file "__pycache__"))))
+      (push 'my/treemacs-ignore-pycache treemacs-ignored-file-predicates)
+
+      (defun my/treemacs-ignored (filename absolute-path)
+        (string-equal filename "ltximg"))
+      (push 'my/treemacs-ignored treemacs-ignored-file-predicates)
+
+      :general
+      (leader
+        "fd"  '(treemacs :which-key "file-drawer")
+        "fD"  '(treemacs-bookmark :which-key "file-drawer (from bookmark)")))
+  #+end_src
+
+  #+begin_src emacs-lisp
+    (with-eval-after-load 'treemacs
+      (add-to-list 'treemacs-pre-file-insert-predicates #'treemacs-is-file-git-ignored?))
+  #+end_src
+
+  #+begin_src emacs-lisp
+    (use-package treemacs-evil
+      :after treemacs evil)
+    (use-package treemacs-projectile
+      :after treemacs projectile)
+    (use-package treemacs-magit
+      :after treemacs magit)
+    (use-package treemacs-icons-dired
+      :after treemacs dired
+      :config (treemacs-icons-dired-mode))
+    ;; (use-package treemacs-perspective
+    ;;   :after treemacs perspective
+    ;;   :config (treemacs-set-scope-type 'Perspectives))
+  #+end_src
+
+** Visual aids
+*** Use [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]] to colour parmeters uniquely
+    #+begin_src emacs-lisp
+      (use-package color-identifiers-mode
+        :hook (after-init . global-color-identifiers-mode))
+    #+end_src
+
+*** Use [[https://github.com/fanael/rainbow-delimiters][<<<rainbow-delimiters>>>]] to colour matching parentheses
+    #+begin_src emacs-lisp
+      (use-package rainbow-delimiters
+        :hook ((prog-mode . rainbow-delimiters-mode)
+               (geiser-repl-mode . rainbow-delimiters-mode)
+               (ielm-mode . rainbow-delimiters-mode)))
+    #+end_src
+
+*** Display hex colour strings in the correct colour via [[https://elpa.gnu.org/packages/rainbow-mode.html][rainbow mode]]
+    #+begin_src emacs-lisp
+      (use-package rainbow-mode
+        :hook (prog-mode . rainbow-mode))
+    #+end_src

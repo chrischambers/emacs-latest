@@ -10,8 +10,205 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* Emacs-Lisp
-** Bindings
+
+* Highlight programming flags (e.g. TODO/FIXME)
+  #+begin_src emacs-lisp
+    (defun my/programming-highlight-terms ()
+      (font-lock-add-keywords
+       nil
+       '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t))))
+
+    (add-hook 'prog-mode-hook #'my/programming-highlight-terms)
+  #+end_src
+* REPL Functionality
+** <<<comint>>>: Command Interpreter / REPL configuration
+   #+begin_src emacs-lisp
+     (use-package comint
+       :no-require t
+       :straight nil
+       :custom
+       (comint-prompt-read-only t)
+       :general
+       ('(insert normal) '(compilation-mode-map comint-mode-map)
+	"C-l" 'comint-clear-buffer))
+   #+end_src
+
+** REPL-toggle
+   #+begin_src emacs-lisp
+     (use-package repl-toggle
+       :preface
+       (defun clojure-repl ()
+         (interactive)
+         (if (cider-current-repl)
+             ;; Switch to repl, ensuring namespace matches current buffer:
+             (cider-switch-to-repl-buffer t)
+           ;; Jack in, and provide a handy cider usage tip as well:
+           (and (cider-jack-in '()) (cider-drink-a-sip))))
+       (defun scheme-repl ()
+         (interactive)
+         (geiser-mode-switch-to-repl nil))
+       :hook (prog-mode . repl-toggle-mode)
+       :custom
+       (rtog/goto-buffer-fun 'pop-to-buffer)
+       ;; (rtog/fullscreen t) ; not sure about this
+       (rtog/mode-repl-alist
+	'((emacs-lisp-mode . ielm)
+          (ruby-mode . inf-ruby)
+          (js-mode . skewer-repl)
+          (haskell-mode . haskell-interactive-switch)
+          (prolog-mode . run-prolog)
+          (scheme-mode . scheme-repl)
+          (sml-mode . sml-prog-proc-switch-to)
+          (lisp-mode . slime-repl) ; requires that slime-auto-start is not 'never
+          (python-mode . run-python)))
+       :general
+       (local-leader 'clojure-mode-map
+         ","  '(clojure-repl :which-key "REPL"))
+       (local-leader 'cider-repl-mode-map
+         ","  '(cider-switch-to-last-clojure-buffer :which-key "REPL"))
+       (local-leader '(prog-mode-map comint-mode-map)
+         ","  '(rtog/toggle-repl :which-key "REPL")))
+   #+end_src
+
+* Version Control / VCS
+** [[https://magit.vc/][<<<Magit>>>]] - Git integration ([[https://github.com/emacs-evil/evil-magit][github]])
+   Add a binding for =magit-status=, and enable various vim-style write
+   shortcuts for the magit buffer (e.g. =:w=, =:x=):
+
+   #+begin_src emacs-lisp
+     (use-package magit
+       :commands (magit-status magit-refresh-all)
+       :custom
+       (git-commit-summary-max-length 50)
+       ;; start in insert-mode for commit messages
+       :hook (git-commit-mode . evil-insert-state)
+       :general
+       (leader
+         "g"   '(:ignore t :which-key "git")
+         "gs"  'magit-status
+         "gr"  '(magit-refresh-all :which-key "refresh diff-hl")))
+   #+end_src
+   See also: evil-collection for evil-magit keybindings.
+
+** <<<git-timemachine>>> ([[https://gitlab.com/pidu/git-timemachine][github]]) for easily viewing historic versions of file
+   Use =p=/=n=/=g=/=q= to look at previous, next, goto arbitrary
+   historic versions, or quit.
+
+   #+begin_src emacs-lisp
+     (use-package git-timemachine
+       :after magit
+       :config
+       (my/keymap-fix-with-evil-mode 'git-timemachine-mode)
+       :general
+       (leader "gt" 'git-timemachine)
+       )
+   #+end_src
+
+   If we want to actually roll-back, we just save the file.
+
+** <<<abridge-diff>>>: more easily-readable diffs
+   #+begin_src emacs-lisp
+     (use-package abridge-diff
+       :after magit
+       :init (abridge-diff-mode 1))
+   #+end_src
+
+* LSP
+  #+begin_src emacs-lisp
+    (use-package lsp-mode
+      :commands (lsp lsp-deferred)
+      :hook (lsp-mode . lsp-enable-which-key-integration)
+      :init
+      (setq lsp-before-save-edits t
+            lsp-inhibit-message t
+            lsp-lens-enable t
+            lsp-semantic-tokens-enable t
+            lsp-eldoc-render-all nil
+            lsp-highlight-symbol-at-point nil
+            read-process-output-max (* 1024 1024)
+            lsp-idle-delay 0.500))
+
+    (use-package lsp-ui
+      :after lsp-mode
+      :commands lsp-ui-mode
+      :config
+      (setq lsp-ui-doc-enable t
+            lsp-ui-doc-use-webkit nil
+            lsp-ui-doc-delay 10000.0
+            lsp-ui-sideline-delay 10000.0
+            lsp-ui-doc-include-signature t
+            lsp-ui-doc-position 'at-point
+            lsp-eldoc-enable-hover nil ; Disable eldoc displays in minibuffer
+            lsp-headerline-breadcrumb-enable nil
+            lsp-modeline-code-actions-enable nil
+            lsp-modeline-diagnostics-enable nil
+            lsp-ui-sideline-enable t
+            lsp-ui-sideline-show-hover nil
+            lsp-ui-sideline-show-diagnostics nil
+            lsp-ui-sideline-ignore-duplicate t))
+
+    (use-package consult-lsp
+      :after lsp consult
+      :config
+      (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
+
+    (use-package lsp-treemacs
+      :after lsp treemacs
+      :commands lsp-treemacs-errors-list)
+
+    (use-package dap-mode
+      :after lsp
+      :hook ((python-mode . dap-ui-mode)
+             (python-mode . dap-mode))
+      :config
+      (add-hook 'dap-stopped-hook
+                (lambda (arg) (call-interactively #'dap-hydra)))
+      (require 'dap-python)
+      ;; NOTE: This monkey-patch enables =pyvenv-workon= and =dap=debug= to play
+      ;; togerther nicely.
+      (advice-add 'dap-python--pyenv-executable-find :override #'my/dap-python--pyenv-executable-find)
+      (defun my/dap-python--pyenv-executable-find (command)
+        (executable-find command))
+
+      ;; ;; Reduce the features to the repl and the local variable information
+      ;; (setq dap-auto-configure-features '(locals repl))
+
+      ;; ;; Redefine the height of the repl buffer
+      ;; (setq dap-ui-buffer-configurations
+      ;;       `((,dap-ui--locals-buffer . ((side . right) (slot . 1) (window-width . 0.20)))
+      ;;         (,dap-ui--expressions-buffer . ((side . right) (slot . 2) (window-width . 0.20)))
+      ;;         (,dap-ui--sessions-buffer . ((side . right) (slot . 3) (window-width . 0.20)))
+      ;;         (,dap-ui--breakpoints-buffer . ((side . left) (slot . 2) (window-width . ,treemacs-width)))
+      ;;         (,dap-ui--debug-window-buffer . ((side . bottom) (slot . 3) (window-width . 0.20)))
+      ;;         (,dap-ui--repl-buffer . ((side . bottom) (slot . 1) (window-height . 0.20)))))
+      )
+  #+end_src
+
+* Lisp Languages
+** Keybindings common across lisps
+   #+begin_src emacs-lisp
+     (defun mine/eval-region-or-buffer ()
+       (interactive)
+       (if (region-active-p)
+           (eval-region (region-beginning) (region-end))
+         (eval-buffer)))
+
+     (with-eval-after-load 'lisp-mode
+       (general-def
+         local-leader lisp-mode-map
+         "e" '(:ignore t :major-modes lisp-mode :which-key "evaluate")
+         "eb" '(mine/eval-region-or-buffer :which-key "buffer/region")))
+   #+end_src
+
+** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
+   #+begin_src emacs-lisp
+     (use-package eval-sexp-fu)
+   #+end_src
+   #+begin_src emacs-lisp
+     (use-package cider-eval-sexp-fu
+       :after cider eval-sexp-fu)
+   #+end_src
+** Emacs-Lisp
    #+begin_src emacs-lisp
      (use-package my/emacs-lisp-config
        :no-require t
@@ -26,18 +223,344 @@
          "er" '(eval-region :which-key "region")
          "eb" '(eval-buffer :which-key "buffer")))
    #+end_src
-** <<<eros>>> ([[https://github.com/xiongtx/eros][github]]): Display evaluation results inline
+*** <<<eros>>> ([[https://github.com/xiongtx/eros][github]]): Display evaluation results inline
+    #+begin_src emacs-lisp
+      (use-package eros
+        :hook (emacs-lisp-mode . eros-mode))
+    #+end_src
+
+*** <<<macrostep>>> ([[https://github.com/joddie/macrostep][github]]): expand elisp macros
+    #+begin_src emacs-lisp
+      (use-package macrostep
+        :commands macrostep-expand
+        :general
+        (local-leader emacs-lisp-mode-map
+          "M" '(macrostep-expand :which-key "macro expand")
+          ))
+    #+end_src
+
+*** <<<suggest>>> ([[https://github.com/Wilfred/suggest.el][github]]): Discover elisp functions which perform desired functionality
+    #+begin_src emacs-lisp
+      (use-package suggest
+        :general
+        (local-leader emacs-lisp-mode-map
+          "s"  '(suggest :which-key "suggest functions")))
+    #+end_src
+
+** Scheme
    #+begin_src emacs-lisp
-     (use-package eros
-       :hook (emacs-lisp-mode . eros-mode))
+     (use-package geiser-racket
+       :after geiser)
+
+     (use-package geiser
+       :preface
+       (defun enable-yasnippet-with-geiser ()
+         (with-eval-after-load 'yasnippet
+           (add-company-backend 'geiser-company-backend)))
+       :hook (geiser-mode . enable-yasnippet-with-geiser)
+       :after company yasnippet
+       :custom
+       (geiser-default-implementation 'racket)
+       :general
+       (local-leader scheme-mode-map
+         "e" '(:ignore t :major-modes scheme-mode :which-key "evaluate")
+         "eb" '(geiser-eval-buffer-and-go :which-key "buffer")
+         "er" '(geiser-eval-region-and-go :which-key "region")
+         "ed" '(geiser-eval-definition-and-go :which-key "definition")))
    #+end_src
 
-** <<<macrostep>>> ([[https://github.com/joddie/macrostep][github]]): expand elisp macros
+** Clojure
    #+begin_src emacs-lisp
-     (use-package macrostep
-       :commands macrostep-expand
+     (use-package clojure-mode
+       ;; :preface
+       ;; (defun my/clojure-setup ()
+       ;;   (interactive)
+       ;;   (font-lock-add-keywords
+       ;;    nil
+       ;;    '(("(\\(facts?\\)"
+       ;;       (1 font-lock-keyword-face))
+       ;;      ("(\\(background?\\)"
+       ;;       (1 font-lock-keyword-face))))
+       ;;   (define-clojure-indent (fact 1))
+       ;;   (define-clojure-indent (facts 1)))
+       ;; :hook (clojure-mode . #'my/clojure-setup)
+        :mode
+        ("\\.edn$" . clojure-mode)
+        ("\\.boot$" . clojure-mode)
+        ("\\.cljs.*$" . clojure-mode)
+       :custom
+       ;; go right to the REPL buffer when it's finished connecting
+       (cider-repl-pop-to-buffer-on-connect t)
+
+       ;; When there's a cider error, show its buffer and switch to it
+       (cider-show-error-buffer t)
+       (cider-auto-select-error-buffer t)
+
+       ;; Where to store the cider history.
+       (cider-repl-history-file (concat user-emacs-directory "cider-history"))
+       ;; Wrap when navigating history.
+       (cider-repl-wrap-history t)
        :general
-       (local-leader emacs-lisp-mode-map
-         "M" '(macrostep-expand :which-key "macro expand")
-         ))
+       (local-leader clojure-mode-map
+                "a"    '(lsp-execute-code-action :which-key "action")
+                "e"    '(:ignore t :major-modes clojure-mode :which-key "eval")
+                "ee"   '(cider-eval-sexp-at-point :which-key "expression")
+                "ef"   '(cider-eval-defun-at-point :which-key "function")
+                "eF"   '(cider-load-buffer :which-key "file")
+                "er"   '(cider-eval-region :which-key "region")
+                "eb"   '(cider-eval-buffer :which-key "buffer")
+                "f"    '(:ignore t :major-modes clojure-mode :which-key "find")
+                "fd"   '(lsp-find-definition :which-key "definition")
+                "fD"   '(lsp-find-declaration :which-key "declaration")
+                "fi"   '(lsp-find-implementation :which-key "implementation (protocol/multimethod)")
+                "fr"   '(lsp-find-references :which-key "references")
+                "i"    '(cider-inspect :which-key "inspect")
+                "t"    '(:ignore t :major-modes clojure-mode :which-key "test")
+                "ta"   '(cider-test-run-project-tests :which-key "all")
+                "tc"   '(cider-test-run-test :which-key "current")
+                "tr"   '(cider-test-rerun-failed-tests :which-key "re-run failed"))
+       (local-leader cider-repl-mode-map
+                "e"    '(:ignore t  :major-modes clojure-repl-mode :which-key "eval")
+                "ee"   '(cider-eval-sexp-at-point :which-key "expression")
+                "er"   '(cider-eval-region :which-key "region"))
+       ('(insert motion) cider-repl-mode-map
+                "C-l"  'cider-repl-clear-buffer)
+       ('(insert motion) clojure-mode-map
+                "C-a"  'lsp-execute-code-action)
+       ('motion '(clojure-mode-map cider-repl-mode-map)
+                "C-]"  'cider-find-var
+                "C-o"  'cider-pop-back))
+
+     (use-package clojure-mode-extra-font-locking)
+
+     (use-package cider
+       :custom
+       (org-babel-clojure-backend 'cider)
+       (cider-repl-display-help-banner nil)
+       :config
+       (require 'ob-clojure)
+       :general
+       ;; Prevent evil from clobbering important bindings:
+       ('(insert normal) cider-browse-ns-mode-map
+        "RET" 'cider-browse-ns-operate-at-point
+        "^"   'cider-browse-ns-all
+        "q"   'cider-popup-buffer-quit-function
+        "s"   'cider-browse-ns-find-at-point
+        "d"   'cider-browse-ns-doc-at-point))
+
+     (use-package clj-refactor
+       :preface
+       (defun my/clojure-refactor ()
+         (cljr-add-keybindings-with-prefix "C-s")
+         (clj-refactor-mode))
+       :hook (clojure-mode . my/clojure-refactor))
+
+     ;; ;; key bindings
+     ;; ;; these help me out with the way I usually develop web apps
+     ;; (defun cider-start-http-server ()
+     ;;   (interactive)
+     ;;   (cider-load-current-buffer)
+     ;;   (let ((ns (cider-current-ns)))
+     ;;     (cider-repl-set-ns ns)
+     ;;     (cider-interactive-eval (format "(println '(def server (%s/start))) (println 'server)" ns))
+     ;;     (cider-interactive-eval (format "(def server (%s/start)) (println server)" ns))))
+     ;;
+     ;;
+     ;; (defun cider-refresh ()
+     ;;   (interactive)
+     ;;   (cider-interactive-eval (format "(user/reset)")))
+     ;;
+     ;; (defun cider-user-ns ()
+     ;;   (interactive)
+     ;;   (cider-repl-set-ns "user"))
+     ;;
+     ;; (eval-after-load 'cider
+     ;;   '(progn
+     ;;      (define-key clojure-mode-map (kbd "C-c C-v") 'cider-start-http-server)
+     ;;      (define-key clojure-mode-map (kbd "C-M-r") 'cider-refresh)
+     ;;      (define-key clojure-mode-map (kbd "C-c u") 'cider-user-ns)
+     ;;      (define-key cider-mode-map (kbd "C-c u") 'cider-user-ns)))
+   #+end_src
+
+   #+begin_src emacs-lisp
+     (add-hook 'clojure-mode-hook 'lsp)
+     (add-hook 'clojurescript-mode-hook 'lsp)
+     (add-hook 'clojurec-mode-hook 'lsp)
+   #+end_src
+* Other Languages
+** Python
+    #+begin_src emacs-lisp
+      (use-package python
+        :mode
+        ("\\.py\\'" . python-mode)
+        ("\\.wsgi$" . python-mode)
+
+        :init
+        (setq-default indent-tabs-mode nil)
+
+        :custom
+        (python-indent-offset 4)
+        (python-shell-interpreter "ipython")
+        (python-shell-interpreter-args "--simple-prompt -i"))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (use-package pyls
+        :straight nil
+        :no-require t
+        :preface
+        (defun my/prep-python-lsp-dap ()
+          (require 'dap-python)
+          (lsp))
+        :hook (python-mode . my/prep-python-lsp-dap)
+        :custom
+        (dap-python-debugger 'debugpy))
+
+      ;; (use-package lsp-python-ms
+      ;;   :init (setq lsp-python-ms-auto-install-server t)
+      ;;   :hook (python-mode . (lambda ()
+      ;;                           (require 'lsp-python-ms)
+      ;;                         (require 'dap-python)
+      ;;                          (lsp)))
+      ;;   :custom
+      ;;   (dap-python-debugger 'debugpy))
+
+      ;; (use-package lsp-pyright
+      ;;   :commands (lsp lsp-deferred)
+      ;;   :hook (python-mode . (lambda ()
+      ;;                         (require 'lsp-pyright)
+      ;;                         (require 'dap-python)
+      ;;                          (lsp)))
+      ;;   :custom
+      ;;   (dap-python-debugger 'debugpy))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      (use-package python-mls
+        :config
+        (python-mls-setup))
+    #+end_src
+
+    #+begin_src emacs-lisp
+      ;; (use-package ein
+      ;;   :config
+      ;;   (cond
+      ;;    ((eq system-type 'darwin) (setq ein:console-args '("--gui=osx" "--matplotlib=osx" "--colors=Linux")))
+      ;;    ((eq system-type 'gnu/linux) (setq ein:console-args '("--gui=gtk3" "--matplotlib=gtk3" "--colors=Linux"))))
+
+      ;;   (setq ein:query-timeout 1000))
+    #+end_src
+
+**** <<<numpydoc>>>: generate numpy-like docstrings ([[https://github.com/douglasdavis/numpydoc.el][github]])
+    #+begin_src emacs-lisp
+      (use-package numpydoc
+        :after python
+        :general
+        (local-leader python-mode-map "d" '(numpydoc-generate :which-key "generate-docstring")))
+    #+end_src
+
+**** virtualenvwrapper
+     #+begin_src emacs-lisp
+       (use-package virtualenvwrapper
+         :config
+         (venv-initialize-interactive-shells)
+         (venv-initialize-eshell))
+     #+end_src
+**** pyenv
+     #+begin_src emacs-lisp
+       (use-package pyvenv
+         ;; :hook (python-mode . pyvenv-tracking-mode)
+         :general
+         (local-leader python-mode-map
+           "v" '(:ignore t :major-modes python-mode :which-key "virtualenv")
+           "vw" '(pyvenv-workon :which-key "workon")
+           "vd" '(pyvenv-deactivate :which-key "deactivate")
+           )
+         )
+     #+end_src
+** Haskell
+*** Haskell Mode
+    Installation: see [[https://www.haskell.org/platform/][Haskell Platform]]
+    #+begin_src emacs-lisp
+      (use-package haskell-mode
+        :mode (("\\.hs\\(c\\|-boot\\)?\\'" . haskell-mode)
+               ("\\.lhs\\'" . literate-haskell-mode)
+               ("\\.cabal\\'" . haskell-cabal-mode)))
+    #+end_src
+
+*** LSP
+    #+begin_src emacs-lisp
+      (use-package lsp-haskell
+        :hook (haskell-mode . lsp)
+        :config
+        (setq lsp-haskell-server-path "haskell-language-server-wrapper")
+        (setq lsp-haskell-server-args ())
+        ;; Comment/uncomment this line to see interactions between lsp client/server.
+        (setq lsp-log-io t))
+    #+end_src
+
+*** Enable =haskell-doc-mode=, which displays the type signature of a function, and uses smart indentation
+    #+begin_src emacs-lisp
+      (add-hook 'haskell-mode-hook
+                (lambda ()
+                  (haskell-doc-mode)
+                  (turn-on-haskell-indent)))
+    #+end_src
+
+*** Ormulu
+    #+begin_src emacs-lisp
+      (use-package ormolu
+        :hook (haskell-mode . ormolu-format-on-save-mode)
+        :general
+        (local-leader haskell-mode-map
+          "f" '(ormolu-format-buffer :which-key "format-buffer")))
+    #+end_src
+
+*** Add keybinding to toggle back to main haskell window
+    #+begin_src emacs-lisp
+      (use-package inferior-haskell
+        :no-require t
+        :straight nil
+        :general
+        (local-leader '(haskell-interactive-mode-map)
+          "," '(haskell-interactive-switch-back :which-key "buffer <=> shell jump")))
+    #+end_src
+
+** Oz
+  Minimally, we would want syntax highlighting to always be available - there
+  are many Oz blocks throughout my notes now:
+
+  #+begin_src emacs-lisp
+    (require 'oz)
+  #+end_src
+
+** Standard ML
+   #+begin_src emacs-lisp
+     (use-package sml-mode)
+   #+end_src
+
+** SQL
+   #+begin_src emacs-lisp
+     (use-package sql
+       :straight nil
+       :no-require t
+       :general
+       (local-leader sql-mode-map
+         "c"    '(sql-connect :which-key "connect")
+         "e"    '(:ignore t :major-modes sql-mode :which-key "eval")
+         "ee"   '(sql-send-line-and-next :which-key "expression")
+         "ef"   '(sql-send-paragraph :which-key "function")
+         "eF"   '(sql-send-buffer :which-key "file")
+         "er"   '(sql-send-region :which-key "region")
+         "eb"   '(sql-send-buffer :which-key "buffer")
+         "l"    '(:ignore t :major-modes sql-mode :which-key "list")
+         "la"   '(sql-list-all :which-key "all")
+         "lt"   '(sql-list-table :which-key "tables"))
+       (local-leader sqli-mode-map
+         "e"    '(:ignore t  :major-modes sqli-mode :which-key "eval")))
+   #+end_src
+
+** Svelte
+   #+begin_src emacs-lisp
+     (use-package svelte-mode)
    #+end_src
