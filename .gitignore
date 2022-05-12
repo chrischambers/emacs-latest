@@ -1,6 +1,6 @@
 .DS_Store
-*.el
 eln-cache/
+config/*.el
 
 auto-save-list/
 .cache/
