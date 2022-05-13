@@ -205,11 +205,12 @@
 
 * Debugging
   #+begin_src emacs-lisp
-    (defun my/toggle-tracing (f)
-      (interactive (trace--read-args "Trace function"))
+    (defun my/toggle-tracing ()
+      (interactive)
+      (let ((f (intern (lisp-current-defun-name))))
       (if (trace-is-traced f)
           (untrace-function f)
-        (trace-function f)))
+        (trace-function f))))
 
       (local-leader emacs-lisp-mode-map
         "d" '(edebug-defun :which-key "debug")
