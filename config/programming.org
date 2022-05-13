@@ -50,8 +50,8 @@
           (scheme-mode . scheme-repl)
           (sml-mode . sml-prog-proc-switch-to)
           (lisp-mode . slime-repl) ; requires that slime-auto-start is not 'never
-           (python-mode . run-python)))
-          ;;(python-mode . elpy-shell-switch-to-shell)))
+          ;;(python-mode . run-python)))
+          (python-mode . elpy-shell-switch-to-shell)))
        :general
        (local-leader 'clojure-mode-map
          ","  '(clojure-repl :which-key "REPL"))
@@ -140,69 +140,84 @@
       :hook (lsp-mode . lsp-enable-which-key-integration)
       :init
       (setq lsp-before-save-edits t
-            lsp-inhibit-message t
+            ;; lsp-inhibit-message t
             lsp-lens-enable t
             lsp-semantic-tokens-enable t
             lsp-eldoc-render-all nil
             lsp-highlight-symbol-at-point nil
-            read-process-output-max (* 1024 1024)
+            ;; read-process-output-max (* 1024 1024)
             lsp-idle-delay 0.500))
-
-    (use-package lsp-ui
-      :after lsp-mode
-      :commands lsp-ui-mode
-      :config
-      (setq lsp-ui-doc-enable t
-            lsp-ui-doc-use-webkit nil
-            lsp-ui-doc-delay 10000.0
-            lsp-ui-sideline-delay 10000.0
-            lsp-ui-doc-include-signature t
-            lsp-ui-doc-position 'at-point
-            lsp-eldoc-enable-hover nil ; Disable eldoc displays in minibuffer
-            lsp-headerline-breadcrumb-enable nil
-            lsp-modeline-code-actions-enable nil
-            lsp-modeline-diagnostics-enable nil
-            lsp-ui-sideline-enable t
-            lsp-ui-sideline-show-hover nil
-            lsp-ui-sideline-show-diagnostics nil
-            lsp-ui-sideline-ignore-duplicate t))
-
-    (use-package consult-lsp
-      :after lsp consult
-      :config
-      (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
-
-    (use-package lsp-treemacs
-      :after lsp treemacs
-      :commands lsp-treemacs-errors-list)
-
-    (use-package dap-mode
-      :after lsp
-      :hook ((python-mode . dap-ui-mode)
-             (python-mode . dap-mode))
-      :config
-      (add-hook 'dap-stopped-hook
-                (lambda (arg) (call-interactively #'dap-hydra)))
-      (require 'dap-python)
-      ;; NOTE: This monkey-patch enables =pyvenv-workon= and =dap=debug= to play
-      ;; togerther nicely.
-      (advice-add 'dap-python--pyenv-executable-find :override #'my/dap-python--pyenv-executable-find)
-      (defun my/dap-python--pyenv-executable-find (command)
-        (executable-find command))
-
-      ;; ;; Reduce the features to the repl and the local variable information
-      ;; (setq dap-auto-configure-features '(locals repl))
-
-      ;; ;; Redefine the height of the repl buffer
-      ;; (setq dap-ui-buffer-configurations
-      ;;       `((,dap-ui--locals-buffer . ((side . right) (slot . 1) (window-width . 0.20)))
-      ;;         (,dap-ui--expressions-buffer . ((side . right) (slot . 2) (window-width . 0.20)))
-      ;;         (,dap-ui--sessions-buffer . ((side . right) (slot . 3) (window-width . 0.20)))
-      ;;         (,dap-ui--breakpoints-buffer . ((side . left) (slot . 2) (window-width . ,treemacs-width)))
-      ;;         (,dap-ui--debug-window-buffer . ((side . bottom) (slot . 3) (window-width . 0.20)))
-      ;;         (,dap-ui--repl-buffer . ((side . bottom) (slot . 1) (window-height . 0.20)))))
-      )
   #+end_src
+
+** LSP-UI
+   To understand which options affect what, see:
+   [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A guide on disabling/enabling lsp-mode features]]
+
+   #+begin_src emacs-lisp
+     (use-package lsp-ui
+       :after lsp-mode
+       :commands lsp-ui-mode
+       :config
+       (setq lsp-ui-doc-enable t
+             lsp-ui-doc-use-webkit nil
+             ;; lsp-ui-doc-delay 10000.0
+             ;; lsp-ui-sideline-delay 10000.0
+             lsp-ui-doc-include-signature t
+             lsp-ui-doc-position 'at-point
+             lsp-eldoc-enable-hover nil ; Disable eldoc displays in minibuffer
+             lsp-headerline-breadcrumb-enable t
+             lsp-modeline-code-actions-enable t
+             lsp-modeline-diagnostics-enable t
+             lsp-ui-sideline-enable t
+             lsp-ui-sideline-show-hover t
+             lsp-ui-sideline-show-diagnostics t
+             lsp-ui-sideline-ignore-duplicate t))
+   #+end_src
+
+** Integration with Consult
+   #+begin_src emacs-lisp
+     (use-package consult-lsp
+       :after lsp consult
+       :config
+       (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
+   #+end_src
+
+** Integration with Treemacs
+   #+begin_src emacs-lisp
+     (use-package lsp-treemacs
+       :after lsp treemacs
+       :commands lsp-treemacs-errors-list)
+   #+end_src
+
+*** DAP Mode
+    #+begin_src emacs-lisp
+      (use-package dap-mode
+        :after lsp
+        :hook ((python-mode . dap-ui-mode)
+               (python-mode . dap-mode))
+        :config
+        (add-hook 'dap-stopped-hook
+                  (lambda (arg) (call-interactively #'dap-hydra)))
+        (require 'dap-python)
+        ;; NOTE: This monkey-patch enables =pyvenv-workon= and =dap=debug= to play
+        ;; togerther nicely.
+        (advice-add 'dap-python--pyenv-executable-find :override #'my/dap-python--pyenv-executable-find)
+        (defun my/dap-python--pyenv-executable-find (command)
+          (executable-find command))
+
+        ;; ;; Reduce the features to the repl and the local variable information
+        ;; (setq dap-auto-configure-features '(locals repl))
+
+        ;; ;; Redefine the height of the repl buffer
+        ;; (setq dap-ui-buffer-configurations
+        ;;       `((,dap-ui--locals-buffer . ((side . right) (slot . 1) (window-width . 0.20)))
+        ;;         (,dap-ui--expressions-buffer . ((side . right) (slot . 2) (window-width . 0.20)))
+        ;;         (,dap-ui--sessions-buffer . ((side . right) (slot . 3) (window-width . 0.20)))
+        ;;         (,dap-ui--breakpoints-buffer . ((side . left) (slot . 2) (window-width . ,treemacs-width)))
+        ;;         (,dap-ui--debug-window-buffer . ((side . bottom) (slot . 3) (window-width . 0.20)))
+        ;;         (,dap-ui--repl-buffer . ((side . bottom) (slot . 1) (window-height . 0.20)))))
+        )
+    #+end_src
 
 * Debugging
   #+begin_src emacs-lisp
@@ -433,6 +448,7 @@
         (setq-default indent-tabs-mode nil)
 
         :custom
+        (elpy-shell-darwin-use-pty t)
         (python-indent-offset 4)
         (python-shell-interpreter "ipython")
         (python-shell-interpreter-args "--simple-prompt -i"))
@@ -447,6 +463,7 @@
        ;; :interpreter ("python" . python-mode)
        :custom
        (python-indent-guess-indent-offset nil)
+       (elpy-shell-darwin-use-pty t)
        :preface
        (defun update-python-interpreter ()
          "Prefer ipython (where available)"
@@ -455,7 +472,7 @@
                 (executable-find "ipython"))
            (setq
             python-shell-interpreter "ipython"
-            python-shell-interpreter-args "--simple-prompt"
+            python-shell-interpreter-args "--simple-prompt -i"
             python-shell-prompt-regexp "In \\[[0-9]+\\]: "
             python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
             python-shell-completion-setup-code
@@ -478,9 +495,6 @@
        :config
        (add-hook 'pyvenv-post-activate-hooks 'update-python-interpreter)
        (setq python-indent-offset 4)
-       ;; The following condition is required due to a bug, see:
-       ;; https://github.com/jorgenschaefer/elpy/issues/1550
-       (setq elpy-shell-echo-output nil)
        :general
        (local-leader python-mode-map
          "i" '(:ignore t :major-modes python-mode :which-key "imports")))
@@ -498,6 +512,7 @@
           (lsp))
         :hook (python-mode . my/prep-python-lsp-dap)
         :custom
+        ;; (lsp-pylsp-plugins-pydocstyle-ignore ["D100" "D101" "D105" "D107"])
         (dap-python-debugger 'debugpy))
     #+end_src
 
@@ -525,13 +540,6 @@
         (dap-python-debugger 'debugpy))
      #+end_src
 
-**** python-mls
-    #+begin_src emacs-lisp
-      (use-package python-mls
-        :config
-        (python-mls-setup))
-    #+end_src
-
 **** COMMENT ein
     #+begin_src emacs-lisp
       (use-package ein
@@ -557,10 +565,10 @@
          (venv-initialize-interactive-shells)
          (venv-initialize-eshell))
      #+end_src
-**** pyenv integration
+**** pyvenv integration
      #+begin_src emacs-lisp
        (use-package pyvenv
-         ;; :hook (python-mode . pyvenv-tracking-mode)
+         :hook (python-mode . pyvenv-tracking-mode)
          :general
          (local-leader python-mode-map
            "v" '(:ignore t :major-modes python-mode :which-key "virtualenv")
@@ -699,56 +707,21 @@
     #+end_src
 
 *** Misc
-**** COMMENT elpy
+**** elpy
      #+begin_src emacs-lisp
        (use-package elpy
          :after python
-         :init
          :custom
          (elpy-test-runner 'elpy-test-pytest-runner)
          (elpy-test-pytest-runner-command '("py.test" "--spec"))
          (elpy-shell-add-to-shell-history t)
-         (elpy-modules '(elpy-module-sane-defaults))
+         ;; (elpy-modules '(elpy-module-sane-defaults))
+
+         ;; You almost certainly want this setting on: evaluation can
+         ;; fail with a stack overflow or strange characters can appear otherwise:
+         (elpy-shell-echo-output nil)
          :config
          (elpy-enable)
-
-         (when (require 'flycheck nil t)
-           (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-           (add-hook 'elpy-mode-hook 'flycheck-mode))
-         (setq elpy-shell-add-to-shell-history t)
-
-         ;; This next section is shamelessly adapted from:
-         ;; https://github.com/pwalsh/pipenv.el/blob/master/pipenv.el
-         (defun verify-python-checkers ()
-           "Manually verify checkers for python-mode"
-           (let ((checkers (seq-filter
-                            (lambda (c) (flycheck-checker-supports-major-mode-p c 'python-mode))
-                                       flycheck-checkers)))
-             (while checkers
-               (setq checker (car checkers))
-               (flycheck-reset-enabled-checker checker)
-               (flycheck-may-use-checker checker)
-               (setq checkers (cdr checkers)))))
-
-         (defun venv/executable-find (executable)
-           "Find EXECUTABLE in the executable path of an activate virtual environment."
-           (when (bound-and-true-p python-shell-virtualenv-root)
-             (let ((exec-path (python-shell-calculate-exec-path)))
-               (executable-find executable))))
-
-         (defun venv/activate-flycheck ()
-           "Activate integration of virtualenv with Flycheck."
-           (setq flycheck-executable-find #'venv/executable-find)
-           (verify-python-checkers)
-           (flycheck-buffer))
-
-         (defun venv/deactivate-flycheck ()
-           "Deactivate integration of virtualenv with Flycheck."
-           (setq flycheck-executable-find #'flycheck-default-executable-find)
-           (verify-python-checkers))
-
-         (add-hook 'pyvenv-post-activate-hooks 'venv/activate-flycheck)
-         (add-hook 'pyvenv-post-deactivate-hooks 'venv/deactivate-flycheck)
 
          :general
          (local-leader '(inferior-python-mode-map)
@@ -818,6 +791,13 @@
          :hook (python-mode . evil-text-object-python-add-bindings))
      #+end_src
 
+**** COMMENT python-mls ([[https://github.com/jdtsmith/python-mls][github]])
+    #+begin_src emacs-lisp
+      (use-package python-mls
+        :config
+        (python-mls-setup))
+    #+end_src
+
 *** TODO Fix =update-python-interpreter= - you need to preserve the default values and restore them on deactivate. Likewise, there should be an order of precedence: jupyter console -> ipython -> python. Finally, this should not run multiple times (it seems to at the moment however)
 *** TODO Evil-unimpaired, python block navigation. Compare to vim?
 ** Haskell
@@ -840,6 +820,7 @@
         ;; Comment/uncomment this line to see interactions between lsp client/server.
         (setq lsp-log-io t))
     #+end_src
+
 
 *** =haskell-doc-mode=: displays type signature of function & uses smart indentation
     #+begin_src emacs-lisp
