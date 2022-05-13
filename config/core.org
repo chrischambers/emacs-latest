@@ -40,6 +40,7 @@ which aren't absolutely necessary, but are very important.
         ;; (global-display-line-numbers-mode)
         (setq-default display-line-numbers-width 4))
     #+end_src
+
 * Display global fill indicator (if emacs supports it)
   #+begin_src emacs-lisp
     (when (version<= "27.0.0" emacs-version )
@@ -56,6 +57,7 @@ which aren't absolutely necessary, but are very important.
 
      (add-hook 'buffer-face-mode-hook #'display-fill-column-indicator--turn-off)
    #+end_src
+
 * Text-wrapping
 ** Wrap paragraphs (fill) automatically
     Org mode inherits from text mode, so both will benefit from the following:
@@ -118,7 +120,7 @@ which aren't absolutely necessary, but are very important.
                           :width 'normal)
      #+end_src
 
-* Set [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Frame-Parameters.html][Frame parameters]]
+* Set [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Frame-Parameters.html][frame parameters]]
   Full list available [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Frame-Parameters.html#Frame-Parameters][here]].
 
   #+begin_src emacs-lisp
@@ -140,7 +142,7 @@ which aren't absolutely necessary, but are very important.
                 )))
   #+end_src
 
-* Additional Evil config
+* Extend Evil
 ** <<<evil-collection>>>: evil-friendly bindings for various packages/modes ([[https://github.com/emacs-evil/evil-collection/blob/master/readme.org][source]])
    #+begin_src emacs-lisp
      (use-package evil-collection
@@ -203,8 +205,6 @@ which aren't absolutely necessary, but are very important.
        (define-and-bind-quoted-text-object "dollar" "$" "\\$" "\\$")
        (global-evil-surround-mode 1))
    #+end_src
-*** TODO Consider [[https://github.com/nivekuil/corral][corral]] instead? ([[https://github.com/cmacrae/.emacs.d#corral][Callum's snippet]])
-
 ** Enable [[https://github.com/bling/evil-visualstar][<<<evil-visualstar>>>]]
    Provides ability to highlight a region and then hit =*= or =#= to forward/backward
    search, respectively:
@@ -347,7 +347,7 @@ which aren't absolutely necessary, but are very important.
       (savehist-mode))
   #+end_src
 
-* <<<projectile>>>: Project-related helpers ([[https://projectile.mx/][docs]]/[[https://github.com/bbatsov/projectile][source]])
+* <<<projectile>>>: Project-related helpers ([[https://projectile.mx/][docs]]/[[https://github.com/bbatsov/projectile][github]])
   #+begin_src emacs-lisp
     (use-package projectile
       :defer 1
@@ -388,7 +388,7 @@ which aren't absolutely necessary, but are very important.
       (use-package let-alist)
     #+end_src
 
-** Add =backward-line= function, for consistency
+** =backward-line= function, for consistency
   #+begin_src emacs-lisp
     (defun backward-line (&optional N)
       "Move N lines backwards (forward if N is negative)."
@@ -478,31 +478,6 @@ which aren't absolutely necessary, but are very important.
     (save-place-mode t)
   #+end_src
 
-* Info configuration
-  #+begin_src emacs-lisp
-    (use-package info
-      :no-require t
-      :straight nil
-      :preface
-      (defun remove-unwanted-info-modes ()
-        (evil-collection-unimpaired-mode 0) ; Allows [ and ] for navigation
-        (display-fill-column-indicator-mode 0))
-      :hook (Info-mode . remove-unwanted-info-modes)
-      :general
-      ;; Unfortunately, there seems to be no way to set =SPC= to 'Info-scroll-up.
-      ;; Toggling =general-override-mode= is global.
-      ('normal Info-mode-map
-               "C-f" 'Info-scroll-up
-               "C-b" 'Info-scroll-down
-               "m"   'Info-menu
-               "t"   'Info-top-node
-               "?"   'Info-help)
-      (local-leader Info-mode-map
-        "SPC" '(Info-scroll-up :which-key "forward")
-        "n"   '(Info-next :which-key "next")
-        "p"   '(Info-prev :which-key "previous")))
-  #+end_src
-
 * Recursive mini-buffers
   #+begin_src emacs-lisp
     (customize-set-variable 'enable-recursive-minibuffers t)
@@ -555,8 +530,7 @@ which aren't absolutely necessary, but are very important.
 	"s"   '(:ignore t :which-key "snippets")
 	"si"  '(yas-insert-snippet :which-key "insert")
 	"se"  '(yas-visit-snippet-file :which-key "edit")
-	"sc"  '(yas-new-snippet :which-key "create")
-	))
+	"sc"  '(yas-new-snippet :which-key "create")))
   #+end_src
 
 * <<<ripgrep>>>
@@ -581,11 +555,35 @@ which aren't absolutely necessary, but are very important.
        :bind
        ([remap other-window] . switch-window)
        :general
-       ('(normal motion) "C-w w" 'other-window)
-       )
+       ('(normal motion) "C-w w" 'other-window))
    #+end_src
 
-* Improved help/discoverability
+* Help / Info
+** Info configuration
+   #+begin_src emacs-lisp
+     (use-package info
+       :no-require t
+       :straight nil
+       :preface
+       (defun remove-unwanted-info-modes ()
+         (evil-collection-unimpaired-mode 0) ; Allows [ and ] for navigation
+         (display-fill-column-indicator-mode 0))
+       :hook (Info-mode . remove-unwanted-info-modes)
+       :general
+       ;; Unfortunately, there seems to be no way to set =SPC= to 'Info-scroll-up.
+       ;; Toggling =general-override-mode= is global.
+       ('normal Info-mode-map
+                "C-f" 'Info-scroll-up
+                "C-b" 'Info-scroll-down
+                "m"   'Info-menu
+                "t"   'Info-top-node
+                "?"   'Info-help)
+       (local-leader Info-mode-map
+         "SPC" '(Info-scroll-up :which-key "forward")
+         "n"   '(Info-next :which-key "next")
+         "p"   '(Info-prev :which-key "previous")))
+   #+end_src
+
 ** Prettier and more useful help display via [[https://github.com/Wilfred/helpful][=Helpful=]]
    The =helpful= package provides, among other things, more context in Help
    buffers.
@@ -615,8 +613,7 @@ which aren't absolutely necessary, but are very important.
 	 "h."  'helpful-at-point
 	 )
        ("C-h f" '(helpful-callable :which-key "describe-function"))
-       ("C-h k" '(helpful-key :which-key "describe-key"))
-       )
+       ("C-h k" '(helpful-key :which-key "describe-key")))
    #+end_src
 
 ** Useful keybinding for =describe-keymap=

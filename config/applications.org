@@ -146,7 +146,7 @@
      "^" (lambda () (interactive) (find-alternate-file "..")))
   #+end_src
 
-* <<<treemacs>>>: ([[https://github.com/Alexander-Miller/treemacs][github]]) file drawer
+* <<<treemacs>>> ([[https://github.com/Alexander-Miller/treemacs][github]]): file drawer
   #+begin_src emacs-lisp
     (use-package treemacs
       :init

@@ -1,4 +1,4 @@
-#+TITLE: Emacs Configuration (mine)
+#+TITLE: Emacs Configuration
 #+AUTHOR: Chris Chambers
 #+EMAIL: magma.chambers@gmail.com
 #+LANGUAGE: en-gb

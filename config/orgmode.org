@@ -160,13 +160,13 @@
     (customize-set-variable 'org-ellipsis " ⤵ ")
   #+end_src
 
-** Nicer bullets via <<<org-superstar>>>
+** <<<org-superstar>>>: Nicer heading indicators
   #+begin_src emacs-lisp
     (use-package org-superstar
       :hook (org-mode . org-superstar-mode))
   #+end_src
 
-** Use <<<org-appear>>> ([[https://github.com/awth13/org-appear][github]]) to hide emphasis markers like =*=, =/=, etc.
+** <<<org-appear>>> ([[https://github.com/awth13/org-appear][github]]): hide emphasis markers like =*=, =/=, etc.
   #+begin_src emacs-lisp
     (use-package org-appear
       :custom
@@ -174,7 +174,7 @@
       :hook (org-mode . org-appear-mode))
   #+end_src
 
-** Insert link using page-title as description automatically via [[https://github.com/rexim/org-cliplink][org-cliplink]]
+** <<<org-cliplink>>> ([[https://github.com/rexim/org-cliplink][github]]): Insert link using page-title as description automatically via
    #+begin_src emacs-lisp
      (use-package org-cliplink
        :general
@@ -188,7 +188,7 @@
      (customize-set-variable 'org-image-actual-width nil)
    #+end_src
 
-** Perfectly align tables with variable-pitch fonts/images via <<<valign>>> ([[https://github.com/casouri/valign][github]])
+** <<<valign>>> ([[https://github.com/casouri/valign][github]]): Align tables with variable-pitch fonts/images properly
    #+begin_src emacs-lisp
      (use-package valign
        :hook (org-mode . valign-mode))
@@ -226,7 +226,7 @@
                               (alist-set "\\.gif\\'" #'my/open-gif org-file-apps))
     #+end_src
 
-** Configure <<<org-habit>>>
+** <<<org-habit>>>
    #+begin_src emacs-lisp
      (use-package org-habit
        :straight nil
@@ -302,13 +302,13 @@
      (customize-set-variable 'org-ditaa-jar-path (concat user-emacs-directory "ditaa.jar"))
    #+end_src
 
-** When editing a code snippet, use the current window rather than popping open a new one (which shows the same information).
+** When editing a code snippet, use current window rather opening a new one
 
    #+begin_src emacs-lisp
      (customize-set-variable 'org-src-window-setup 'current-window)
    #+end_src
 
-** Org table headers always visible (if available):
+** Org table headers always visible (if available)
 
    #+begin_src emacs-lisp
      (when (boundp 'org-table-electric-header-mode)
@@ -383,38 +383,7 @@
         "f" '(org-agenda-follow-mode :which-key "follow")))
   #+end_src
 
-** <<<org-super-agenda>>> ([[https://github.com/alphapapa/org-super-agenda][github]])
-   #+begin_src emacs-lisp
-     (use-package org-super-agenda
-       :after org-agenda
-       :straight (org-super-agenda :type git :host github :repo "alphapapa/org-super-agenda")
-       :hook (org-agenda-mode . org-super-agenda-mode)
-       :custom
-       (org-super-agenda-keep-order t)
-       (org-super-agenda-groups
-            '((:log t)  ; Automatically named "Log"
-              (:habit t)
-              (:name "Schedule"
-                     :time-grid t)
-              (:name "Today"
-                     :scheduled today)
-              (:name "Due today"
-                     :deadline today)
-              (:name "Overdue"
-                     :deadline past)
-              (:name "Due soon"
-                     :deadline future)
-              (:name "Unimportant"
-                     :todo ("SOMEDAY" "MAYBE" "CHECK" "TO-READ" "TO-WATCH")
-                     :order 100)
-              (:name "Waiting..."
-                     :todo "WAITING"
-                     :order 98)
-              (:name "Scheduled earlier"
-                     :scheduled past))))
-   #+end_src
-
-** agenda files
+** Agenda files
 *** +Limited Subset+
    : #+begin_src emacs-lisp
    :   (setq org-agenda-files
@@ -491,6 +460,37 @@
      (setq org-agenda-files
             (my/org-agenda-file-filter
              (org-agenda-find-files-with org-agenda-todo-regex))))
+   #+end_src
+
+** <<<org-super-agenda>>> ([[https://github.com/alphapapa/org-super-agenda][github]]): Better agenda display
+   #+begin_src emacs-lisp
+     (use-package org-super-agenda
+       :after org-agenda
+       :straight (org-super-agenda :type git :host github :repo "alphapapa/org-super-agenda")
+       :hook (org-agenda-mode . org-super-agenda-mode)
+       :custom
+       (org-super-agenda-keep-order t)
+       (org-super-agenda-groups
+            '((:log t)  ; Automatically named "Log"
+              (:habit t)
+              (:name "Schedule"
+                     :time-grid t)
+              (:name "Today"
+                     :scheduled today)
+              (:name "Due today"
+                     :deadline today)
+              (:name "Overdue"
+                     :deadline past)
+              (:name "Due soon"
+                     :deadline future)
+              (:name "Unimportant"
+                     :todo ("SOMEDAY" "MAYBE" "CHECK" "TO-READ" "TO-WATCH")
+                     :order 100)
+              (:name "Waiting..."
+                     :todo "WAITING"
+                     :order 98)
+              (:name "Scheduled earlier"
+                     :scheduled past))))
    #+end_src
 
 * <<<org-protocol>>> ([[https://github.com/bastibe/org-journal][github]])
@@ -753,7 +753,7 @@
   #+end_src
 
 * Org and .pdf/.epub/.mobi Integration
-** <<<PDF>>>
+** <<<pdf>>>
    #+begin_src emacs-lisp
      (use-package pdf-tools
        :defer 1
@@ -770,7 +770,7 @@
        (setq-default pdf-view-display-size 'fit-page))
    #+end_src
 
-** <<<Nov.el>>>: <<<Epub>>> and <<<Mobi>>> viewing within Emacs
+** <<<nov.el>>>: <<<epub>>> and <<<mobi>>> viewing within Emacs
    #+begin_src emacs-lisp
      (use-package esxml)
      (use-package nov.el

@@ -70,13 +70,13 @@
 
      (add-hook 'prog-mode-hook #'my/programming-highlight-terms)
    #+end_src
-** Use [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]] to colour parmeters uniquely
+** [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]]: colour parmeters uniquely
    #+begin_src emacs-lisp
      (use-package color-identifiers-mode
        :hook (after-init . global-color-identifiers-mode))
    #+end_src
 
-** Use [[https://github.com/fanael/rainbow-delimiters][<<<rainbow-delimiters>>>]] to colour matching parentheses
+** [[https://github.com/fanael/rainbow-delimiters][<<<rainbow-delimiters>>>]]: colour matching parentheses
    #+begin_src emacs-lisp
      (use-package rainbow-delimiters
        :hook ((prog-mode . rainbow-delimiters-mode)
@@ -84,13 +84,13 @@
               (ielm-mode . rainbow-delimiters-mode)))
    #+end_src
 
-** Display hex colour strings in the correct colour via [[https://elpa.gnu.org/packages/rainbow-mode.html][rainbow mode]]
+** <<<rainbow-mode>>> ([[https://elpa.gnu.org/packages/rainbow-mode.html][source]]): Display hex colour strings in the correct colour via
    #+begin_src emacs-lisp
      (use-package rainbow-mode
        :hook (prog-mode . rainbow-mode))
    #+end_src
 * Version Control / VCS
-** [[https://magit.vc/][<<<Magit>>>]] - Git integration ([[https://github.com/emacs-evil/evil-magit][github]])
+** [[https://magit.vc/][<<<Magit>>>]]: Git integration ([[https://github.com/emacs-evil/evil-magit][github]])
    Add a binding for =magit-status=, and enable various vim-style write
    shortcuts for the magit buffer (e.g. =:w=, =:x=):
 
@@ -109,7 +109,7 @@
    #+end_src
    See also: evil-collection for evil-magit keybindings.
 
-** <<<git-timemachine>>> ([[https://gitlab.com/pidu/git-timemachine][github]]) for easily viewing historic versions of file
+** <<<git-timemachine>>> ([[https://gitlab.com/pidu/git-timemachine][github]]): easily view historic versions of file
    Use =p=/=n=/=g=/=q= to look at previous, next, goto arbitrary
    historic versions, or quit.
 
@@ -125,7 +125,7 @@
 
    If we want to actually roll-back, we just save the file.
 
-** <<<abridge-diff>>>: more easily-readable diffs
+** <<<abridge-diff>>>: easily-readable diffs
    #+begin_src emacs-lisp
      (use-package abridge-diff
        :after magit
@@ -478,14 +478,14 @@
         (local-leader python-mode-map "d" '(numpydoc-generate :which-key "generate-docstring")))
     #+end_src
 
-**** virtualenvwrapper
+**** virtualenvwrapper integration
      #+begin_src emacs-lisp
        (use-package virtualenvwrapper
          :config
          (venv-initialize-interactive-shells)
          (venv-initialize-eshell))
      #+end_src
-**** pyenv
+**** pyenv integration
      #+begin_src emacs-lisp
        (use-package pyvenv
          ;; :hook (python-mode . pyvenv-tracking-mode)
@@ -518,7 +518,7 @@
         (setq lsp-log-io t))
     #+end_src
 
-*** Enable =haskell-doc-mode=, which displays the type signature of a function, and uses smart indentation
+*** =haskell-doc-mode=: displays type signature of function & uses smart indentation
     #+begin_src emacs-lisp
       (add-hook 'haskell-mode-hook
                 (lambda ()
@@ -526,7 +526,8 @@
                   (turn-on-haskell-indent)))
     #+end_src
 
-*** Ormulu
+*** Bindings
+**** Format buffer via ormolu
     #+begin_src emacs-lisp
       (use-package ormolu
         :hook (haskell-mode . ormolu-format-on-save-mode)
@@ -535,7 +536,7 @@
           "f" '(ormolu-format-buffer :which-key "format-buffer")))
     #+end_src
 
-*** Add keybinding to toggle back to main haskell window
+**** Jump back from REPL to main buffer
     #+begin_src emacs-lisp
       (use-package inferior-haskell
         :no-require t
