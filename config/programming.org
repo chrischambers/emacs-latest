@@ -203,6 +203,18 @@
       )
   #+end_src
 
+* Debugging
+  #+begin_src emacs-lisp
+    (defun my/toggle-tracing (f)
+      (interactive (trace--read-args "Trace function"))
+      (if (trace-is-traced f)
+          (untrace-function f)
+        (trace-function f)))
+
+      (local-leader emacs-lisp-mode-map
+        "d" '(edebug-defun :which-key "debug")
+        "t" '(my/toggle-tracing :which-key "trace"))
+  #+end_src
 * Lisp Languages
 ** Keybindings common across lisps
    #+begin_src emacs-lisp
