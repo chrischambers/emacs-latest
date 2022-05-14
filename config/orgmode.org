@@ -873,6 +873,57 @@
 * <<<org-chef>>> ([[https://github.com/Chobbes/org-chef][github]])
   #+begin_src emacs-lisp
     (use-package org-chef
+      :preface
+      ;; Stolen from org-roan-node-slug
+      (defun slugify (title)
+        (let ((slug-trim-chars
+               '(;; Combining Diacritical Marks https://www.unicode.org/charts/PDF/U0300.pdf
+                 768 ; U+0300 COMBINING GRAVE ACCENT
+                 769 ; U+0301 COMBINING ACUTE ACCENT
+                 770 ; U+0302 COMBINING CIRCUMFLEX ACCENT
+                 771 ; U+0303 COMBINING TILDE
+                 772 ; U+0304 COMBINING MACRON
+                 774 ; U+0306 COMBINING BREVE
+                 775 ; U+0307 COMBINING DOT ABOVE
+                 776 ; U+0308 COMBINING DIAERESIS
+                 777 ; U+0309 COMBINING HOOK ABOVE
+                 778 ; U+030A COMBINING RING ABOVE
+                 779 ; U+030B COMBINING DOUBLE ACUTE ACCENT
+                 780 ; U+030C COMBINING CARON
+                 795 ; U+031B COMBINING HORN
+                 803 ; U+0323 COMBINING DOT BELOW
+                 804 ; U+0324 COMBINING DIAERESIS BELOW
+                 805 ; U+0325 COMBINING RING BELOW
+                 807 ; U+0327 COMBINING CEDILLA
+                 813 ; U+032D COMBINING CIRCUMFLEX ACCENT BELOW
+                 814 ; U+032E COMBINING BREVE BELOW
+                 816 ; U+0330 COMBINING TILDE BELOW
+                 817 ; U+0331 COMBINING MACRON BELOW
+                 )))
+          (cl-flet* ((nonspacing-mark-p (char) (memq char slug-trim-chars))
+                     (strip-nonspacing-marks (s) (string-glyph-compose
+                                                  (apply #'string
+                                                         (seq-remove #'nonspacing-mark-p
+                                                                     (string-glyph-decompose s)))))
+                     (cl-replace (title pair) (replace-regexp-in-string (car pair) (cdr pair) title)))
+            (let* ((pairs `(("[^[:alnum:][:digit:]]" . "_") ;; convert anything not alphanumeric
+                            ("__*" . "_")                   ;; remove sequential underscores
+                            ("^_" . "")                     ;; remove starting underscore
+                            ("_$" . "")))                   ;; remove ending underscore
+                   (slug (-reduce-from #'cl-replace (strip-nonspacing-marks title) pairs)))
+              (downcase slug)))))
+
+      (defun my/recipe-url->slug (url)
+        (let ((recipe-name (cdr (assoc 'name (org-chef-fetch-recipe url)))))
+          (slugify recipe-name)))
+
+      (defun my/get-recipe-filepath-from-url ()
+        "Prompt for a recipe URL, and return the ‘org-mode’ string."
+        (let* ((URL (read-string "Recipe URL: "))
+               (slug (my/recipe-url->slug URL))
+               (file-path (concat org-directory "/recipes/" slug ".org")))
+          file-path))
+
       :init
       (setq org-cookbook (concat org-directory "/cookbook.org"))
       :config
@@ -881,48 +932,4 @@
               :empty-lines 1) org-capture-templates)
       (push '("m" "Manual Cookbook" entry (file org-cookbook)
               "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n") org-capture-templates))
-  #+end_src
-
-  #+begin_src emacs-lisp :results output value
-    ;; Stolen from org-roan-node-slug
-    (defun slugify (title)
-      (let ((slug-trim-chars '(;; Combining Diacritical Marks https://www.unicode.org/charts/PDF/U0300.pdf
-                               768 ; U+0300 COMBINING GRAVE ACCENT
-                               769 ; U+0301 COMBINING ACUTE ACCENT
-                               770 ; U+0302 COMBINING CIRCUMFLEX ACCENT
-                               771 ; U+0303 COMBINING TILDE
-                               772 ; U+0304 COMBINING MACRON
-                               774 ; U+0306 COMBINING BREVE
-                               775 ; U+0307 COMBINING DOT ABOVE
-                               776 ; U+0308 COMBINING DIAERESIS
-                               777 ; U+0309 COMBINING HOOK ABOVE
-                               778 ; U+030A COMBINING RING ABOVE
-                               779 ; U+030B COMBINING DOUBLE ACUTE ACCENT
-                               780 ; U+030C COMBINING CARON
-                               795 ; U+031B COMBINING HORN
-                               803 ; U+0323 COMBINING DOT BELOW
-                               804 ; U+0324 COMBINING DIAERESIS BELOW
-                               805 ; U+0325 COMBINING RING BELOW
-                               807 ; U+0327 COMBINING CEDILLA
-                               813 ; U+032D COMBINING CIRCUMFLEX ACCENT BELOW
-                               814 ; U+032E COMBINING BREVE BELOW
-                               816 ; U+0330 COMBINING TILDE BELOW
-                               817 ; U+0331 COMBINING MACRON BELOW
-                               )))
-        (cl-flet* ((nonspacing-mark-p (char) (memq char slug-trim-chars))
-                   (strip-nonspacing-marks (s) (string-glyph-compose
-                                                (apply #'string
-                                                       (seq-remove #'nonspacing-mark-p
-                                                                   (string-glyph-decompose s)))))
-                   (cl-replace (title pair) (replace-regexp-in-string (car pair) (cdr pair) title)))
-          (let* ((pairs `(("[^[:alnum:][:digit:]]" . "_") ;; convert anything not alphanumeric
-                          ("__*" . "_")                   ;; remove sequential underscores
-                          ("^_" . "")                     ;; remove starting underscore
-                          ("_$" . "")))                   ;; remove ending underscore
-                 (slug (-reduce-from #'cl-replace (strip-nonspacing-marks title) pairs)))
-            (downcase slug)))))
-
-    (let* ((url "https://www.bbcgoodfood.com/recipes/mediterranean-vegetables-lamb")
-           (recipe-name (cdr (assoc 'name (org-chef-fetch-recipe url)))))
-      (slugify recipe-name))
   #+end_src
