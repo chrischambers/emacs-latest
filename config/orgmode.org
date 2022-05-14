@@ -913,19 +913,36 @@
                    (slug (-reduce-from #'cl-replace (strip-nonspacing-marks title) pairs)))
               (downcase slug)))))
 
-      (defun my/recipe-url->slug (url)
-        (let ((recipe-name (cdr (assoc 'name (org-chef-fetch-recipe url)))))
+      (defun my/recipe-to-name (recipe)
+        (when recipe
+          (cdr (assoc 'name recipe))))
+
+      (defun my/recipe-to-slug (recipe)
+        (when-let ((recipe-name (my/recipe-to-name recipe)))
           (slugify recipe-name)))
 
+      (defvar my/current-recipe nil "a cache for the previously fetched recipe.")
+
       (defun my/get-recipe-filepath-from-url ()
-        "Prompt for a recipe URL, and return the ‘org-mode’ string."
+        "Prompt for a recipe URL, and return the desired file-path for the recipe.
+
+    SIDE EFFECT: caches recipe in `my/current-recipe'."
         (let* ((URL (read-string "Recipe URL: "))
-               (slug (my/recipe-url->slug URL))
+               (recipe (org-chef-fetch-recipe URL))
+               (slug (my/recipe-to-slug recipe))
                (file-path (concat org-directory "/recipes/" slug ".org")))
+          (customize-set-variable 'my/current-recipe recipe)
           file-path))
 
+      (defun my/current-recipe-name ()
+        (my/recipe-to-name my/current-recipe))
+
+      (defun my/recipe-as-string ()
+        (when my/current-recipe
+          (org-chef-recipe-org-string my/current-recipe)))
+
       :config
-      (push `("c" "Cookbook" entry
+      (push `("c" "Cookbook" plain
               (file my/get-recipe-filepath-from-url)
               (file ,(concat my/org-capture-templates "recipe.org"))) org-capture-templates)
       (push '("m" "Manual Cookbook" entry (file org-cookbook)
