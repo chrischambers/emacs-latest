@@ -245,12 +245,19 @@
     #+begin_src emacs-lisp
       (use-package org-capture
         :straight nil
+        :init
+        (setq org-cookbook (concat org-directory "/cookbook.org"))
         :custom
         (org-default-notes-file (concat org-directory "/todo.org"))
         (org-capture-templates
          '(("t" "Task" entry
             (file+headline "todo.org" "Inbox")
-            "* TODO %?"))))
+            "* TODO %?")
+           ("c" "Cookbook" entry (file org-cookbook)
+            "%(org-chef-get-recipe-from-url)"
+            :empty-lines 1)
+           ("m" "Manual Cookbook" entry (file org-cookbook)
+            "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n"))))
     #+end_src
 
 ** Provide special binding for opening org files via projectile
@@ -868,4 +875,9 @@
       :hook (org-mode . org-transclusion-mode)
       :general
       (leader "X" '(org-transclusion-make-from-link :which-key "transclude")))
+  #+end_src
+
+* <<<org-chef>>> ([[https://github.com/Chobbes/org-chef][github]])
+  #+begin_src emacs-lisp
+    (use-package org-chef)
   #+end_src
