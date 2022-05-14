@@ -924,12 +924,10 @@
                (file-path (concat org-directory "/recipes/" slug ".org")))
           file-path))
 
-      :init
-      (setq org-cookbook (concat org-directory "/cookbook.org"))
       :config
-      (push '("c" "Cookbook" entry (file org-cookbook)
-              "%(org-chef-get-recipe-from-url)"
-              :empty-lines 1) org-capture-templates)
+      (push `("c" "Cookbook" entry
+              (file my/get-recipe-filepath-from-url)
+              (file ,(concat my/org-capture-templates "recipe.org"))) org-capture-templates)
       (push '("m" "Manual Cookbook" entry (file org-cookbook)
               "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n") org-capture-templates))
   #+end_src
