@@ -10,6 +10,13 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
+* IN-PROGRESS Extract common LSP interface into local leader
+  :LOGBOOK:
+  - State "IN-PROGRESS" from "TODO"          [2022-05-14 Sat 10:12]
+  :END:
+  Ideally using fontification to indicate whether the functionality is
+  available, as LSP does under its own prefix.
+* TODO Configure SQL(i) repl-toggle correctly
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
    #+begin_src emacs-lisp
@@ -23,7 +30,7 @@
 	"C-l" 'comint-clear-buffer))
    #+end_src
 
-** REPL-toggle
+** REPL-toggle ([[https://github.com/tomterl/repl-toggle][github]]/[[https://sr.ht/~tomterl/tomtel/][sourcehut]])
    #+begin_src emacs-lisp
      (use-package repl-toggle
        :preface
@@ -500,7 +507,69 @@
          "i" '(:ignore t :major-modes python-mode :which-key "imports")))
    #+end_src
 
+*** elpy
+    #+begin_src emacs-lisp
+      (use-package elpy
+        :after python
+        :custom
+        (elpy-test-runner 'elpy-test-pytest-runner)
+        (elpy-test-pytest-runner-command '("py.test" "--spec"))
+        (elpy-shell-add-to-shell-history t)
+        ;; (elpy-modules '(elpy-module-sane-defaults))
+
+        ;; You almost certainly want this setting on: evaluation can
+        ;; fail with a stack overflow or strange characters can appear otherwise:
+        (elpy-shell-echo-output nil)
+        :config
+        (elpy-enable)
+
+        :general
+        (local-leader '(inferior-python-mode-map)
+          "," '(elpy-shell-switch-to-buffer :which-key "buffer <=> shell jump"))
+        ('insert python-mode-map "C-<tab>" 'elpy-shell-switch-to-shell)
+        ('insert inferior-python-mode-map "C-<tab>" 'elpy-shell-switch-to-buffer)
+        (local-leader python-mode-map
+          "," '(elpy-shell-switch-to-shell :which-key "buffer <=> shell jump")
+
+          "e" '(:ignore t :major-modes python-mode :which-key "evaluate")
+          ;; "eb" '(elpy-shell-send-region-or-buffer :which-key "buffer (or region)")
+          "eb" '(elpy-shell-send-region-or-buffer-and-step-and-go
+                 :which-key "buffer (or region)")
+          "el" '(elpy-shell-send-statement-and-step-and-go :which-key "line")
+          "ef" '(elpy-shell-send-defun-and-step-and-go :which-key "function")
+          "ec" '(elpy-shell-send-defclass-and-step-and-go :which-key "class")
+          "eg" '(elpy-shell-send-group-and-go :which-key "group")
+          "e#" '(elpy-shell-send-codecell-and-step-and-go
+                 :which-key "codecell (block between ##)")
+
+          "d" '(elpy-doc :which-key "documentation")
+
+          "g" '(:ignore t :major-modes python-mode :which-key "goto")
+          "gq" 'elpy-goto-definition
+          "gw" 'xref-find-apropos
+          "ge" 'xref-find-definitions
+          ;; (elpy-flymake-next-error)
+          ;; (elpy-flymake-previous-error)
+          "c" '(elpy-check :which-key "code-check")))
+    #+end_src
+
 *** LSP
+    #+begin_src emacs-lisp
+      (use-package python-config
+        :straight nil
+        :no-require t
+        :general
+        (local-leader python-mode-map
+          "f"    '(:ignore t :major-modes python-mode :which-key "find")
+          "fd"   '(lsp-find-definition :which-key "definition")
+          "fD"   '(lsp-find-declaration :which-key "declaration")
+          "fi"   '(lsp-find-implementation :which-key "implementation")
+          "fr"   '(lsp-find-references :which-key "references")
+          "="    '(:ignore t :major-modes python-mode :which-key "format")
+          "=b"   '(lsp-format-buffer :which-key "buffer")
+          "=r"   '(lsp-format-region :which-key "region")))
+    #+end_src
+
 **** pyls
     #+begin_src emacs-lisp
       (use-package pyls
@@ -707,56 +776,6 @@
     #+end_src
 
 *** Misc
-**** elpy
-     #+begin_src emacs-lisp
-       (use-package elpy
-         :after python
-         :custom
-         (elpy-test-runner 'elpy-test-pytest-runner)
-         (elpy-test-pytest-runner-command '("py.test" "--spec"))
-         (elpy-shell-add-to-shell-history t)
-         ;; (elpy-modules '(elpy-module-sane-defaults))
-
-         ;; You almost certainly want this setting on: evaluation can
-         ;; fail with a stack overflow or strange characters can appear otherwise:
-         (elpy-shell-echo-output nil)
-         :config
-         (elpy-enable)
-
-         :general
-         (local-leader '(inferior-python-mode-map)
-           "," '(elpy-shell-switch-to-buffer :which-key "buffer <=> shell jump"))
-         ('insert python-mode-map "C-<tab>" 'elpy-shell-switch-to-shell)
-         ('insert inferior-python-mode-map "C-<tab>" 'elpy-shell-switch-to-buffer)
-         (local-leader python-mode-map
-           "," '(elpy-shell-switch-to-shell :which-key "buffer <=> shell jump")
-
-           "e" '(:ignore t :major-modes python-mode :which-key "evaluate")
-           ;; "eb" '(elpy-shell-send-region-or-buffer :which-key "buffer (or region)")
-           "eb" '(elpy-shell-send-region-or-buffer-and-step-and-go
-                  :which-key "buffer (or region)")
-
-           "el" '(elpy-shell-send-statement-and-step-and-go :which-key "line")
-           "ef" '(elpy-shell-send-defun-and-step-and-go :which-key "function")
-           "ec" '(elpy-shell-send-defclass-and-step-and-go :which-key "class")
-           "eg" '(elpy-shell-send-group-and-go :which-key "group")
-           "e#" '(elpy-shell-send-codecell-and-step-and-go
-                  :which-key "codecell (block between ##)")
-
-           "d" '(elpy-doc :which-key "documentation")
-
-           "g" '(:ignore t :major-modes python-mode :which-key "goto")
-           "gq" 'elpy-goto-definition
-           "gw" 'xref-find-apropos
-           "ge" 'xref-find-definitions
-
-           "c" '(elpy-check :which-key "code-check")
-           ;; (elpy-flymake-next-error)
-           ;; (elpy-flymake-previous-error)
-
-           "f" '(elpy-format-code :which-key "format")))
-     #+end_src
-
 **** COMMENT pip-requirements
     #+begin_src emacs-lisp
       (use-package pip-requirements
@@ -820,7 +839,6 @@
         ;; Comment/uncomment this line to see interactions between lsp client/server.
         (setq lsp-log-io t))
     #+end_src
-
 
 *** =haskell-doc-mode=: displays type signature of function & uses smart indentation
     #+begin_src emacs-lisp
