@@ -239,8 +239,8 @@
        :general
        (local-leader org-agenda-mode-map
          "K" '(org-habit-toggle-display-in-agenda :which-key "toggle habits")))
-
    #+end_src
+
 ** IN-PROGRESS <<<org-capture>>>
     #+begin_src emacs-lisp
       (use-package org-capture
@@ -271,6 +271,7 @@
 
      (leader "fN" '(my/find-notes-file :which-key "notes")))
    #+end_src
+
 ** Use a =:LOGBOOK:= drawer to contain changes to =TODO= states
    #+begin_src emacs-lisp
      (customize-set-variable 'org-log-into-drawer "LOGBOOK")
@@ -360,6 +361,7 @@
         (push '("SOMEDAY-MAYBE"  . ??) prettify-symbols-alist)
         (push '("IDEA"  . ?💡) prettify-symbols-alist)))
   #+end_src
+
 * <<<org-agenda>>>
   #+begin_src emacs-lisp
     (use-package org-agenda
@@ -588,6 +590,14 @@
 	"wr"   '(:ignore t :major-modes org-mode :which-key "refs")
 	"wra"   '(org-roam-ref-add :which-key "add")
 	"wrr"   '(org-roam-ref-remove :which-key "remove")))
+    #+end_src
+
+** When using standard org-capture, automatically add id and sync with roam DB
+    #+begin_src emacs-lisp
+      (with-eval-after-load
+          'org 'org-roam
+          (add-hook 'org-capture-mode-hook #'org-id-get-create)
+          (add-hook 'org-capture-after-finalize-hook #'org-roam-db-sync))
     #+end_src
 
 ** Org-roam Refactoring Funxtions
