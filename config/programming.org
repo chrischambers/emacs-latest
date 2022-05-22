@@ -89,6 +89,7 @@
      (use-package rainbow-delimiters
        :hook ((prog-mode . rainbow-delimiters-mode)
               (geiser-repl-mode . rainbow-delimiters-mode)
+              (cider-repl-mode . rainbow-delimiters-mode)
               (ielm-mode . rainbow-delimiters-mode)))
    #+end_src
 
@@ -127,8 +128,7 @@
        :config
        (my/keymap-fix-with-evil-mode 'git-timemachine-mode)
        :general
-       (leader "gt" 'git-timemachine)
-       )
+       (leader "gt" 'git-timemachine))
    #+end_src
 
    If we want to actually roll-back, we just save the file.
@@ -375,7 +375,7 @@
                 "tc"   '(cider-test-run-test :which-key "current")
                 "tr"   '(cider-test-rerun-failed-tests :which-key "re-run failed"))
        (local-leader cider-repl-mode-map
-                "e"    '(:ignore t  :major-modes clojure-repl-mode :which-key "eval")
+                "e"    '(:ignore t  :major-modes cider-repl-mode :which-key "eval")
                 "ee"   '(cider-eval-sexp-at-point :which-key "expression")
                 "er"   '(cider-eval-region :which-key "region"))
        ('(insert motion) cider-repl-mode-map
@@ -585,7 +585,7 @@
         (dap-python-debugger 'debugpy))
     #+end_src
 
-**** COMMENT pyls
+**** COMMENT lsp-python-ms
      #+begin_src emacs-lisp
        (use-package lsp-python-ms
          :init (setq lsp-python-ms-auto-install-server t)
@@ -597,7 +597,7 @@
          (dap-python-debugger 'debugpy))
      #+end_src
 
-**** COMMENT pyls
+**** COMMENT lsp-pyright
      #+begin_src emacs-lisp
       (use-package lsp-pyright
         :commands (lsp lsp-deferred)
