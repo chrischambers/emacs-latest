@@ -613,6 +613,18 @@
         "wrr"   '(org-roam-ref-remove :which-key "remove")))
     #+end_src
 
+** Convenience function when capturing: set =ROAM-ALIASES= to sensible default
+   #+begin_src emacs-lisp
+     (with-eval-after-load 'org 's
+       (defun my/roam-alias-default ()
+         "Sets the org-roam alias to a sensible default."
+         (let* ((title (car minibuffer-history))
+                (title (if (s-matches? "\s" title)
+                           (s-format "\"{$0}\"" (list title))
+                         title)))
+               title)))
+   #+end_src
+
 ** When using standard org-capture, automatically add id and sync with roam DB
     #+begin_src emacs-lisp
       (with-eval-after-load
@@ -621,7 +633,7 @@
           (add-hook 'org-capture-after-finalize-hook #'org-roam-db-sync))
     #+end_src
 
-** Org-roam Refactoring Funxtions
+** Org-roam Refactoring Functions
    #+begin_src emacs-lisp
      (with-eval-after-load 'org-roam
        (defun my/conditional-kill-buffer-for-file (file)
