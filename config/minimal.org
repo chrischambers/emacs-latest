@@ -15,10 +15,18 @@ you can work with.
 
 * Use [[https://github.com/hrs/sensible-defaults.el][sensible-defaults]]
   #+begin_src emacs-lisp
-    (load-file (concat user-emacs-directory "sensible-defaults.el"))
+    (load-file (concat user-emacs-directory "/config/" "sensible-defaults.el"))
     (sensible-defaults/use-all-settings)
     (sensible-defaults/use-all-keybindings)
     (sensible-defaults/backup-to-temp-directory)
+  #+end_src
+
+* No littering, please
+  #+begin_src emacs-lisp
+    (use-package no-littering
+      :config
+      (require 'no-littering)
+      (setq custom-file (no-littering-expand-etc-file-name "custom.el")))
   #+end_src
 
 * Favour unix line-endings

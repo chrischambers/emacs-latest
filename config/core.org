@@ -336,7 +336,7 @@ which aren't absolutely necessary, but are very important.
       :straight nil
       :hook (after-init . recentf-mode)
       :custom
-      (recentf-exclude '("emacs\.d/elpa" "/bookmarks$" "/\.cache"))
+      (recentf-exclude `(,no-littering-var-directory ,no-littering-etc-directory))
       (recentf-max-saved-items 100))
   #+end_src
 
