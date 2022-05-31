@@ -56,7 +56,12 @@
      (use-package poly-ansible
        :mode ("\\.ya?ml\\'" . poly-ansible-mode))
    #+end_src
-
+*** YAML Linting via flymake
+    #+begin_src emacs-lisp
+      (use-package flymake-yamllint
+        :hook ((yaml-mode . flymake-yamllint-setup)
+               (yaml-mode . flymake-mode)))
+    #+end_src
 ** CSV
    #+begin_src emacs-lisp
      (use-package csv-mode
