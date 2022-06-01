@@ -73,10 +73,11 @@
               (buffer-substring-no-properties start end))))
 
         (defun my/ansible-doc-read-module (prompt)
-          "Read a Ansible module name from minibuffer with PROMPT."
+          "Read a Ansible module name from minibuffer (including
+      fully-qualified ansible modules) with PROMPT."
           (let* ((modules (ansible-doc-modules))
-                 (symbol (my/python-variable-at-point))
-                 (symbol (s-replace "ansible.builtin." "" symbol))
+                 (symbol (my/python-variable-at-point))               ; modified
+                 (symbol (s-replace "ansible.builtin." "" symbol))    ; modified
                  (default (if (or (null modules) (member symbol modules))
                               symbol
                             nil))
@@ -91,14 +92,9 @@
                                          nil nil default)))
             (if (string= reply "") default reply)))
 
-        (defun my/ansible-doc (module)
-          "Show ansible documentation for MODULE."
-          (interactive
-           (list (my/ansible-doc-read-module "Documentation for Ansible Module")))
-          (pop-to-buffer (ansible-doc-buffer module)))
-
+        (advice-add 'ansible-doc-read-module :override #'my/ansible-doc-read-module)
         :general
-        ('(motion normal) "K" #'my/ansible-doc))
+        ('(motion normal) "K" #'ansible-doc))
     #+end_src
 
 *** company-ansible
