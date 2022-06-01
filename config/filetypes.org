@@ -58,7 +58,47 @@
 
 *** ansible-doc
     #+begin_src emacs-lisp
-      (use-package ansible-doc)
+      (use-package ansible-doc
+        :preface
+        (require 'ansible-doc)
+
+        (defun my/python-variable-at-point ()
+          "Extracts word at point conforming to python variable rules."
+          (let (start end (pattern "[:alpha:][[:alpha:][:digit:]._="))
+            (save-excursion
+              (skip-chars-backward pattern)
+              (setq start (point))
+              (skip-chars-forward pattern)
+              (setq end (point))
+              (buffer-substring-no-properties start end))))
+
+        (defun my/ansible-doc-read-module (prompt)
+          "Read a Ansible module name from minibuffer with PROMPT."
+          (let* ((modules (ansible-doc-modules))
+                 (symbol (my/python-variable-at-point))
+                 (symbol (s-replace "ansible.builtin." "" symbol))
+                 (default (if (or (null modules) (member symbol modules))
+                              symbol
+                            nil))
+                 (prompt (if default
+                             (format "%s (default %s): " prompt default)
+                           (format "%s: " prompt)))
+                 ;; If we have no modules available, we don't require a match, and use
+                 ;; the symbol at point as default value and sole completion candidate.
+                 (reply (completing-read prompt
+                                         (or modules (list default))
+                                         nil (not (null modules))
+                                         nil nil default)))
+            (if (string= reply "") default reply)))
+
+        (defun my/ansible-doc (module)
+          "Show ansible documentation for MODULE."
+          (interactive
+           (list (my/ansible-doc-read-module "Documentation for Ansible Module")))
+          (pop-to-buffer (ansible-doc-buffer module)))
+
+        :general
+        ('(motion normal) "K" #'my/ansible-doc))
     #+end_src
 
 *** company-ansible
