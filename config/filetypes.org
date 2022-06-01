@@ -21,9 +21,8 @@
   #+begin_src emacs-lisp
     (use-package logview
       :commands logview-mode
-      :mode
-      ("\\.log\\(?:\\.[0-9]+\\)?\\'" . logview-mode)
-      ("syslog\\(?:\\.[0-9]+\\)?\\'" . logview-mode))
+      :mode (("\\.log\\(?:\\.[0-9]+\\)?\\'" . logview-mode)
+             ("syslog\\(?:\\.[0-9]+\\)?\\'" . logview-mode)))
   #+end_src
 
 * Markup Formats
