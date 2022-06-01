@@ -14,7 +14,8 @@
              "\\.conf$"
              "git.*\\.symlink$"
              "rc\\.symlink$"
-             "conf\\.symlink$"))
+             "conf\\.symlink$"
+             "^\\.?[^.]*$"))        ; i.e. non-dotfiles without extensions
   #+end_src
 
 * <<<logview>>>: Log files
