@@ -64,6 +64,9 @@
 *** company-ansible
     #+begin_src emacs-lisp
       (use-package company-ansible
+        :straight (company-ansible
+                   :host github
+                   :repo "chrischambers/company-ansible")
         :config
         (add-company-backend 'company-ansible))
     #+end_src
