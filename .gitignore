@@ -1,4 +1,5 @@
 config/*.el
+config/ltximg
 configuration.el
 
 var
