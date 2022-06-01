@@ -33,29 +33,41 @@
        :mode ("\\.json$"))
    #+end_src
 
-** YAML
-   : #+begin_src emacs-lisp
-   :   (use-package yaml-mode
-   :     :mode ("\\.yaml\\'" "\\.yml\\'"))
-   : #+end_src
-
+** YAML (esp. for Ansible)
+*** COMMENT yaml-mode (superseded by poly-ansible)
    #+begin_src emacs-lisp
-     (use-package ansible
-       :straight (emacs-ansible
-                  :host github
-                  :repo "k1LoW/emacs-ansible"
-                  ;; The following prevents pulling in the entire ansible codebase:
-                  :nonrecursive t))
-
-     (use-package ansible-doc)
-
-     (use-package company-ansible
-       :config
-       (add-company-backend 'company-ansible))
-
-     (use-package poly-ansible
-       :mode ("\\.ya?ml\\'" . poly-ansible-mode))
+     (use-package yaml-mode
+       :mode ("\\.ya?ml\\'"))
    #+end_src
+
+*** COMMENT emacs-ansible
+    #+begin_src emacs-lisp
+      (use-package ansible
+        :straight (emacs-ansible
+                   :host github
+                   :repo "k1LoW/emacs-ansible"
+                   ;; The following prevents pulling in the entire ansible codebase:
+                   :nonrecursive t))
+    #+end_src
+
+*** poly-ansible
+    #+begin_src emacs-lisp
+      (use-package poly-ansible
+        :mode ("\\.ya?ml\\'" . poly-ansible-mode))
+    #+end_src
+
+*** ansible-doc
+    #+begin_src emacs-lisp
+      (use-package ansible-doc)
+    #+end_src
+
+*** company-ansible
+    #+begin_src emacs-lisp
+      (use-package company-ansible
+        :config
+        (add-company-backend 'company-ansible))
+    #+end_src
+
 *** YAML Linting via flymake
     #+begin_src emacs-lisp
       (use-package flymake-yamllint
