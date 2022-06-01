@@ -94,7 +94,7 @@
 
         (advice-add 'ansible-doc-read-module :override #'my/ansible-doc-read-module)
         :general
-        ('(motion normal) "K" #'ansible-doc))
+        ('(motion normal) yaml-mode-map "K" #'ansible-doc))
     #+end_src
 
 *** company-ansible
