@@ -139,17 +139,18 @@
      ;; ('(insert motion) "C-c C-o" 'consult-multi-occur)
      (leader
        ;; "SPC" '(consult-complex-command :which-key "M-x")
-       "bb" '(consult-buffer :which-key "switch buffer")
-       "fr" '(consult-recent-file :which-key "recent")
-       "lk" '(consult-yank-pop :which-key "kill-ring")
-       "lr" '(consult-register :which-key "register")
-       "S"  '(:ignore t :which-key "search")
-       "Sr" '(consult-ripgrep :which-key "ripgrep")
-       "Sg" '(consult-git-grep :which-key "git-grep")
-       "Sf" '(consult-find :which-key "find")
-       "Sl" '(consult-locate :which-key "locate")
+       "bb"   '(consult-buffer :which-key "switch buffer")
+       "fr"   '(consult-recent-file :which-key "recent")
+       "lk"   '(consult-yank-pop :which-key "kill-ring")
+       "lr"   '(consult-register :which-key "register")
+       "S"    '(:ignore t :which-key "search")
+       "Sr"   '(consult-ripgrep :which-key "ripgrep")
+       "Sg"   '(consult-git-grep :which-key "git-grep")
+       "Sf"   '(consult-find :which-key "find")
+       "Sl"   '(consult-locate :which-key "locate")
 
-       "."  '(consult-complex-command :which-key "repeat command")
+       "has"  '(consult-apropos :which-key "symbol")
+       "."    '(consult-complex-command :which-key "repeat command")
        ))
  #+end_src
 

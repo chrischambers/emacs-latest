@@ -635,25 +635,12 @@ which aren't absolutely necessary, but are very important.
        ;; :ensure help-fns+
        :general
        (leader
-	 "h"   '(:ignore t :which-key "help")
-	 "ha"  '(apropos-command :which-key "apropos-command")
-	 "hb"  '(describe-bindings :which-key "describe-bindings")
-
-	 ;; The following is apparently useful for looking at
-	 ;; interactive-functions exclusively:
-	 "hc"  'helpful-command
-	 "hf"  '(helpful-callable :which-key "describe-function")
-	 "hi"  '(info :which-key "info")
-
-	 ;; "default" is the main face youll want to inspect:
-	 ;;"hF"  '(faces :which-key "describe-faces (fonts)")
-	 "hk"  '(helpful-key :which-key "describe-key")
-	 "hK"  'describe-keymap
-	 "hm"  'describe-mode
-	 "hp"  'describe-package
-	 "hv"  '(describe-variable :which-key "describe-variable")
-	 "h."  'helpful-at-point
-	 )
+         "hc"  '(helpful-command :which-key "describe-command")
+         "hh"  '(helpful-callable :which-key "helpful callable")
+         "hf"  '(helpful-function :which-key "describe-function")
+         "hk"  '(helpful-key :which-key "describe-key")
+         "hv"  '(helpful-variable :which-key "describe-variable")
+         "h."  'helpful-at-point)
        ("C-h f" '(helpful-callable :which-key "describe-function"))
        ("C-h k" '(helpful-key :which-key "describe-key")))
    #+end_src
