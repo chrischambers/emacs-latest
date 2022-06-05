@@ -40,7 +40,7 @@
        :mode ("\\.ya?ml\\'"))
    #+end_src
 
-*** COMMENT emacs-ansible
+*** COMMENT emacs-ansible ([[https://github.com/k1LoW/emacs-ansible][github]])
     #+begin_src emacs-lisp
       (use-package ansible
         :straight (emacs-ansible
@@ -56,7 +56,7 @@
         :mode ("\\.ya?ml\\'" . poly-ansible-mode))
     #+end_src
 
-*** ansible-doc
+*** ansible-doc ([[https://github.com/emacsorphanage/ansible-doc][github]])
     #+begin_src emacs-lisp
       (use-package ansible-doc
         :preface
