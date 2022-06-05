@@ -576,8 +576,10 @@ which aren't absolutely necessary, but are very important.
   #+end_src
 
 * <<<ripgrep>>>
+  Required for =projectile-ripgrep=, amongst other things:
+  #+begin_src emacs-lisp
     (use-package ripgrep)
-
+  #+end_src
 * Window management
 ** <<<switch-window>>> ([[https://github.com/dimitri/switch-window][github]])
    Improves =C-w w=:
