@@ -559,7 +559,9 @@
       :init
       (setq org-roam-directory org-directory)
       :custom
-      (org-default-properties (append org-default-properties '("ROAM_ALIASES" "ROAM_EXCLUDE" "filetags")))
+      (org-default-properties (append
+                               org-default-properties
+                               '("ROAM_ALIASES" "ROAM_EXCLUDE" "filetags")))
       (org-roam-completion-everywhere t)
       (org-roam-capture-templates
        `(("d" "default" plain (file ,(concat my/org-capture-templates "default.org"))
