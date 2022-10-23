@@ -133,3 +133,9 @@
        (leader
          "vd" '(wordnut-lookup-current-word :which-key "dictionary")))
    #+end_src
+
+** origmai
+   #+begin_src emacs-lisp
+     (use-package origami
+       :hook (after-init . global-origami-mode))
+   #+end_src
