@@ -548,6 +548,7 @@
 
     (use-package org-roam
       :after org
+      :straight (org-roam :type git :host github :repo "chrischambers/org-roam")
       :config
       (if IS-MAC
         ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
