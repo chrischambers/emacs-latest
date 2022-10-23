@@ -93,7 +93,7 @@
    #+begin_src emacs-lisp
      (use-package notmuch
        :straight nil
-       :load-path "/usr/local/Cellar/notmuch/0.35/share/emacs/"
+       :load-path "/opt/homebrew/Cellar/notmuch/0.37_1/share/emacs/"
        :preface
        (defcustom my/notmuch-maildir
          (expand-file-name "~/Mail/")
