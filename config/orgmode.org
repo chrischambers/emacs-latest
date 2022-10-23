@@ -798,7 +798,8 @@
       ;;          "J"   'org-noter-sync-next-note
       ;;          "K"   'org-noter-sync-prev-note
       ;;          "C-]" 'org-noter-sync-current-note)
-      )
+      :general
+      (leader "aN"   '(org-noter :which-key "noter")))
   #+end_src
 
 * Org and .pdf/.epub/.mobi Integration
