@@ -146,3 +146,5 @@
 ;; This file stores usernames, passwords, and other such treasures for the
 ;; aspiring malicious third party.
 (setq auth-sources (list "~/.authinfo.gpg"))
+
+(setq native-comp-deferred-compilation-deny-list nil)
