@@ -138,10 +138,17 @@ which aren't absolutely necessary, but are very important.
                 (name . "Emacs")
                 (internal-border-width . 24)  ; padding, ala nano-emacs
                 (tool-bar-lines . 0)
-                (width . 106)  ; chars
-                (height . 45)  ; lines
+                (width . 171)  ; chars
+                (height . 50)  ; lines
                 )))
   #+end_src
+** Set window placement in OSX (laptop)
+   #+begin_src elisp
+     (when IS-MAC
+       (progn
+         (add-to-list 'initial-frame-alist '(top . 35))
+         (add-to-list 'initial-frame-alist '(left . 5))))
+   #+end_src
 
 * Extend Evil
 ** <<<evil-collection>>>: evil-friendly bindings for various packages/modes ([[https://github.com/emacs-evil/evil-collection/blob/master/readme.org][source]])
