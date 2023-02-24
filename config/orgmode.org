@@ -53,7 +53,7 @@
       (org-directory my/notes-directory)
       (org-archive-location
        (concat
-        (concat org-directory "/archive.org")
+        (concat org-directory "/#archives/completed_tasks.org")
         "::* From %s"))
       (org-log-done 'time)
       (org-preview-latex-image-directory (concat org-directory "/latex-images/"))
@@ -431,7 +431,7 @@
      (require 's)
      (require 'dash)
 
-     (defcustom org-agenda-blacklist '("#old" "archive.org$")
+     (defcustom org-agenda-blacklist '("#old" "#archives/completed_tasks.org$")
        "patterns to exclude from org-agenda path names")
 
      (defvar org-todo-states (-map (lambda (s) (car (s-split "(" s)))
@@ -884,7 +884,7 @@
      (setq org-drill-blacklist
            (-map (lambda (fname) (expand-file-name (concat org-directory "/" fname)))
                  '("#old"
-                   "archive.org")))
+                   "#archives/completed_tasks.org")))
 
      (defun org-drill-notes ()
          "org-drill over all files containing :drill: (except those whose
