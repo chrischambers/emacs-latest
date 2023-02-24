@@ -347,6 +347,8 @@
 
 * Custom TODOs
 ** Customise org-todo keywords
+   - =@= :: log timestamp/note when task is transitioned into
+   - =!= :: log timestamp when task is transitioned out of
   #+begin_src emacs-lisp
     (customize-set-variable 'org-todo-keywords
           '((sequence
