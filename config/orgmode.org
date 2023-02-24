@@ -98,6 +98,8 @@
         "id"  '(org-insert-drawer :which-key "drawer")
         "in"  '(org-add-note :which-key "note")
 
+        "P"  '(org-priority :which-key "priority")
+
         "p"   '(:ignore t :major-modes org-mode :which-key "property")
         "pc"  '(org-set-property :which-key "create property")
         "pd"  '(org-delete-property :which-key "delete property")
