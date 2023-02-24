@@ -172,6 +172,23 @@
      (customize-set-variable 'org-agenda-dim-blocked-tasks t)
    #+end_src
 
+** Customise org-clock and org-timer
+   #+begin_src elisp
+     (customize-set-variable
+      'org-clock-sound
+      (concat user-emacs-directory "org-clock-sound.wav"))
+
+     ;; Defaults to using `aplay`, which isn't available on OSX:
+     ;; Source: https://emacs.stackexchange.com/questions/67956/trying-to-set-org-clock-sound-for-org-timer
+     (when IS-MAC
+       (defun my/play-sound (original-fn sound)
+         (cl-destructuring-bind (_ _ file) sound
+           (make-process :name (concat "play-sound-" file)
+                         :connection-type 'pipe
+                         :command `("afplay" ,file))))
+       (advice-add 'play-sound :around 'my/play-sound))
+   #+end_src
+
 ** <<<org-superstar>>>: Nicer heading indicators
   #+begin_src emacs-lisp
     (use-package org-superstar
