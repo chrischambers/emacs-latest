@@ -97,6 +97,7 @@
         "p"   '(:ignore t :major-modes org-mode :which-key "property")
         "pc"  '(org-set-property :which-key "create property")
         "pd"  '(org-delete-property :which-key "delete property")
+        "po"  '(org-toggle-ordered-property :which-key "toggle ORDERED")
 
         "/"   '(consult-org-heading :which-key "jump to headings")
         "x"   '(org-export-dispatch :which-key "export")
@@ -159,6 +160,13 @@
     ;; (setq org-ellipsis " ▼ ")
     (customize-set-variable 'org-ellipsis " ⤵ ")
   #+end_src
+
+** Enforce =ORDERED= property
+   #+begin_src emacs-lisp
+     (customize-set-variable 'org-enforce-todo-dependencies t)
+     (customize-set-variable 'org-track-ordered-property-with-tag t)
+     (customize-set-variable 'org-agenda-dim-blocked-tasks t)
+   #+end_src
 
 ** <<<org-superstar>>>: Nicer heading indicators
   #+begin_src emacs-lisp
