@@ -94,6 +94,10 @@
         "tt"  '(org-todo :which-key "toggle")
         "t/"  '(org-show-todo-tree :which-key "tree (sparse)")
 
+        "i"   '(:ignore t :major-modes org-mode :which-key "insert")
+        "id"  '(org-insert-drawer :which-key "drawer")
+        "in"  '(org-add-note :which-key "note")
+
         "p"   '(:ignore t :major-modes org-mode :which-key "property")
         "pc"  '(org-set-property :which-key "create property")
         "pd"  '(org-delete-property :which-key "delete property")
