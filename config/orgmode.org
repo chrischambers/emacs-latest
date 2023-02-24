@@ -242,8 +242,7 @@
 
 *** Launch a notification at startup to prompt clock-in
      #+begin_src emacs-lisp
-       (with-eval-after-load 'alert
-         (my/-notify-clock-out))
+       (add-hook 'after-init-hook #'my/-notify-clock-out)
      #+end_src
 
 *** Define a custom clock/timer sound
