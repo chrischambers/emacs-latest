@@ -2,6 +2,6 @@
 # name: Source Code block
 # key: src
 # --
-#+begin_src ${1:emacs-lisp}
+#+begin_src ${1:elisp}
 $2
 #+end_src
