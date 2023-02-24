@@ -126,7 +126,8 @@ which aren't absolutely necessary, but are very important.
   #+begin_src emacs-lisp
     (when IS-MAC
       (progn
-        (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+        (add-to-list 'default-frame-alist '(undecorated-round . t))
+        ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
         (add-to-list 'default-frame-alist '(ns-appearance . light))))
   #+end_src
 
