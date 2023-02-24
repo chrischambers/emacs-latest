@@ -1,0 +1,4 @@
+# key: i
+# name: Inline Source
+# --
+src_${1:elisp}${2:[:exports both]}{$3}$0
