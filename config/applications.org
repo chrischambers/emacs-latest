@@ -6,19 +6,19 @@
 #+property: header-args:emacs-lisp :results output silent
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
 * <<<elfeed>>>
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package elfeed
       :custom
       (elfeed-feeds '("https://blog.tecosaur.com/tmio/rss.xml")))
   #+end_src
 
 * <<<calibredb>>> ([[https://github.com/chenyanming/calibredb.el][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package calibredb
       :init
       (setq calibredb-root-dir my/ebooks-directory)
@@ -77,7 +77,7 @@
   #+end_src
 
 * <<<ERC>>>: Emacs IRC
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package erc
       :preface
       (defun my/erc-connect ()
@@ -104,26 +104,26 @@
 
   #+end_src
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
   (use-package erc-hl-nicks)
   #+end_src
 ** SOMEDAY-MAYBE [[https://github.com/minad/consult/wiki#erc-buffers][Consult: ERC]]
 
 * <<<EWW>>>: Emacs Web Wowser (Browser)
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (setq shr-max-width 70)
     (setq shr-use-colors nil)
     (setq shr-bullet "- ")
   #+end_src
 
-  : #+begin_src emacs-lisp
+  : #+begin_src elisp
   : (setq shr-color-visible-luminance-min 70
   :    shr-use-colors nil  ;; Don't use colors in text/html stuff
   :    shr-width 90 ;; Notmuch weirdly indents stuff, so using window with often results in weird word-wrapping
   :    shr-use-fonts nil) ;; I don't like proportional fonts
   : #+end_src
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package eww-lnum
       :after eww
       :general
@@ -137,7 +137,7 @@
   This snippet prevents =dired= from proliferating buffers as you navigate the
   file tree:
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (require 'dired)
     (general-define-key
      :states '(normal)
@@ -147,7 +147,7 @@
   #+end_src
 
 * <<<treemacs>>> ([[https://github.com/Alexander-Miller/treemacs][github]]): file drawer
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package treemacs
       :init
       :custom
@@ -185,12 +185,12 @@
         "fD"  '(treemacs-bookmark :which-key "file-drawer (from bookmark)")))
   #+end_src
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (with-eval-after-load 'treemacs
       (add-to-list 'treemacs-pre-file-insert-predicates #'treemacs-is-file-git-ignored?))
   #+end_src
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package treemacs-evil
       :after treemacs evil)
     (use-package treemacs-projectile

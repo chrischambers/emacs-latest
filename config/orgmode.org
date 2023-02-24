@@ -6,12 +6,12 @@
 #+property: header-args:emacs-lisp :results output silent
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
 * <<<org>>> / <<<orgmode>>>
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org
       :preface
       ;; https://emacs.stackexchange.com/questions/7211/collapse-src-blocks-in-org-mode-by-default
@@ -116,14 +116,14 @@
   #+end_src
 
 ** Include (rather large) <<<org-contrib>>>
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package org-contrib)
      #+end_src
 
 ** Enable evil-org [[https://github.com/Somelauw/evil-org-mode/blob/master/doc/keythemes.org][keybindings]]
    Critically, enables shifting blocks with ~<<~ and ~>>~.
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package evil-org
        :custom
        (evil-org-key-theme
@@ -147,30 +147,30 @@
 
 ** Default to showing pretty entities in all org buffers
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (setq-default org-pretty-entities t)
    #+end_src
 
 ** Make =TAB= act as if it were issued in a buffer of the language’s major mode
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (customize-set-variable 'org-src-tab-acts-natively t)
    #+end_src
 
 ** Don’t ask before evaluating code blocks
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (customize-set-variable 'org-confirm-babel-evaluate nil)
    #+end_src
 
 ** Customise dropdown icon at right of headings
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     ;; (setq org-ellipsis " ▼ ")
     (customize-set-variable 'org-ellipsis " ⤵ ")
   #+end_src
 
 ** Enforce =ORDERED= property
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (customize-set-variable 'org-enforce-todo-dependencies t)
      (customize-set-variable 'org-track-ordered-property-with-tag t)
      (customize-set-variable 'org-agenda-dim-blocked-tasks t)
@@ -178,7 +178,7 @@
 
 ** Customise org-clock and org-timer
 *** Hydra for clocking in/out
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (defun my/org-clock-display-toggle ()
         "Toggles display of total time clocked via overlay."
         (interactive)
@@ -221,14 +221,14 @@
 
 *** Notify when clocking in/out
 **** <<<alert>>> ([[https://github.com/jwiegley/alert][github]]): Use various growl-like notifiers
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package alert
          :config
          (if IS-MAC (setq alert-default-style 'osx-notifier)))
      #+end_src
 
 *** Advise clock-in/out
-      #+begin_src emacs-lisp
+      #+begin_src elisp
         (with-eval-after-load 'alert
           (defun my/-notify-clock-in (&optional select start-time)
             (let* ((body (substring-no-properties org-clock-current-task))
@@ -241,7 +241,7 @@
       #+end_src
 
 *** Launch a notification at startup to prompt clock-in
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (add-hook 'after-init-hook #'my/-notify-clock-out)
      #+end_src
 
@@ -266,13 +266,13 @@
      #+end_src
 
 ** <<<org-superstar>>>: Nicer heading indicators
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-superstar
       :hook (org-mode . org-superstar-mode))
   #+end_src
 
 ** <<<org-appear>>> ([[https://github.com/awth13/org-appear][github]]): hide emphasis markers like =*=, =/=, etc.
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-appear
       :custom
       (org-hide-emphasis-markers t)
@@ -280,7 +280,7 @@
   #+end_src
 
 ** <<<org-cliplink>>> ([[https://github.com/rexim/org-cliplink][github]]): Insert link using page-title as description automatically via
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package org-cliplink
        :general
        ('(insert) org-mode-map "M-v" 'org-cliplink)
@@ -289,18 +289,18 @@
    #+end_src
 
 ** Scale image widths (with imagemagick, where available) if =#+ATTR_ORG :width= is set
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (customize-set-variable 'org-image-actual-width nil)
    #+end_src
 
 ** <<<valign>>> ([[https://github.com/casouri/valign][github]]): Align tables with variable-pitch fonts/images properly
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package valign
        :hook (org-mode . valign-mode))
    #+end_src
 
 ** Show animated gifs when clicked on
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       ;; https://emacs.stackexchange.com/questions/33892/replace-element-of-alist-using-equal-even-if-key-does-not-exist/33893#33893
       (defun alist-set (key val alist &optional symbol)
         "Set property KEY to VAL in ALIST. Return new alist.
@@ -332,7 +332,7 @@
     #+end_src
 
 ** <<<org-habit>>>
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package org-habit
        :straight nil
        :custom
@@ -347,7 +347,7 @@
    #+end_src
 
 ** IN-PROGRESS <<<org-capture>>>
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package org-capture
         :init
         (setq my/org-capture-templates (concat org-directory "/" "templates/"))
@@ -382,7 +382,7 @@
     #+end_src
 
 ** Provide special binding for opening org files via projectile
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (with-eval-after-load 'org 'projectile 'general
 
        (defun my/find-notes-file ()
@@ -401,12 +401,12 @@
    #+end_src
 
 ** Use a =:LOGBOOK:= drawer to contain changes to =TODO= states
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (customize-set-variable 'org-log-into-drawer "LOGBOOK")
    #+end_src
 
 ** Org =src= languages (see complete list [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][here]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (org-babel-do-load-languages
       'org-babel-load-languages
       '(
@@ -427,25 +427,25 @@
    #+end_src
 
 *** Ditaa config
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (customize-set-variable 'org-ditaa-jar-path (concat user-emacs-directory "ditaa.jar"))
    #+end_src
 
 ** When editing a code snippet, use current window rather opening a new one
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (customize-set-variable 'org-src-window-setup 'current-window)
    #+end_src
 
 ** Org table headers always visible (if available)
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (when (boundp 'org-table-electric-header-mode)
        (org-table-electric-header-mode))
    #+end_src
 
 ** Org external links styled differently
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (org-link-set-parameters "http" :face '(:foreground "tomato" :underline t))
     (org-link-set-parameters "https" :face '(:foreground "#61bfff" :underline t))
   #+end_src
@@ -454,7 +454,7 @@
 ** Customise org-todo keywords
    - =@= :: log timestamp/note when task is transitioned into
    - =!= :: log timestamp when task is transitioned out of
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (customize-set-variable 'org-todo-keywords
           '((sequence
              "TODO(t!)"
@@ -477,7 +477,7 @@
   #+end_src
 
 ** Prettify TODO symbols
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package prettify-symbols
       :straight nil
       :hook
@@ -493,7 +493,7 @@
   #+end_src
 
 * <<<org-agenda>>>
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-agenda
       :straight nil
       :custom
@@ -517,7 +517,7 @@
 
 ** Agenda files
 *** +Limited Subset+
-   : #+begin_src emacs-lisp
+   : #+begin_src elisp
    :   (setq org-agenda-files
    :         `(
    :           ,org-directory
@@ -527,12 +527,12 @@
    : #+end_src
 
 *** +All files?+
-   : #+begin_src emacs-lisp
+   : #+begin_src elisp
    :   (setq org-agenda-files (directory-files-recursively org-directory "\\.org$"))
    : #+end_src
 
 *** Intelligently Selected Files
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (with-eval-after-load 'org
      (require 'f)
      (require 's)
@@ -595,7 +595,7 @@
    #+end_src
 
 ** <<<org-super-agenda>>> ([[https://github.com/alphapapa/org-super-agenda][github]]): Better agenda display
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package org-super-agenda
        :after org-agenda
        :straight (org-super-agenda :type git :host github :repo "alphapapa/org-super-agenda")
@@ -626,13 +626,13 @@
    #+end_src
 
 * <<<org-protocol>>> ([[https://github.com/bastibe/org-journal][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (server-start)
     (require 'org-protocol)
   #+end_src
 
 * <<<org-journal>>> ([[https://github.com/bastibe/org-journal][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-journal
       :custom
       (org-journal-dir (concat org-directory "/" "journals"))
@@ -650,7 +650,7 @@
   #+end_src
 
 * <<<org roam>>>: Superior backlinking and hyperlinking
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package emacsql-sqlite)
 
     (use-package org-roam
@@ -730,7 +730,7 @@
     #+end_src
 
 ** Convenience function when capturing: set =ROAM-ALIASES= to sensible default
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (with-eval-after-load 'org 's
        (defun my/roam-alias-default ()
          "Sets the org-roam alias to a sensible default."
@@ -742,7 +742,7 @@
    #+end_src
 
 ** When using standard org-capture, automatically add id and sync with roam DB
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (with-eval-after-load
           'org 'org-roam
           (add-hook 'org-capture-mode-hook #'org-id-get-create)
@@ -750,7 +750,7 @@
     #+end_src
 
 ** Org-roam Refactoring Functions
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (with-eval-after-load 'org-roam
        (defun my/conditional-kill-buffer-for-file (file)
 	 "Kill buffer for FILE if it's not modified: otherwise, throw error."
@@ -799,7 +799,7 @@
    #+end_src
 
 ** =org-roam-node-find= Display Style
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (with-eval-after-load 'org-roam
        (cl-defmethod org-roam-node-icon ((node org-roam-node))
 	 (let ((path (org-roam-node-file node)))
@@ -833,7 +833,7 @@
    #+end_src
 
 * <<<org-ref>>> ([[https://github.com/jkitchin/org-ref][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package ivy-bibtex
       :custom
       (bibtex-completion-bibliography (concat my/ebooks-directory "/" "references.bib"))
@@ -857,7 +857,7 @@
   #+end_src
 
 * <<<org-roam-bibtex>>> ([[https://github.com/org-roam/org-roam-bibtex][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-roam-bibtex
       :after org-roam
       :custom
@@ -868,7 +868,7 @@
   #+end_src
 
 * <<<org-noter>>> ([[https://github.com/weirdNox/org-noter][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-noter
       :preface
       (defun my/org-noter-precise-note ()
@@ -914,7 +914,7 @@
 
 * Org and .pdf/.epub/.mobi Integration
 ** <<<pdf>>>
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package pdf-tools
        :defer 1
        :straight (pdf-tools :type git :host github :repo "vedang/pdf-tools")
@@ -931,7 +931,7 @@
    #+end_src
 
 ** <<<nov.el>>>: <<<epub>>> and <<<mobi>>> viewing within Emacs
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package esxml)
      (use-package nov.el
        :config
@@ -940,7 +940,7 @@
    #+end_src
 
 ** <<<org-pdftools>>> ([[https://github.com/fuxialexander/org-pdftools][github]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package org-pdftools
        :after org pdf-tools
        :hook (org-mode . org-pdftools-setup-link))
@@ -980,7 +980,7 @@
    #+end_src
 
 * <<<org-drill>>> ([[https://gitlab.com/phillord/org-drill/][gitlab]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-drill
      :after org dash s
      :commands (org-drill
@@ -1018,12 +1018,12 @@
         #+end_src
 
 * =table.el= ([[https://www.emacswiki.org/emacs/TableMode][emacswiki]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (require 'table)
   #+end_src
 
 * <<<org-transclusion>>> ([[https://github.com/nobiot/org-transclusion][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-transclusion
       :after org
       :hook (org-mode . org-transclusion-mode)
@@ -1032,7 +1032,7 @@
   #+end_src
 
 * <<<org-chef>>> ([[https://github.com/Chobbes/org-chef][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package org-chef
       :preface
       (defun my/recipe-to-name (recipe)

@@ -6,13 +6,13 @@
 #+property: header-args:emacs-lisp :results output silent
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
 * COMMENT <<<selectrum>>> ([[https://github.com/raxod502/selectrum][github]])
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package selectrum
       :init
       (selectrum-mode)
@@ -33,14 +33,14 @@
   A fuzzy-file matching like =flx=, but that has better sorting than the in-built
   =flex= matcher or =orderless-flex=.
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package hotfuzz
       :custom
       (completion-styles '(hotfuzz)))  ; incompatible with orderless, as always matches
   #+end_src
 
 * <<<vertico>>> ([[https://github.com/minad/vertico][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package vertico
       :init
       ;; Do not allow the cursor in the minibuffer prompt
@@ -85,7 +85,7 @@
     once you've written the glob expression
   #+end_important
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package orderless
       :preface
       (defun my/orderless-style-dispatcher-template (s delim symbol)
@@ -117,7 +117,7 @@
   #+end_src
 
 * <<<embark>>> ([[https://github.com/oantolin/embark/][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package embark
       :general
       ('(motion normal)
@@ -127,7 +127,7 @@
 
 * <<<consult>>> ([[https://github.com/minad/consult][github]])
 
- #+begin_src emacs-lisp
+ #+begin_src elisp
    (use-package consult
      :init
      ;; (fset 'multi-occur #'consult-multi-occur)
@@ -154,7 +154,7 @@
        ))
  #+end_src
 
- #+begin_src emacs-lisp
+ #+begin_src elisp
    (with-eval-after-load
        'projectile 'consult
        (leader "pb" '(consult-project-buffer :which-key "switch buffer")))
@@ -162,19 +162,19 @@
 
 * <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
 ** All-the-icons completion ([[https://github.com/iyefrat/all-the-icons-completion][source]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package all-the-icons-completion
        :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
    #+end_src
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package marginalia
       :config
       (marginalia-mode))
   #+end_src
 
 * <<<company>>> ([[https://company-mode.github.io/][github]])/([[https://www.emacswiki.org/emacs/CompanyMode][wiki]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package company
       :preface
       (defun exit-company-normal-mode (&optional arguments)

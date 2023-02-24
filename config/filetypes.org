@@ -6,7 +6,7 @@
 #+property: header-args:emacs-lisp :results output silent
 
 * <<<conf-mode>>>: Config files
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package conf-mode
       :mode ("\\.git.*$"
              "dot_.*"
@@ -19,7 +19,7 @@
   #+end_src
 
 * <<<logview>>>: Log files
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package logview
       :commands logview-mode
       :mode (("\\.log\\(?:\\.[0-9]+\\)?\\'" . logview-mode)
@@ -28,20 +28,20 @@
 
 * Markup Formats
 ** JSON
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package json-mode
        :mode ("\\.json$"))
    #+end_src
 
 ** YAML (esp. for Ansible)
 *** COMMENT yaml-mode (superseded by poly-ansible)
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package yaml-mode
        :mode ("\\.ya?ml\\'"))
    #+end_src
 
 *** COMMENT emacs-ansible ([[https://github.com/k1LoW/emacs-ansible][github]])
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package ansible
         :straight (emacs-ansible
                    :host github
@@ -51,13 +51,13 @@
     #+end_src
 
 *** poly-ansible
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package poly-ansible
         :mode ("\\.ya?ml\\'" . poly-ansible-mode))
     #+end_src
 
 *** ansible-doc ([[https://github.com/emacsorphanage/ansible-doc][github]])
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package ansible-doc
         :preface
         (require 'ansible-doc)
@@ -98,7 +98,7 @@
     #+end_src
 
 *** company-ansible
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package company-ansible
         :straight (company-ansible
                    :host github
@@ -108,13 +108,13 @@
     #+end_src
 
 *** YAML Linting via flymake
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package flymake-yamllint
         :hook ((yaml-mode . flymake-yamllint-setup)
                (yaml-mode . flymake-mode)))
     #+end_src
 ** CSV
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package csv-mode
        :mode ("\\.csv$")
        :config
@@ -124,7 +124,7 @@
 ** TODO Markdown
    Github markdown format.
 
-   : #+begin_src emacs-lisp
+   : #+begin_src elisp
    :   (use-package ox-gfm
    :     :after ox)
    : #+end_src

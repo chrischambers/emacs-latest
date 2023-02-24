@@ -6,13 +6,13 @@
 #+property: header-args:emacs-lisp :results output silent
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
 * Theme
 ** Doom Themes
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package doom-themes
       :config
       (load-theme 'doom-dracula t)
@@ -23,12 +23,12 @@
   #+end_src
 
 ** Poet Theme
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package poet-theme)
   #+end_src
 
 ** Nano Theme
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package nano-theme
       :straight (nano-theme :host github :repo "rougier/nano-theme"))
   #+end_src
@@ -36,7 +36,7 @@
 ** Custom Theme Selector
    [[https://emacs.stackexchange.com/questions/24088/make-a-function-to-toggle-themes][Make a function to toggle themes - Emacs Stack Exchange]]
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package theme-cycler
        :no-require t
        :straight nil
@@ -87,7 +87,7 @@
 ** Fix $LaTeX$ background on Theme Change
    Thanks to hlissner - from [[https://github.com/hlissner/emacs-solaire-mode/issues/24][this issue]]:
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (defun +org-update-latex-preview-background-color (&rest _)
      (setq-default
          org-format-latex-options
@@ -103,7 +103,7 @@
 ** COMMENT Minimalist mode-line
    Source: [[https://github.com/mwfogleman/.emacs.d/blob/master/michael.org][Tasshin Fogleman (Building a Second Brain)]]
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (setq-default mode-line-format
        '("%e" ; print error message about full memory.
          mode-line-front-space
@@ -125,7 +125,7 @@
          mode-line-end-spaces))
     #+end_src
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package less-chrome
         :straight nil
         :no-require t
@@ -140,12 +140,12 @@
         (window-divider-default-right-width 1))
     #+end_src
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (require 'nano-faces)
       (require 'nano-modeline)
     #+end_src
 ** COMMENT spaceline ([[https://github.com/TheBB/spaceline][source]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package spaceline
        ;; :defer 2
        :config
@@ -156,7 +156,7 @@
    #+end_src
 
 ** doom-modeline ([[https://github.com/seagle0128/doom-modeline][source]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package doom-modeline
        :hook (after-init . doom-modeline-mode))
    #+end_src

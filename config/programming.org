@@ -6,7 +6,7 @@
 #+property: header-args:emacs-lisp :results output silent
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
@@ -19,7 +19,7 @@
 * TODO Configure SQL(i) repl-toggle correctly
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package comint
        :no-require t
        :straight nil
@@ -31,7 +31,7 @@
    #+end_src
 
 ** REPL-toggle ([[https://github.com/tomterl/repl-toggle][github]]/[[https://sr.ht/~tomterl/tomtel/][sourcehut]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package repl-toggle
        :preface
        (defun clojure-repl ()
@@ -70,7 +70,7 @@
 
 * Visual aids
 ** Highlight programming flags (e.g. TODO/FIXME)
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (defun my/programming-highlight-terms ()
        (font-lock-add-keywords
         nil
@@ -79,13 +79,13 @@
      (add-hook 'prog-mode-hook #'my/programming-highlight-terms)
    #+end_src
 ** [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]]: colour parmeters uniquely
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package color-identifiers-mode
        :hook (after-init . global-color-identifiers-mode))
    #+end_src
 
 ** [[https://github.com/fanael/rainbow-delimiters][<<<rainbow-delimiters>>>]]: colour matching parentheses
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package rainbow-delimiters
        :hook ((prog-mode . rainbow-delimiters-mode)
               (geiser-repl-mode . rainbow-delimiters-mode)
@@ -94,7 +94,7 @@
    #+end_src
 
 ** <<<rainbow-mode>>> ([[https://elpa.gnu.org/packages/rainbow-mode.html][source]]): Display hex colour strings in the correct colour via
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package rainbow-mode
        :hook (prog-mode . rainbow-mode))
    #+end_src
@@ -103,7 +103,7 @@
    Add a binding for =magit-status=, and enable various vim-style write
    shortcuts for the magit buffer (e.g. =:w=, =:x=):
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package magit
        :commands (magit-status magit-refresh-all)
        :custom
@@ -122,7 +122,7 @@
    Use =p=/=n=/=g=/=q= to look at previous, next, goto arbitrary
    historic versions, or quit.
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package git-timemachine
        :after magit
        :config
@@ -134,14 +134,14 @@
    If we want to actually roll-back, we just save the file.
 
 ** <<<abridge-diff>>>: easily-readable diffs
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package abridge-diff
        :after magit
        :init (abridge-diff-mode 1))
    #+end_src
 
 * LSP / Language Server Protocol
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package lsp-mode
       :commands (lsp lsp-deferred)
       :hook (lsp-mode . lsp-enable-which-key-integration)
@@ -160,7 +160,7 @@
    To understand which options affect what, see:
    [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A guide on disabling/enabling lsp-mode features]]
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package lsp-ui
        :after lsp-mode
        :commands lsp-ui-mode
@@ -182,7 +182,7 @@
    #+end_src
 
 ** Integration with Consult
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package consult-lsp
        :after lsp consult
        :config
@@ -190,14 +190,14 @@
    #+end_src
 
 ** Integration with Treemacs
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package lsp-treemacs
        :after lsp treemacs
        :commands lsp-treemacs-errors-list)
    #+end_src
 
 *** DAP Mode
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package dap-mode
         :after lsp
         :hook ((python-mode . dap-ui-mode)
@@ -227,7 +227,7 @@
     #+end_src
 
 * Debugging
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (defun my/toggle-tracing ()
       (interactive)
       (let ((f (intern (lisp-current-defun-name))))
@@ -241,7 +241,7 @@
   #+end_src
 * Lisp Languages
 ** Keybindings common across lisps
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (defun mine/eval-region-or-buffer ()
        (interactive)
        (if (region-active-p)
@@ -256,15 +256,15 @@
    #+end_src
 
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package eval-sexp-fu)
    #+end_src
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package cider-eval-sexp-fu
        :after cider eval-sexp-fu)
    #+end_src
 ** Emacs-Lisp
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package my/emacs-lisp-config
        :no-require t
        :straight nil
@@ -279,13 +279,13 @@
          "eb" '(eval-buffer :which-key "buffer")))
    #+end_src
 *** <<<eros>>> ([[https://github.com/xiongtx/eros][github]]): Display evaluation results inline
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package eros
         :hook (emacs-lisp-mode . eros-mode))
     #+end_src
 
 *** <<<macrostep>>> ([[https://github.com/joddie/macrostep][github]]): expand elisp macros
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package macrostep
         :commands macrostep-expand
         :general
@@ -295,7 +295,7 @@
     #+end_src
 
 *** <<<suggest>>> ([[https://github.com/Wilfred/suggest.el][github]]): Discover elisp functions which perform desired functionality
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package suggest
         :general
         (local-leader emacs-lisp-mode-map
@@ -303,7 +303,7 @@
     #+end_src
 
 ** Scheme
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package geiser-racket
        :after geiser)
 
@@ -325,7 +325,7 @@
    #+end_src
 
 ** Clojure
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package clojure-mode
        ;; :preface
        ;; (defun my/clojure-setup ()
@@ -437,7 +437,7 @@
      ;;      (define-key cider-mode-map (kbd "C-c u") 'cider-user-ns)))
    #+end_src
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (add-hook 'clojure-mode-hook 'lsp)
      (add-hook 'clojurescript-mode-hook 'lsp)
      (add-hook 'clojurec-mode-hook 'lsp)
@@ -445,7 +445,7 @@
 * Other Languages
 ** Python
 *** Main Config
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package python
         :mode
         ("\\.py\\'" . python-mode)
@@ -462,7 +462,7 @@
     #+end_src
 
 *** COMMENT Main Config
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package python
        :mode
        ("\\.py\\'" . python-mode)
@@ -508,7 +508,7 @@
    #+end_src
 
 *** elpy
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package elpy
         :after python
         :custom
@@ -554,7 +554,7 @@
     #+end_src
 
 *** LSP
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package python-config
         :straight nil
         :no-require t
@@ -571,7 +571,7 @@
     #+end_src
 
 **** pyls
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package pyls
         :straight nil
         :no-require t
@@ -586,7 +586,7 @@
     #+end_src
 
 **** COMMENT lsp-python-ms
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package lsp-python-ms
          :init (setq lsp-python-ms-auto-install-server t)
          :hook (python-mode . (lambda ()
@@ -598,7 +598,7 @@
      #+end_src
 
 **** COMMENT lsp-pyright
-     #+begin_src emacs-lisp
+     #+begin_src elisp
       (use-package lsp-pyright
         :commands (lsp lsp-deferred)
         :hook (python-mode . (lambda ()
@@ -610,7 +610,7 @@
      #+end_src
 
 **** COMMENT ein
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package ein
         :config
         (cond
@@ -620,7 +620,7 @@
     #+end_src
 
 **** <<<numpydoc>>>: generate numpy-like docstrings ([[https://github.com/douglasdavis/numpydoc.el][github]])
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package numpydoc
         :after python
         :general
@@ -628,14 +628,14 @@
     #+end_src
 
 **** virtualenvwrapper integration
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package virtualenvwrapper
          :config
          (venv-initialize-interactive-shells)
          (venv-initialize-eshell))
      #+end_src
 **** pyvenv integration
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package pyvenv
          :hook (python-mode . pyvenv-tracking-mode)
          :general
@@ -649,7 +649,7 @@
 
 *** REPL
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
     (with-eval-after-load 'evil
       (evil-set-initial-state 'inferior-python-mode 'normal)
       (general-def 'insert inferior-python-mode-map
@@ -662,7 +662,7 @@
 
 *** Testing/Debugging
 **** pytest ([[https://github.com/ionrock/pytest-el][github]])
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package pytest
          :config
          (setq pytest-cmd-flags "-x -s --spec")
@@ -680,7 +680,7 @@
      #+end_src
 
 **** COMMENT python-pytest
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package python-pytest
          :custom
          (python-pytest-arguments '("--spec"))
@@ -691,7 +691,7 @@
 
 ***** live-py-mode
 
-      #+begin_src emacs-lisp
+      #+begin_src elisp
         (use-package live-py-mode
           :general
           (local-leader python-mode-map
@@ -702,7 +702,7 @@
 
 *** Formatting
 **** COMMENT blacken
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package blacken
         :after python
         :config
@@ -715,7 +715,7 @@
     #+end_src
 
 **** COMMENT yaplify
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package yapfify
         ;; :hook (python-mode . yapf-mode)
         :after python)
@@ -723,26 +723,26 @@
 
 **** COMMENT python-docstring
     Note: this doesn't play well with lsp-mode
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package python-docstring
         :hook (python-mode . python-docstring-mode))
     #+end_src
 
 *** Documentation
 **** COMMENT pydoc
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package pydoc)
      #+end_src
 
 **** COMMENT pylookup
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package pylookup
          :commands (pylookup-lookup pylookup-update pylookup-update-all))
      #+end_src
 
 *** Imports
 **** COMMENT import magic
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package importmagic
         :hook (python-mode . importmagic-mode)
         :config
@@ -754,7 +754,7 @@
     #+end_src
 
 **** COMMENT Pyimport
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package pyimport
          :preface
          (defun update-pyimport-pyflakes-path ()
@@ -768,7 +768,7 @@
      #+end_src
 
 **** COMMENT isortify
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package isortify
         :general
         (local-leader python-mode-map
@@ -777,7 +777,7 @@
 
 *** Misc
 **** COMMENT pip-requirements
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package pip-requirements
         :commands pip-requirements-mode
         :mode
@@ -786,7 +786,7 @@
     #+end_src
 
 **** COMMENT pippel
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package pippel
         :after python
         :general
@@ -805,13 +805,13 @@
 
 **** COMMENT [[https://github.com/wbolster/evil-text-object-python][=evil-text-object-python=]]
 
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        (use-package evil-text-object-python
          :hook (python-mode . evil-text-object-python-add-bindings))
      #+end_src
 
 **** COMMENT python-mls ([[https://github.com/jdtsmith/python-mls][github]])
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package python-mls
         :config
         (python-mls-setup))
@@ -822,7 +822,7 @@
 ** Haskell
 *** Haskell Mode
     Installation: see [[https://www.haskell.org/platform/][Haskell Platform]]
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package haskell-mode
         :mode (("\\.hs\\(c\\|-boot\\)?\\'" . haskell-mode)
                ("\\.lhs\\'" . literate-haskell-mode)
@@ -830,7 +830,7 @@
     #+end_src
 
 *** LSP
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package lsp-haskell
         :hook (haskell-mode . lsp)
         :config
@@ -841,7 +841,7 @@
     #+end_src
 
 *** =haskell-doc-mode=: displays type signature of function & uses smart indentation
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (add-hook 'haskell-mode-hook
                 (lambda ()
                   (haskell-doc-mode)
@@ -850,7 +850,7 @@
 
 *** Bindings
 **** Format buffer via ormolu
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package ormolu
         :hook (haskell-mode . ormolu-format-on-save-mode)
         :general
@@ -859,7 +859,7 @@
     #+end_src
 
 **** Jump back from REPL to main buffer
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package inferior-haskell
         :no-require t
         :straight nil
@@ -872,17 +872,17 @@
   Minimally, we would want syntax highlighting to always be available - there
   are many Oz blocks throughout my notes now:
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (require 'oz)
   #+end_src
 
 ** Standard ML
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package sml-mode)
    #+end_src
 
 ** SQL
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package sql
        :straight nil
        :no-require t
@@ -903,6 +903,6 @@
    #+end_src
 
 ** Svelte
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package svelte-mode)
    #+end_src

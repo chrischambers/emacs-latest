@@ -9,14 +9,14 @@ Dependencies for other types of configuration, as well as key config settings
 which aren't absolutely necessary, but are very important.
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
 * Silence compiler warnings
   These can be pretty disruptive with native-compilation enabled:
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (when (>= emacs-major-version 28)
       (setq native-comp-async-report-warnings-errors nil)
       (setq comp-async-report-warnings-errors nil))
@@ -24,7 +24,7 @@ which aren't absolutely necessary, but are very important.
   #+end_src
 
 * Startup message (timestamp)
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package startup
       :no-require t
       :straight nil
@@ -35,14 +35,14 @@ which aren't absolutely necessary, but are very important.
   #+end_src
 
 * Configure line numbers (if emacs supports it)
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (when (version<= "26.0.50" emacs-version )
         ;; (global-display-line-numbers-mode)
         (setq-default display-line-numbers-width 4))
     #+end_src
 
 * Display global fill indicator (if emacs supports it)
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (when (version<= "27.0.0" emacs-version )
       ;; (global-display-fill-column-indicator-mode)
       (add-hook 'text-mode-hook 'display-fill-column-indicator-mode)
@@ -50,7 +50,7 @@ which aren't absolutely necessary, but are very important.
   #+end_src
 
 ** ...but avoid using =display-fill-column-indicator-mode= when =variable-pitch-mode= is active
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (defun display-fill-column-indicator--turn-off ()
        (interactive)
        (display-fill-column-indicator-mode 0))
@@ -62,42 +62,42 @@ which aren't absolutely necessary, but are very important.
 ** Wrap paragraphs (fill) automatically
     Org mode inherits from text mode, so both will benefit from the following:
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (add-hook 'text-mode-hook 'auto-fill-mode)
     #+end_src
 
 ** [[https://www.emacswiki.org/emacs/TruncateLines][Truncate lines]] (i.e. don't soft-wrap) by default
-    #+begin_src emacs-lisp
+    #+begin_src elisp
     (set-default 'truncate-lines t)
     #+end_src
 
 * Add =site-lisp/= to load-path
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
   #+end_src
 ** Tweak window chrome
 *** Remove toolbar
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (tool-bar-mode 0)
     #+end_src
 
 *** Enable menu-bar (it's occasionally useful for discovery)
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (menu-bar-mode 1)
     #+end_src
 
 *** Disable the (tiny) scrollbar in the minibuffer window
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (set-window-scroll-bars (minibuffer-window) nil nil)
     #+end_src
 
 *** COMMENT Highlight the current line
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (global-hl-line-mode 1)
     #+end_src
 
 *** Set fonts
-     #+begin_src emacs-lisp
+     #+begin_src elisp
        ;; Standard font when =variable-pitch-mode= is not active
        (eval `(set-face-attribute 'default nil
                           :family "SauceCodePro Nerd Font"
@@ -123,7 +123,7 @@ which aren't absolutely necessary, but are very important.
 * Set [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Frame-Parameters.html][frame parameters]]
   Full list available [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Frame-Parameters.html#Frame-Parameters][here]].
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (when IS-MAC
       (progn
         (add-to-list 'default-frame-alist '(undecorated-round . t))
@@ -131,7 +131,7 @@ which aren't absolutely necessary, but are very important.
         (add-to-list 'default-frame-alist '(ns-appearance . light))))
   #+end_src
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (if (display-graphic-p)
         (setq initial-frame-alist
               '(
@@ -152,7 +152,7 @@ which aren't absolutely necessary, but are very important.
 
 * Extend Evil
 ** <<<evil-collection>>>: evil-friendly bindings for various packages/modes ([[https://github.com/emacs-evil/evil-collection/blob/master/readme.org][source]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package evil-collection
        :after evil
        :custom
@@ -164,7 +164,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 ** Provide function for fixing interaction between (minor) mode and evil
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (defun my/keymap-fix-with-evil-mode (mode &optional hook map)
        "Allows (minor) mode to use evil as a base, but its keybindings take precedence.
 
@@ -185,7 +185,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 ** Emulate =vim-surround= with <<<evil-surround>>> ([[https://github.com/emacs-evil/evil-surround][github]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package evil-surround
        :preface
        ;; Source: https://github.com/emacs-evil/evil-surround
@@ -217,14 +217,14 @@ which aren't absolutely necessary, but are very important.
    Provides ability to highlight a region and then hit =*= or =#= to forward/backward
    search, respectively:
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package evil-visualstar
        :after evil
        :config (global-evil-visualstar-mode 1))
    #+end_src
 
 ** Enable <<<evil-numbers>>> ([[https://github.com/cofi/evil-numbers][github]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package evil-numbers
        :general
        ('motion '(text-mode-map prog-mode-map)
@@ -233,7 +233,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 *** Increment/decrement timestamp or number at point in org-mode
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (with-eval-after-load
          'org 'evil-numbers
          (defun my/inc-timestamp-or-number (amount)
@@ -256,7 +256,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 ** Provide function for fixing interaction between (minor) mode and evil
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (defun my/keymap-fix-with-evil-mode (mode &optional hook map)
        "Allows (minor) mode to use evil as a base, but its keybindings take precedence.
 
@@ -278,7 +278,7 @@ which aren't absolutely necessary, but are very important.
 ** Evil ex commands
    View a list of all commands by inspecting =evil-ex-commands=.
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (defun evil-ex-define-local-cmds (hook mapping)
         "Wrapper function for defining a mode-specific set of ex-commands."
         (interactive)
@@ -291,7 +291,7 @@ which aren't absolutely necessary, but are very important.
 	   (mapc (lambda (args) (apply 'evil-ex-define-cmd args)) mapping))))
     #+end_src
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (evil-ex-define-local-cmds
        'snippet-mode-hook
        '(("wq[uit]" yas-load-snippet-buffer-and-close)
@@ -300,7 +300,7 @@ which aren't absolutely necessary, but are very important.
 	 ("exi[t]"  yas-load-snippet-buffer-and-close)))
     #+end_src
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (evil-ex-define-local-cmds
        'org-src-mode-hook
        '(("wq[uit]" org-edit-src-exit)
@@ -309,7 +309,7 @@ which aren't absolutely necessary, but are very important.
 	 ("exi[t]"  org-edit-src-abort)))
     #+end_src
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (evil-ex-define-local-cmds
        'magit-mode-hook
        '(("wq[uit]" with-editor-finish)
@@ -318,7 +318,7 @@ which aren't absolutely necessary, but are very important.
 	 ("exi[t]"  with-editor-finish)))
     #+end_src
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (evil-ex-define-local-cmds
        'message-mode-hook
        '(("wq[uit]" message-send-and-exit)
@@ -328,7 +328,7 @@ which aren't absolutely necessary, but are very important.
 	 ("q[uit]"  message-kill-buffer)))
     #+end_src
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (evil-ex-define-local-cmds
        'org-capture-mode-hook
        '(("wq[uit]" org-capture-finalize)
@@ -339,7 +339,7 @@ which aren't absolutely necessary, but are very important.
     #+end_src
 
 * <<<recentf>>>: Operate on recent files easily
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package recentf
       :straight nil
       :hook (after-init . recentf-mode)
@@ -354,14 +354,14 @@ which aren't absolutely necessary, but are very important.
   #+end_src
 
 * <<<savehist>>>: Persist history across emacs sessions
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package savehist
       :init
       (savehist-mode))
   #+end_src
 
 * <<<projectile>>>: Project-related helpers ([[https://projectile.mx/][docs]]/[[https://github.com/bbatsov/projectile][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package projectile
       :defer 1
       :general (leader "p" '(projectile-command-map :which-key "projects"))
@@ -370,7 +370,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 * <<<all-the-icons>>> ([[https://github.com/domtronn/all-the-icons.el][source]])
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package all-the-icons
         :defer 0.5)
     #+end_src
@@ -378,7 +378,7 @@ which aren't absolutely necessary, but are very important.
 * Improving Emacs via Elisp Extensions
 ** Add utility libraries
 *** [[https://github.com/magnars/dash.el][dash]] - "a modern list library for emacs"
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package dash
 	:config
 	(with-eval-after-load 'info-look
@@ -387,22 +387,22 @@ which aren't absolutely necessary, but are very important.
     #+end_src
 
 *** [[https://github.com/magnars/s.el][s]] - "the long-lost Emacs string manipulation library"
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package s)
     #+end_src
 
 *** [[https://github.com/rejeep/f.el][f]] - "Modern API for working with files and directories in Emacs"
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package f)
     #+end_src
 
 *** [[http://git.savannah.gnu.org/gitweb/?p=emacs.git;a=blob;f=lisp/emacs-lisp/let-alist.el][let-alist.el]] - slick way of unpacking association lists (=alist=)
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package let-alist)
     #+end_src
 
 ** =backward-line= function, for consistency
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (defun backward-line (&optional N)
       "Move N lines backwards (forward if N is negative)."
       (interactive)
@@ -413,7 +413,7 @@ which aren't absolutely necessary, but are very important.
 ** Better narrowing
    Main function stolen from [[https://github.com/zamansky/using-emacs/blob/master/myinit.org][Mike Zamansky]]:
 
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package better-narrowing
         :no-require t
         :straight nil
@@ -446,7 +446,7 @@ which aren't absolutely necessary, but are very important.
 
 ** =slugify= function
    Stolen from =org-roam= (i.e. =org-roan-node-slug=):
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (defun slugify (title)
        (let ((slug-trim-chars
               '(;; Combining Diacritical Marks https://www.unicode.org/charts/PDF/U0300.pdf
@@ -487,7 +487,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 * Better jumper ([[https://github.com/gilbertw1/better-jumper][github]])
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package better-jumper
       :config
       (require 'better-jumper)
@@ -499,7 +499,7 @@ which aren't absolutely necessary, but are very important.
 
 * Emoji
   Handled natively in Emacs 29:
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package emoji
       :straight nil
       :no-require t
@@ -515,7 +515,7 @@ which aren't absolutely necessary, but are very important.
   #+end_src
 
 *** COMMENT Render emojis via [[https://github.com/iqbalansari/emacs-emojify][emojify]]
-    #+begin_src emacs-lisp
+    #+begin_src elisp
       (use-package emojify
         :hook (after-init . global-emojify-mode)
         :custom
@@ -529,26 +529,26 @@ which aren't absolutely necessary, but are very important.
     #+end_src
 
 * Save view/point location of previously opened files
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (save-place-mode t)
   #+end_src
 
 * Recursive mini-buffers
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (customize-set-variable 'enable-recursive-minibuffers t)
   #+end_src
 
 * <<<so-long-mode>>>: Handle minified files/files with very long line-length gracefully
   Emacs performs badly with very long lines (e.g. minified JSON)
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (global-so-long-mode t)
   #+end_src
 
 * <<<avy>>> ([[https://github.com/abo-abo/avy][github]]) Quick cursor movement
   There's a great explanation of the way to use avy [[http://pragmaticemacs.com/emacs/super-efficient-movement-using-avy/][here]].
 
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package avy
       :custom
       (avy-background nil)
@@ -563,7 +563,7 @@ which aren't absolutely necessary, but are very important.
   #+end_src
 
 * <<<yasnippet>>>: Snippet expansion
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package yasnippet
       :init
       (yas-global-mode 1)
@@ -590,7 +590,7 @@ which aren't absolutely necessary, but are very important.
 
 * <<<ripgrep>>>
   Required for =projectile-ripgrep=, amongst other things:
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package ripgrep)
   #+end_src
 * Window management
@@ -600,7 +600,7 @@ which aren't absolutely necessary, but are very important.
    - Howecver, If thee are greater than two windows, it displays letter hints
      for jumping around, like =vimperator=, =ace-windows=, etc.
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package switch-window
        :config
        (setq switch-window-input-style 'minibuffer)
@@ -617,7 +617,7 @@ which aren't absolutely necessary, but are very important.
 
 * Help / Info
 ** Info configuration
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package info
        :no-require t
        :straight nil
@@ -645,7 +645,7 @@ which aren't absolutely necessary, but are very important.
    The =helpful= package provides, among other things, more context in Help
    buffers.
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package helpful
        ;; :ensure help-fns+
        :general
@@ -661,6 +661,6 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 ** Useful keybinding for =describe-keymap=
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (general-def "C-h C-k" 'describe-keymap)
    #+end_src

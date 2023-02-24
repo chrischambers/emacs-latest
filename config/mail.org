@@ -6,12 +6,12 @@
 #+property: header-args:emacs-lisp :results output silent
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
 * COMMENT MU4E
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package mu4e
      :no-require t
      :straight nil
@@ -90,7 +90,7 @@
 ** TODO the flagged face styles the entire line - you want the same strike-through effect for =trash=
 ** TODO Fix brittle =:load-path= configuration below - only works on OSX, and if notmuch version matches
 * <<<notmuch>>> ([[https://notmuchmail.org/][homepage]])
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package notmuch
        :straight nil
        :load-path "/opt/homebrew/Cellar/notmuch/0.37_2/share/emacs/"
@@ -424,7 +424,7 @@
    #+end_src
 
 * Sending mail
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package sendmail
        :no-require t
        :custom
@@ -441,7 +441,7 @@
 	   "b" '(mml-secure-message-sign-encrypt :which-key "sign + encrypt")))
    #+end_src
 
-   #+begin_src emacs-lisp
+   #+begin_src elisp
      (use-package mml-sec
        :no-require t
        :straight nil

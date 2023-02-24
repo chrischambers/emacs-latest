@@ -9,12 +9,12 @@ This should ideally be the absolute bare minimum required to bootstrap an emacs
 you can work with.
 
 * Enable lexical binding
-#+begin_src emacs-lisp
+#+begin_src elisp
   ;; -*- lexical-binding: t -*-
 #+end_src
 
 * Use [[https://github.com/hrs/sensible-defaults.el][sensible-defaults]]
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (load-file (concat user-emacs-directory "/config/" "sensible-defaults.el"))
     (sensible-defaults/use-all-settings)
     (sensible-defaults/use-all-keybindings)
@@ -22,7 +22,7 @@ you can work with.
   #+end_src
 
 * No littering, please
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package no-littering
       :config
       (require 'no-littering)
@@ -30,19 +30,19 @@ you can work with.
   #+end_src
 
 * Favour unix line-endings
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (set-buffer-file-coding-system 'unix 't)
   #+end_src
 
 * OSX-specific options
   Right option-key should be pass-through (not meta), to allow typing ~#~, for
   example:
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (setq mac-right-option-modifier 'none)
   #+end_src
 
 * <<<which-key>>> ([[https://github.com/justbur/emacs-which-key][github]]): Display leader/prefix hints
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package which-key
       :config
       ;; (which-key-setup-side-window-right-bottom)
@@ -55,7 +55,7 @@ you can work with.
   #+end_src
 
 * <<<general>>> ([[https://github.com/noctuid/general.el][github]]): Evil key binding helper
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package general
       :preface
       (defun kill-other-buffers ()
@@ -201,7 +201,7 @@ you can work with.
   #+end_src
 
 * <<<evil>>> ([[https://github.com/emacs-evil/evil][github]]): Vim-style keybindings
-  #+begin_src emacs-lisp
+  #+begin_src elisp
     (use-package evil
       :demand
       :init
