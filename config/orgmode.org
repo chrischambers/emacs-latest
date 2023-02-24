@@ -220,19 +220,31 @@
     #+end_src
 
 *** Notify when clocking in/out
-    #+begin_src emacs-lisp
-      (with-eval-after-load 'alert
-        (defun my/-notify-clock-in (&optional select start-time)
-          (let* ((body (substring-no-properties org-clock-current-task))
-                 (body (org-export-string-as body 'ascii t)))
-            (alert body :title "Emacs: Task Active" :persistent t)))
-        (defun my/-notify-clock-out ()
-          (alert "Clock into a task to begin working." :title "Emacs: No Task Active" :persistent t))
-        (advice-add #'org-clock-in :after #'my/-notify-clock-in)
-        (advice-add #'org-clock-out :after #'my/-notify-clock-out)
-        ;; Launch a notification at startup to prompt clock-in.
-        (my/-notify-clock-out))
-    #+end_src
+**** <<<alert>>> ([[https://github.com/jwiegley/alert][github]]): Use various growl-like notifiers
+     #+begin_src emacs-lisp
+       (use-package alert
+         :config
+         (if IS-MAC (setq alert-default-style 'osx-notifier)))
+     #+end_src
+
+*** Advise clock-in/out
+      #+begin_src emacs-lisp
+        (with-eval-after-load 'alert
+          (defun my/-notify-clock-in (&optional select start-time)
+            (let* ((body (substring-no-properties org-clock-current-task))
+                   (body (org-export-string-as body 'ascii t)))
+              (alert body :title "Emacs: Task Active" :persistent t)))
+          (defun my/-notify-clock-out ()
+            (alert "Clock into a task to begin working." :title "Emacs: No Task Active" :persistent t))
+          (advice-add #'org-clock-in :after #'my/-notify-clock-in)
+          (advice-add #'org-clock-out :after #'my/-notify-clock-out))
+      #+end_src
+
+*** Launch a notification at startup to prompt clock-in
+     #+begin_src emacs-lisp
+       (with-eval-after-load 'alert
+         (my/-notify-clock-out))
+     #+end_src
 
 *** Define a custom clock/timer sound
     #+begin_src elisp
