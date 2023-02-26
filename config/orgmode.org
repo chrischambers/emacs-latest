@@ -257,7 +257,7 @@
      #+begin_src elisp
        ;; Defaults to using `aplay`, which isn't available on OSX:
        (when IS-MAC
-         (defun my/play-sound (original-fn sound)
+         (defun my/play-sound (sound)
            (cl-destructuring-bind (_ _ file) sound
              (make-process :name (concat "play-sound-" file)
                            :connection-type 'pipe
