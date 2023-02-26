@@ -3,7 +3,7 @@
 #+EMAIL: magma.chambers@gmail.com
 #+LANGUAGE: en-gb
 #+startup: align shrink inlineimages latexpreview content
-#+property: header-args:emacs-lisp :results output silent
+#+property: header-args:elisp :results value silent
 
 * Enable lexical binding
   #+begin_src elisp
