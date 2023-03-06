@@ -97,6 +97,7 @@
 
         "i"   '(:ignore t :major-modes org-mode :which-key "insert")
         "id"  '(org-insert-drawer :which-key "drawer")
+        "ii"  '(org-id-get-create :which-key "id")
         "in"  '(org-add-note :which-key "note")
 
         "k"  '(hydra-clock/body :which-key "klock")
