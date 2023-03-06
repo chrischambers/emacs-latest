@@ -615,6 +615,11 @@ which aren't absolutely necessary, but are very important.
        ('(normal motion) "C-w w" 'other-window))
    #+end_src
 
+* Hydra ([[https://github.com/abo-abo/hydra][github]])
+  A library for building keyboard-driven UIs. Similar to magit-transient.
+  #+begin_src elisp
+    (use-package hydra)
+  #+end_src
 * Help / Info
 ** Info configuration
    #+begin_src elisp
