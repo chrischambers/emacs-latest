@@ -666,6 +666,7 @@
       :init
       (setq org-roam-directory org-directory)
       :custom
+      (org-roam-mode-sections '((org-roam-backlinks-section :unique t) org-roam-reflinks-section))
       (org-default-properties (append
                                org-default-properties
                                '("ROAM_ALIASES" "ROAM_EXCLUDE" "filetags")))
