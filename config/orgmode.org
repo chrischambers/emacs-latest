@@ -461,15 +461,12 @@
           '((sequence
              "TODO(t!)"
              "IDEA(i!)"
-             "FIXME(f!)"
              "NEXT(n!)"
              "IN-PROGRESS(p!)"
              "BLOCKED(b@/!)"
              "TO-DELEGATE(g@/!)"
              "DELEGATED(D@/!)"
-             "FOLLOWUP(F@/!)"
-             "TICKLE(T!)"
-             "THOUGHT(?!)"
+             "THOUGHT(?!)"           ; not sure about this one
              "SOMEDAY-MAYBE(s!)"
              "|"
 
