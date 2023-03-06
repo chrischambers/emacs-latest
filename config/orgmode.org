@@ -413,17 +413,17 @@
       'org-babel-load-languages
       '(
         (C . t)
-        (shell . t)
-        (js . t)
-        (haskell . t)
-        (python . t)
+        (clojure . t)
         (ditaa . t)
         (dot . t)
+        (haskell . t)
+        (js . t)
+        (latex . t)
         (oz . t)
         (plantuml . t)
-        (latex . t)
+        (python . t)
         (scheme . t)
-        (clojure . t)
+        (shell . t)
         (sqlite . t)
         ))
    #+end_src
