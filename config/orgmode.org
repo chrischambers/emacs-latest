@@ -110,7 +110,7 @@
         "po"  '(org-toggle-ordered-property :which-key "toggle ORDERED")
 
         "/"   '(consult-org-heading :which-key "jump to headings")
-        "x"   '(org-export-dispatch :which-key "export")
+        "x"   '(org-export-dispatch :which-key "export...")
 
         "L"   '(org-latex-preview :which-key "LaTeX (toggle render)")
         "R"   '(org-toggle-raw-view :which-key "raw")
