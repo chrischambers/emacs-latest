@@ -160,6 +160,7 @@ you can work with.
         ;; is useful for escaping org-mode markup:
         "ic"   '(insert-char :which-key "character")
         "it"   '(org-time-stamp :which-key "timestamp")
+        "iT"   '(org-time-stamp-inactive :which-key "timestamp (inactive)")
 
         ;; List operations
         "l"    '(:ignore t :which-key "list")
