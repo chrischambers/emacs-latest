@@ -11,7 +11,6 @@
 #+end_src
 
 * COMMENT <<<selectrum>>> ([[https://github.com/raxod502/selectrum][github]])
-
   #+begin_src elisp
     (use-package selectrum
       :init
@@ -24,9 +23,9 @@
       :general
       ('insert selectrum-minibuffer-map
        "C-<return>"    'selectrum-submit-exact-input
-       "C-o"		'embark-export
-       "C-n"		'next-line-or-history-element
-       "C-p"		'previous-line-or-history-element))
+       "C-o"           'embark-export
+       "C-n"           'next-line-or-history-element
+       "C-p"           'previous-line-or-history-element))
   #+end_src
 
 * COMMENT <<<hotfuzz>>> ([[https://github.com/axelf4/hotfuzz][github]])
@@ -129,7 +128,7 @@
 
  #+begin_src elisp
    (use-package consult
-     :init
+     ;; :init
      ;; (fset 'multi-occur #'consult-multi-occur)
      :custom
      (consult-preview-key (list :debounce 0.5 'any))
