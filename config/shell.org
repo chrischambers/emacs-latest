@@ -1,0 +1,23 @@
+#+TITLE: Shell Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:elisp :results value silent
+
+* Enable lexical binding
+  #+begin_src elisp
+    ;; -*- lexical-binding: t -*-
+  #+end_src
+
+* Keybindings
+  #+begin_src elisp
+      (defun my/toggle-comint-autoscroll ()
+        (interactive)
+        (customize-set-variable 'comint-scroll-to-bottom-on-output
+                                (not comint-scroll-to-bottom-on-output )))
+
+      (general-def
+        local-leader eshell-mode-map
+        "a" '(my/toggle-comint-autorscroll :which-key "toggle autoscroll"))
+  #+end_src
