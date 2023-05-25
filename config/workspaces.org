@@ -1,0 +1,32 @@
+#+TITLE: Workspace Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:elisp :results value silent
+
+* <<<perspective>>>: Frames with specific buffers ([[https://github.com/nex3/perspective-el][github]])
+  #+begin_src elisp
+    (use-package perspective
+      :preface
+      (defun kill-other-buffers ()
+        "Kill all other buffers /in current perspective/."
+        (interactive)
+        (mapc 'persp-kill-buffer*
+              (delq (current-buffer)
+                    (org-remove-if-not 'buffer-file-name (persp-current-buffers)))))
+      :custom
+      (persp-mode-prefix-key (kbd "C-x x"))
+      :init
+      (persp-mode)
+      :config
+      (with-eval-after-load 'consult
+        (consult-customize consult--source-buffer :hidden t :default nil)
+        (add-to-list 'consult-buffer-sources persp-consult-source))
+      :general
+      (leader
+        ;; The following line is overridden by consult, if active, but is here as a
+        ;; fallback:
+        "bb" '(persp-switch-to-buffer* :which-key "switch buffer")
+        "bo" 'kill-other-buffers))
+  #+end_src

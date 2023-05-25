@@ -60,6 +60,11 @@
     (my/config-load "config/core.org")
     #+end_src
 
+* [[./config/workspaces.org][Workspace configuration]]
+    #+begin_src elisp
+    (my/config-load "config/workspaces.org")
+    #+end_src
+
 * [[./config/style.org][Styling configuration]]
     #+begin_src elisp
     (my/config-load "config/style.org")
