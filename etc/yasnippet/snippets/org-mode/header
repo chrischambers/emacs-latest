@@ -7,6 +7,5 @@
 #+date: [${4:`(format-time-string "%Y-%m-%d")`}]
 #+language: en-gb
 #+startup: align shrink inlineimages latexpreview content
-#+setupfile: ~/.emacs.d/babel-export-themes/read-the-docs.setup
 
 $0
