@@ -153,6 +153,7 @@
       :custom
       (treemacs-width 30)
       (treemacs-tag-follow-delay 0.5)
+      (treemacs-hide-gitignored-files-mode t)
       :config
       ;; slightly lower the size of treemacs icons
       (treemacs-resize-icons 18)
@@ -164,7 +165,7 @@
       (pcase (cons (not (null (executable-find "git")))
                    (not (null treemacs-python-executable)))
         (`(t . t)
-         (treemacs-git-mode 'extended))
+         (treemacs-git-mode 'deferred))
         (`(t . _)
          (treemacs-git-mode 'simple)))
 
@@ -176,9 +177,12 @@
       (push 'my/treemacs-ignore-pycache treemacs-ignored-file-predicates)
 
       (defun my/treemacs-ignored (filename absolute-path)
-        (string-equal filename "ltximg"))
+        (s-equals? filename "ltximg")
+        (s-contains? ".lsp" filename)
+        (s-contains? ".clj-kondo" filename))
       (push 'my/treemacs-ignored treemacs-ignored-file-predicates)
 
+      ;; (treemacs-display-current-project-exclusively)
       :general
       (leader
         "fd"  '(treemacs :which-key "file-drawer")
