@@ -724,7 +724,7 @@
                    '("\\*org-roam\\*"
                      (display-buffer-in-direction)
                      (direction . right)
-                     (window-width . 0.45)
+                     (window-width . 0.5)
                      (window-height . fit-window-to-buffer)))
 
       :general
