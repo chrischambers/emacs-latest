@@ -160,6 +160,10 @@
  #+end_src
 
 * <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
+  Adds annotations to completion candidates. Cannot change style of candidates
+  themselves, just provides extra information. That extra information isn't able
+  to be filtered via completing-read.
+
 ** All-the-icons completion ([[https://github.com/iyefrat/all-the-icons-completion][source]])
    #+begin_src elisp
      (use-package all-the-icons-completion
