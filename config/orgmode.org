@@ -888,6 +888,8 @@
 
 * <<<org-noter>>> ([[https://github.com/weirdNox/org-noter][github]])
   #+begin_src elisp
+    (use-package djvu)
+
     (use-package org-noter
       :preface
       (defun my/org-noter-precise-note ()
@@ -949,7 +951,7 @@
        (setq-default pdf-view-display-size 'fit-page))
    #+end_src
 
-** <<<nov.el>>>: <<<epub>>> and <<<mobi>>> viewing within Emacs
+** <<<nov.el>>> ([[https://depp.brause.cc/nov.el/][homepage]]): <<<epub>>> and <<<mobi>>> viewing within Emacs
    #+begin_src elisp
      (use-package esxml)
      (use-package nov.el
