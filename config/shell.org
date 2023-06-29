@@ -10,6 +10,11 @@
     ;; -*- lexical-binding: t -*-
   #+end_src
 
+* <<<vterm>>> ([[https://github.com/akermu/emacs-libvterm][github]])
+  #+begin_src elisp
+    (use-package vterm)
+  #+end_src
+
 * Keybindings
   #+begin_src elisp
       (defun my/toggle-comint-autoscroll ()
