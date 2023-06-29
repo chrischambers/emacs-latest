@@ -177,9 +177,11 @@
       (push 'my/treemacs-ignore-pycache treemacs-ignored-file-predicates)
 
       (defun my/treemacs-ignored (filename absolute-path)
-        (s-equals? filename "ltximg")
-        (s-contains? ".lsp" filename)
-        (s-contains? ".clj-kondo" filename))
+        (or
+         (s-equals? filename "latex-images")
+         (s-equals? filename "ltximg")
+         (s-contains? ".lsp" filename)
+         (s-contains? ".clj-kondo" filename)))
       (push 'my/treemacs-ignored treemacs-ignored-file-predicates)
 
       ;; (treemacs-display-current-project-exclusively)
