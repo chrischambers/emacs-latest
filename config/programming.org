@@ -455,6 +455,9 @@
         (setq-default indent-tabs-mode nil)
 
         :custom
+        ;; Don't tell me you're working out the indentation:
+        ;; https://stackoverflow.com/questions/18778894/emacs-24-3-python-cant-guess-python-indent-offset-using-defaults-4
+        (python-indent-guess-indent-offset-verbose nil)
         (elpy-shell-darwin-use-pty t)
         (python-indent-offset 4)
         (python-shell-interpreter "ipython")
