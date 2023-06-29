@@ -529,6 +529,7 @@
         :general
         (local-leader '(inferior-python-mode-map)
           "," '(elpy-shell-switch-to-buffer :which-key "buffer <=> shell jump"))
+        ('normal '(python-mode-map inferior-python-mode-map) "K" 'elpy-doc)
         ('insert python-mode-map "C-<tab>" 'elpy-shell-switch-to-shell)
         ('insert inferior-python-mode-map "C-<tab>" 'elpy-shell-switch-to-buffer)
         (local-leader python-mode-map
