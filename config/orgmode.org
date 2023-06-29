@@ -670,16 +670,11 @@
     (use-package org-roam
       :after org
       :straight (org-roam :type git :host github :repo "chrischambers/org-roam")
-      :config
-      (if IS-MAC
-        ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
-        ;; (customize-set-variable 'org-roam-graph-viewer (executable-find "gapplin"))
-        (customize-set-variable 'org-roam-graph-viewer (executable-find "firefox"))
-        (customize-set-variable 'org-roam-graph-viewer (executable-find "chromium")))
-      ;; (custom-set-faces '(org-roam-link ((t (:inherit org-link :foreground "#61bfff")))))
       :init
       (setq org-roam-directory org-directory)
       :custom
+      ;; Further filtering can be done on backlinks, see:
+      ;; https://github.com/org-roam/org-roam/commit/f9228ce31969cab9ca46ad4890e82e2ea7de3738
       (org-roam-mode-sections '((org-roam-backlinks-section :unique t) org-roam-reflinks-section))
       (org-default-properties (append
                                org-default-properties
@@ -722,6 +717,12 @@
           :if-new (file+head "sources/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)))
       :config
+      (if IS-MAC
+        ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
+        ;; (customize-set-variable 'org-roam-graph-viewer (executable-find "gapplin"))
+        (customize-set-variable 'org-roam-graph-viewer (executable-find "firefox"))
+        (customize-set-variable 'org-roam-graph-viewer (executable-find "chromium")))
+      ;; (custom-set-faces '(org-roam-link ((t (:inherit org-link :foreground "#61bfff")))))
       (org-roam-db-autosync-mode)
       (add-to-list 'display-buffer-alist
                    '("\\*org-roam\\*"
