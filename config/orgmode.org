@@ -267,6 +267,14 @@
          (advice-add 'play-sound :override 'my/play-sound))
      #+end_src
 
+** Attachment configuration
+   #+begin_src elisp
+     (with-eval-after-load 'org 'general
+      (local-leader org-mode-map
+        "+" '(org-attach :which-key "attachments..."))
+      (customize-set-variable 'org-attach-id-dir (concat org-directory "/" "#attachments")))
+   #+end_src
+
 ** <<<org-superstar>>>: Nicer heading indicators
   #+begin_src elisp
     (use-package org-superstar
