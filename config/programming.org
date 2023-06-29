@@ -513,7 +513,10 @@
 *** elpy
     #+begin_src elisp
       (use-package elpy
-        :after python
+        ;; :after python
+        :defer t
+        :init
+        (advice-add 'python-mode :before 'elpy-enable)
         :custom
         (elpy-test-runner 'elpy-test-pytest-runner)
         (elpy-test-pytest-runner-command '("py.test" "--spec"))
@@ -523,9 +526,6 @@
         ;; You almost certainly want this setting on: evaluation can
         ;; fail with a stack overflow or strange characters can appear otherwise:
         (elpy-shell-echo-output nil)
-        :config
-        (elpy-enable)
-
         :general
         (local-leader '(inferior-python-mode-map)
           "," '(elpy-shell-switch-to-buffer :which-key "buffer <=> shell jump"))
