@@ -363,7 +363,7 @@
         (setq my/org-capture-templates (concat org-directory "/" "templates/"))
         (setq my/default-template (concat my/org-capture-templates "default.org"))
         :preface
-        (defun my/get-filepath-from-title (&optional subdirectory)
+        (defun my/get-filepath-from-title (&optional subdirectory date-prefix)
           "Prompt for a title, return filepath located under org-directory.
 
       If `subdirectory' is specified, that will be included in the path.
@@ -375,6 +375,9 @@
                  (path (concat org-directory p))
                  (title (read-string "Title: "))
                  (slug (slugify title))
+                 (slug (if date-prefix
+                           (concat (format-time-string "%Y-%m") "-" slug)
+                         slug))
                  (file-path (concat path slug ".org")))
             (make-directory path t)
             file-path))
@@ -385,6 +388,9 @@
          `(("t" "Task" entry
             (file+headline "todo.org" "Inbox")
             "* TODO %?")
+           ("p" "Project" plain
+            (file (lambda () (my/get-filepath-from-title "projects" t)))
+            (file ,(concat my/org-capture-templates "project.org")))
            ("w" "Word" plain
             (file (lambda () (my/get-filepath-from-title "memex/#words")))
             (file ,(concat my/org-capture-templates "word.org")))
