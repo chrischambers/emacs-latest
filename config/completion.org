@@ -125,6 +125,33 @@
   #+end_src
 
 * <<<consult>>> ([[https://github.com/minad/consult][github]])
+  #+begin_quote
+  Consult provides search and navigation commands based on the Emacs completion
+  function src_elisp{(helpful-function #'completing-read)} . Completion allows
+  you to quickly select an item from a list of candidates.
+
+  [...]
+
+  Some of the Consult commands are enhanced versions of built-in Emacs commands.
+  For example the command consult-imenu presents a flat list of the Imenu with
+  live preview, grouping and narrowing.
+  #+end_quote
+
+  If =persp-mode= is active, we use a different command for consult-buffer:
+  (for dynamic-loading technique, see: [[https://stackoverflow.com/questions/7790382/how-to-determine-whether-a-package-is-installed-in-elisp][source]])
+
+  #+begin_src elisp
+    (if (require 'persp-mode nil 'noerror)
+      (defun my/consult-buffer ()
+        "`consult-buffer' with buffers provided by persp."
+        (interactive)
+        (with-persp-buffer-list ()
+                                (consult-buffer)))
+        (defun my/consult-buffer ()
+          "`consult-buffer' wrapper."
+          (interactive)
+          (consult-buffer)))
+  #+end_src
 
  #+begin_src elisp
    (use-package consult
@@ -137,7 +164,8 @@
      :general
      ;; ('(insert motion) "C-c C-o" 'consult-multi-occur)
      (leader
-       "bb"   '(consult-buffer :which-key "switch buffer")
+       "bB"   '(consult-buffer :which-key "switch buffer (all)")
+       "bb"   '(my/consult-buffer :which-key "switch buffer (workspace)")
 
        "fr"   '(consult-recent-file :which-key "recent")
        "lk"   '(consult-yank-pop :which-key "kill-ring")

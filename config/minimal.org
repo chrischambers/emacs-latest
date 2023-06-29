@@ -94,9 +94,6 @@ you can work with.
         "."    '(repeat-complex-command :which-key "repeat command")
         "!"    '(with-editor-async-shell-command :which-key "async sh command")
 
-        ;; Workspace operations
-        "TAB"  '(:ignore t :which-key "workspaces")
-
         ;; Application operations
         "a"    '(:ignore t :which-key "applications")
         "ad"   '(dired :which-key "dired")

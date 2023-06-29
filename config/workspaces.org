@@ -45,28 +45,77 @@
       display-buffer-pop-up-window.)
   #+end_quote
 
-* <<<perspective>>>: Frames with specific buffers ([[https://github.com/nex3/perspective-el][github]])
+* <<<persp-mode>>>: Frames with specific buffers ([[https://github.com/Bad-ptr/persp-mode.el][github]])
   #+begin_src elisp
-    (use-package perspective
+    (use-package persp-mode
       :preface
       (defun kill-other-buffers ()
         "Kill all other buffers /in current perspective/."
         (interactive)
-        (mapc 'persp-kill-buffer*
+        (persp-kill-buffer
               (delq (current-buffer)
-                    (org-remove-if-not 'buffer-file-name (persp-current-buffers)))))
-      :custom
-      (persp-mode-prefix-key (kbd "C-x x"))
+                    (org-remove-if-not 'buffer-file-name (persp-buffer-list)))))
+      ;; :custom
+      ;; (persp-mode-prefix-key (kbd "C-x x"))
       :init
-      (persp-mode)
-      :config
-      (with-eval-after-load 'consult
-        (consult-customize consult--source-buffer :hidden t :default nil)
-        (add-to-list 'consult-buffer-sources persp-consult-source))
+      (persp-mode 1)
+      ;; :config
+      ;; (with-eval-after-load 'consult
+      ;;   (consult-customize consult--source-buffer :hidden t :default nil)
+      ;;   (add-to-list 'consult-buffer-sources persp-consult-source))
+
+      ;; :custom
+      ;; (persp-init-new-frame-behaviour-override t)
+      ;; (persp-emacsclient-init-frame-behaviour-override t)
       :general
       (leader
+        ;; Workspace operations
+        "TAB"   '(:ignore t :which-key "workspaces")
+        "TAB s" '(persp-frame-switch :which-key "switch")
+        ;; "TAB S" '(persp-window-switch :which-key "switch (just for window)")
+        "TAB b" '(:ignore t :which-key "buffer")
+        "TAB ba" '(persp-add-buffer :which-key "add")
+        "TAB br" '(persp-remove-buffer :which-key "remove")
+        "TAB n" '(persp-next :which-key "next")
+        "TAB p" '(persp-prev :which-key "prev")
+        "TAB r" '(persp-rename :which-key "rename")
+
         ;; The following line is overridden by consult, if active, but is here as a
         ;; fallback:
-        "bb" '(persp-switch-to-buffer* :which-key "switch buffer")
-        "bo" 'kill-other-buffers))
+        "bb" '(persp-switch-to-buffer :which-key "switch buffer")
+        ;; Override kill-other-buffers
+        "bo" '(kill-other-buffers :which-key "only this buffer")))
+  #+end_src
+
+** COMMENT projectile integration
+  #+begin_src elisp
+    (use-package persp-mode-projectile-bridge
+      :config
+      (with-eval-after-load 'projectile
+        (add-hook
+         'persp-mode-projectile-bridge-mode-hook
+         #'(lambda ()
+             (if persp-mode-projectile-bridge-mode
+                 (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+               (persp-mode-projectile-bridge-kill-perspectives))))
+        (add-hook 'after-init-hook #'(lambda () (persp-mode-projectile-bridge-mode 1)) t)))
+  #+end_src
+
+** Fix =evil-alternate-buffer= to work only for current workspace
+  #+begin_src elisp
+    (defun +workspaces--evil-alternate-buffer-a (&optional window)
+      "Make `evil-alternate-buffer' ignore buffers outside the current workspace."
+      (let* ((prev-buffers
+              (if persp-mode
+                  (cl-remove-if-not #'persp-contain-buffer-p (window-prev-buffers)
+                                    :key #'car)
+                (window-prev-buffers)))
+             (head (car prev-buffers)))
+        (if (eq (car head) (window-buffer window))
+            (cadr prev-buffers)
+          head)))
+
+    (advice-add #'evil-alternate-buffer
+                :override
+                #'+workspaces--evil-alternate-buffer-a)
   #+end_src
