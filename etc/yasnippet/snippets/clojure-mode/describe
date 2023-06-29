@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Describe
+# key: desc
+# --
+(describe
+        "$1"
+                $0)
