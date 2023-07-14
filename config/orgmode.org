@@ -950,7 +950,7 @@
        :straight (pdf-tools :type git :host github :repo "vedang/pdf-tools")
        :custom
        ;; more fine-grained zooming
-       (pdf-view-resize-factor 1.1)
+       (pdf-view-resize-factor 1.05)
 
        :config
        ;; Install dependencies:
