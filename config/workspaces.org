@@ -122,3 +122,17 @@
                 :override
                 #'+workspaces--evil-alternate-buffer-a)
   #+end_src
+
+* workgroups2 ([[https://github.com/pashinin/workgroups2][github]])
+  #+begin_src elisp
+    (use-package workgroups2
+      :config
+      (require 'workgroups2)
+      :general
+      (leader
+        ;; Workspace operations
+        "TAB"   '(:ignore t :which-key "workspaces")
+        "TAB s" '(wg-create-workgroup :which-key "save")
+        "TAB o" '(wg-open-workgroup :which-key "open")
+        "TAB d" '(wg-kill-workgroup :which-key "delete")))
+  #+end_src
