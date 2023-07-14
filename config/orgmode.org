@@ -1125,8 +1125,9 @@
 
 * org-roam-refactoring (experimental)
   #+begin_src elisp
-    (require 'org-roam-refactoring)
+    (load "org-roam-refactoring.el")
   #+end_src
+
 ** Add link type for going directly to ~point~ value
    #+begin_src elisp
      (defun my/open-orgmode-id-at-point (id pos)

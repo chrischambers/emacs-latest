@@ -289,9 +289,11 @@ Implementation stolen from org-roam-db-map-links."
                            (find-file-noselect file))))
            (with-current-buffer buffer
              (goto-char pos)
-             (let* ((headline (my/get-parent-headline))
-                    (new-pos (org-element-property :begin headline)))
-               (move-marker (make-marker) new-pos buffer))))))))
+             (let* ((parent-headline (my/get-parent-headline))
+                    (new-pos (org-element-property :begin parent-headline)))
+               (if parent-headline
+                   (move-marker (make-marker) new-pos buffer)
+                   (move-marker (make-marker) pos buffer)))))))))
 
 (defun my/get-parent-headline ()
   (let ((result (org-element-lineage (org-element-context) 'headline)))
@@ -331,12 +333,12 @@ Implementation stolen from org-roam-db-map-links."
 
 (defun my/org-roam-row-to-transclusion-block (row)
   (pcase row
-    (`(,title ,source ,pos ,dest, file)
+    (`(,title ,source ,pos ,dest ,file)
      (let ((link (format "[[id@point:%s:@%s][%s]]"
                          source
                          pos
                          title)))
-       (format "#+transclude: %s :level 2\n" link)))))
+       (format "#+transclude: %s :level 2 :exclude-elements \"drawer keyword\"\n" link)))))
 
 (defun my/org-roam-row-to-link-text (row)
   (cl-destructuring-bind (title id pos search-term _) row
@@ -347,15 +349,19 @@ Implementation stolen from org-roam-db-map-links."
             pos)))
 
 (defun my/render-org-roam-row (row)
-  (format "%s\n  %s" (my/org-roam-row-to-link-text row) (my/org-roam-row-to-transclusion-block row)))
+  (format "%s\n %s"
+          (my/org-roam-row-to-link-text row)
+          (my/org-roam-row-to-transclusion-block row)))
 
 (defun org-roam-refactor ()
+  "Easily update all the backlinks for a given node."
   (interactive)
   (let* ((node (org-roam-node-read))
          (id (org-roam-node-id node))
          (new-buffer (get-buffer-create org-roam-refactoring-buffer-name))
-         (rows (org-roam-db-query (format
-                                   "SELECT n.title, l.source, l.pos, l.dest, n.file
+         (rows (org-roam-db-query
+                (format
+                 "SELECT n.title, l.source, l.pos, l.dest, n.file
                      FROM nodes as n, links as l
                      WHERE n.id = l.source AND l.type = '\"id\"'
                      AND l.dest = '\"%s\"'" id))))
@@ -363,4 +369,5 @@ Implementation stolen from org-roam-db-map-links."
     (erase-buffer)
     (org-roam-refactoring-mode)
     (insert (s-join "\n" (mapcar #'my/render-org-roam-row rows)))
-    (goto-char (point-min))))
+    (goto-char (point-min))
+    (org-transclusion-add-all)))
