@@ -206,7 +206,9 @@
     (use-package treemacs-icons-dired
       :after treemacs dired
       :config (treemacs-icons-dired-mode))
-    (use-package treemacs-persp
-      :after treemacs persp-mode
-      :config (treemacs-set-scope-type 'Perspectives))
+
+    (if (require 'persp-mode nil 'noerror)
+        (use-package treemacs-persp
+          :after treemacs persp-mode
+          :config (treemacs-set-scope-type 'Perspectives)))
   #+end_src

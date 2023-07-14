@@ -45,7 +45,7 @@
       display-buffer-pop-up-window.)
   #+end_quote
 
-* <<<persp-mode>>>: Frames with specific buffers ([[https://github.com/Bad-ptr/persp-mode.el][github]])
+* COMMENT <<<persp-mode>>>: Frames with specific buffers ([[https://github.com/Bad-ptr/persp-mode.el][github]])
   #+begin_src elisp
     (use-package persp-mode
       :preface
