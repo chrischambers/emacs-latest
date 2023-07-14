@@ -669,3 +669,15 @@ which aren't absolutely necessary, but are very important.
    #+begin_src elisp
      (general-def "C-h C-k" 'describe-keymap)
    #+end_src
+
+* DWIM Shell Commands ([[https://github.com/xenodium/dwim-shell-command][github]])
+  #+begin_src elisp
+    (use-package dwim-shell-command
+      :bind (([remap shell-command] . dwim-shell-command)
+             :map dired-mode-map
+             ([remap dired-do-async-shell-command] . dwim-shell-command)
+             ([remap dired-do-shell-command] . dwim-shell-command)
+             ([remap dired-smart-shell-command] . dwim-shell-command))
+      :config
+      (require 'dwim-shell-commands))
+  #+end_src

@@ -105,6 +105,41 @@
     #+end_src
 
 * Misc
+** <<<whitespace-cleanup-mode>>> ([[https://github.com/purcell/whitespace-cleanup-mode][github]]): Intelligently remove extra whitespace
+
+   #+begin_quote
+   whitespace-cleanup-mode is a minor mode which calls whitespace-cleanup before
+   saving the current buffer, but only if the whitespace in the buffer was
+   initially clean. It determines this by quickly checking to see if
+   whitespace-cleanup would have any effect on the buffer.
+   #+end_quote
+
+   #+begin_src elisp
+     (use-package whitespace-cleanup-mode
+       :hook (after-init . global-whitespace-cleanup-mode))
+   #+end_src
+
+** origmai
+   #+begin_src elisp
+     (use-package origami
+       :hook (after-init . global-origami-mode))
+   #+end_src
+
+* Prose
+  - [X] [[https://www.masteringemacs.org/article/wordsmithing-in-emacs][Wordsmithing in Emacs - Mastering Emacs]]
+
+  #+begin_src elisp
+    (use-package dictionary-config
+      :no-require t
+      :straight nil
+      :general
+      (leader
+        "d"    '(:ignore t :which-key "dict/spell")
+        "ds"   '(ispell-word :which-key "spellcheck")
+        "df"   '(dictionary-search :which-key "dictionary (find)")
+        "dd"   '(dictionary-lookup-definition :which-key "dictionary (point)")))
+  #+end_src
+
 ** <<<flyspell>>>: Spell-checker
    #+begin_src elisp
      (use-package flyspell
@@ -147,4 +182,11 @@
    #+begin_src elisp
      (use-package origami
        :hook (after-init . global-origami-mode))
+   #+end_src
+
+** COMMENT hyperbole ([[https://github.com/rswgnu/hyperbole][github]])
+   #+begin_src elisp
+     (use-package hyperbole
+       :config
+       (hyperbole-mode 1))
    #+end_src
