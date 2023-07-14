@@ -275,6 +275,38 @@
       (customize-set-variable 'org-attach-id-dir (concat org-directory "/" "#attachments")))
    #+end_src
 
+** Add link type for going directly to ~point~ value
+   #+begin_src elisp
+     (defun my/open-orgmode-id-at-point (id pos)
+       "Uses roam database to find ID, then opens file and updates point position"
+       (let* ((id (s-chop-prefix "id:" id))
+              (pos (if (stringp pos) (string-to-number pos) pos))
+              (maybe-pair (org-roam-id-find id)))
+         (if (consp maybe-pair)
+             (progn
+               ;; (message "pair: %s" maybe-pair)
+               (find-file (car maybe-pair))
+               (goto-char pos))
+           (message "Could not find id '%s' in database" id))))
+
+     (defun my/open-orgmode-file-at-point (path pos)
+       (let ((path (s-chop-prefix "file:" path))
+             (pos (if (stringp pos) (string-to-number pos) pos)))
+         ;; (message "path: %s, pos: %s" path pos)
+         (find-file path)
+         (goto-char pos)))
+
+     (defun my/id@point (pathstring)
+       (apply #'my/open-orgmode-id-at-point (s-split ":@" pathstring)))
+
+     (defun my/file@point (pathstring)
+       (apply #'my/open-orgmode-file-at-point (s-split ":@" pathstring)))
+
+     (with-eval-after-load 'org 'org-roam
+       (org-link-set-parameters "id@point" :follow #'my/id@point)
+       (org-add-link-type "file@point" #'my/file@point))
+   #+end_src
+
 ** <<<org-superstar>>>: Nicer heading indicators
   #+begin_src elisp
     (use-package org-superstar
