@@ -76,8 +76,11 @@
         "TAB b" '(:ignore t :which-key "buffer")
         "TAB ba" '(persp-add-buffer :which-key "add")
         "TAB br" '(persp-remove-buffer :which-key "remove")
+
         "TAB n" '(persp-next :which-key "next")
         "TAB p" '(persp-prev :which-key "prev")
+
+        "TAB d" '(persp-kill :which-key "delete")
         "TAB r" '(persp-rename :which-key "rename")
 
         ;; The following line is overridden by consult, if active, but is here as a
