@@ -255,6 +255,13 @@
          "eb" '(mine/eval-region-or-buffer :which-key "buffer/region")))
    #+end_src
 
+** Testing symex
+   #+begin_src elisp
+     (use-package symex
+       :config
+       (symex-initialize)
+       (global-set-key (kbd "s-;") 'symex-mode-interface))
+   #+end_src
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
    #+begin_src elisp
      (use-package eval-sexp-fu)
@@ -327,7 +334,23 @@
 ** Clojure
    #+begin_src elisp
      (use-package clojure-mode
-       ;; :preface
+       :preface
+       (defun my/clojure-test-jump ()
+         "Jumps back and forth between an implementation and its corresponding test file."
+         (interactive)
+         (let* ((fname (buffer-file-name (current-buffer)))
+                (clojure-file? (s-ends-with? ".clj" fname))
+                (test-file? (s-ends-with? "_test.clj" fname))
+                (other-file (if test-file?
+                              (replace-regexp-in-string
+                               "/test/\\([^.]+\\)_test\\.clj$"
+                               "/src/\\1.clj" fname)
+                              (replace-regexp-in-string
+                               "/src/\\([^.]+\\)\\.clj$"
+                               "/test/\\1_test.clj" fname))))
+           (when clojure-file?
+               (find-file other-file))))
+
        ;; (defun my/clojure-setup ()
        ;;   (interactive)
        ;;   (font-lock-add-keywords
@@ -351,8 +374,15 @@
        (cider-show-error-buffer t)
        (cider-auto-select-error-buffer t)
 
-       ;; Where to store the cider history.
-       (cider-repl-history-file (concat user-emacs-directory "cider-history"))
+       (cider-popup-stacktraces nil)
+       (cider-repl-popup-stacktraces t)
+       (nrepl-hide-special-buffers t)
+
+       (cider-repl-use-pretty-printing t)
+       (cider-font-lock-dynamically nil)
+
+       ;; Where to store the cider history (no-littering).
+       (cider-repl-history-file (concat user-emacs-directory "var/" "cider-history"))
        ;; Wrap when navigating history.
        (cider-repl-wrap-history t)
        :general
@@ -373,6 +403,7 @@
                 "t"    '(:ignore t :major-modes clojure-mode :which-key "test")
                 "ta"   '(cider-test-run-project-tests :which-key "all")
                 "tc"   '(cider-test-run-test :which-key "current")
+                "tj"   '(my/clojure-test-jump :which-key "jump")
                 "tr"   '(cider-test-rerun-failed-tests :which-key "re-run failed"))
        (local-leader cider-repl-mode-map
                 "e"    '(:ignore t  :major-modes cider-repl-mode :which-key "eval")
