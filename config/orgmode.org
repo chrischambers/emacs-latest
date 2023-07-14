@@ -553,7 +553,10 @@
      (require 's)
      (require 'dash)
 
-     (defcustom org-agenda-blacklist '("#old" "#archives/completed_tasks.org$")
+     (defcustom org-agenda-blacklist
+       '(
+         ;; "#old"
+         "#archives/completed_tasks.org$")
        "patterns to exclude from org-agenda path names")
 
      (defvar org-todo-states (-map (lambda (s) (car (s-split "(" s)))
