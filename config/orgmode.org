@@ -887,9 +887,19 @@
 
 * <<<org-noter>>> ([[https://github.com/weirdNox/org-noter][github]])
   #+begin_src elisp
-    (use-package djvu)
+    (use-package djvu
+      :general
+      (('motion normal emacs) djvu-read-mode-map
+       "C-n" 'djvu-next-page
+       "C-p" 'djvu-prev-page
+       "H"   'djvu-history-backward
+       "L"   'djvu-history-forward))
 
     (use-package org-noter
+      ;; pin to old version until bug with org-pdftools resolved, see:
+      ;; https://github.com/fuxialexander/org-pdftools/issues/93
+      ;; :straight (org-noter :type git :host github :repo "weirdNox/org-noter")
+
       :preface
       (defun my/org-noter-precise-note ()
         (interactive)
@@ -956,7 +966,13 @@
      (use-package nov.el
        :config
        (my/keymap-fix-with-evil-mode 'nov-mode)
-       :mode ("\\.\\(epub\\|mobi\\)\\'" . nov-mode))
+       :mode ("\\.\\(epub\\|mobi\\)\\'" . nov-mode)
+       :general
+       ('(motion normal emacs) nov-mode-map
+         "C-n" 'nov-next-document
+         "C-p" 'nov-previous-document
+         "H"   'nov-history-back
+         "L"   'nov-history-forward))
    #+end_src
 
 ** <<<org-pdftools>>> ([[https://github.com/fuxialexander/org-pdftools][github]])
