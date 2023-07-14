@@ -433,6 +433,7 @@
         (haskell . t)
         (js . t)
         (latex . t)
+        (org . t)
         (oz . t)
         (plantuml . t)
         (python . t)
