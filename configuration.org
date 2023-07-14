@@ -125,6 +125,12 @@
        :hook (after-init . global-origami-mode))
    #+end_src
 
+** COMMENT hyperbole ([[https://github.com/rswgnu/hyperbole][github]])
+   #+begin_src elisp
+     (use-package hyperbole
+       :config
+       (hyperbole-mode 1))
+   #+end_src
 * Prose
   - [X] [[https://www.masteringemacs.org/article/wordsmithing-in-emacs][Wordsmithing in Emacs - Mastering Emacs]]
 
@@ -182,11 +188,4 @@
    #+begin_src elisp
      (use-package origami
        :hook (after-init . global-origami-mode))
-   #+end_src
-
-** COMMENT hyperbole ([[https://github.com/rswgnu/hyperbole][github]])
-   #+begin_src elisp
-     (use-package hyperbole
-       :config
-       (hyperbole-mode 1))
    #+end_src
