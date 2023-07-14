@@ -32,7 +32,7 @@
          (first (car (-flatten links))))
     (org-roam-node-from-id first)))
 
-;; Alternatively, use the extracted body to avoid the needless database query checK:
+;; Alternatively, use the extracted body to avoid the needless database query check:
 (defun wibble ()
   (interactive)
   (let* ((node (org-roam-node-read))
@@ -61,8 +61,8 @@
       (message "%s" from-node))))
 
 ;; ------------------------------------------------------------------------------
-; source: file link is in
-; dest: where file is going
+; source: file link is located in
+; dest: where link is going to
 (defun wibble ()
   (interactive)
   (let* ((to-node (org-roam-node-read))
@@ -84,10 +84,10 @@
     (while (re-search-forward org-link-bracket-re nil t)
       (org-roam-link-replace-at-point))))
 
-;; "Run fns over all links in the current buffer."
 (defun my/print-link (link)
   (message "%s" link))
 
+;; "Run fns over all links in the current buffer."
 ;; (org-roam-db-map-links (list #'my/print-link))
 
 ;; (link (:type id
@@ -210,17 +210,9 @@ Implementation stolen from org-roam-db-map-links."
             (push link results)))))
   results))
 
-(defun get-link-property (key link)
-  (let* ((link (cadr link))
-         (index (-elem-index key link)))
-    (when index
-      (let* ((value-index (+ 1 index))
-             (value (nth value-index link)))
-        value))))
-
 (defun org-roam-refactor/buffer-get-links-to-id (id)
   (let ((links (org-roam-refactor/buffer-get-links)))
-    (--filter (string= (get-link-property :path it) id) links)))
+    (--filter (s-contains? id (org-element-property :path it) id) links)))
 
 (defun org-roam-refactor/get-links-to-id (id)
   (let* ((links (org-roam-db-query
@@ -248,6 +240,11 @@ Implementation stolen from org-roam-db-map-links."
 
 ;;; ------------------------------------------------------------------------------
 (require 'org-roam-node)
+
+(defcustom org-roam-refactoring-buffer-name "*org-roam-refactoring*"
+  "The name of the special org-roam-refactoring buffer"
+  :group 'org-roam-refactoring
+  :type 'string)
 
 (defun my/org-roam-aliases ()
   ;; (mapcar (lambda (node) `(,(org-roam-node-title node) . ,node)) (org-roam-node-list)))
@@ -284,16 +281,30 @@ Implementation stolen from org-roam-db-map-links."
 
 (advice-add #'org-id-find :override #'my/org-roam-id-find)
 
+(defun my/marker-for-parent-headline (id pos)
+  (pcase (my/org-roam-id-find id nil pos)
+    (`(,file . ,pos)
+     (unwind-protect
+         (let ((buffer (or (find-buffer-visiting file)
+                           (find-file-noselect file))))
+           (with-current-buffer buffer
+             (goto-char pos)
+             (let* ((headline (my/get-parent-headline))
+                    (new-pos (org-element-property :begin headline)))
+               (move-marker (make-marker) new-pos buffer))))))))
+
+(defun my/get-parent-headline ()
+  (let ((result (org-element-lineage (org-element-context) 'headline)))
+    result))
+
 (defun org-transclusion-add-org-id-at-point (link plist)
   "Return a list for Org-ID LINK object and PLIST.
     Return nil if not found."
-  (pp link)
-  (pp plist)
   (when (string= "id@point" (org-element-property :type link))
     (let* ((pair (s-split ":@" (org-element-property :path link)))
            (id (car pair))
            (pos (string-to-number (cadr pair)))
-           (mkr (ignore-errors (org-id-find id t pos)))
+           (mkr (my/marker-for-parent-headline id pos))
            (payload '(:tc-type "org-id")))
       (if mkr
           (append payload (org-transclusion-content-org-marker mkr plist))
@@ -338,11 +349,11 @@ Implementation stolen from org-roam-db-map-links."
 (defun my/render-org-roam-row (row)
   (format "%s\n  %s" (my/org-roam-row-to-link-text row) (my/org-roam-row-to-transclusion-block row)))
 
-(defun my/roam-backlinks ()
+(defun org-roam-refactor ()
   (interactive)
   (let* ((node (org-roam-node-read))
          (id (org-roam-node-id node))
-         (new-buffer (get-buffer-create "org-roam-refactor"))
+         (new-buffer (get-buffer-create org-roam-refactoring-buffer-name))
          (rows (org-roam-db-query (format
                                    "SELECT n.title, l.source, l.pos, l.dest, n.file
                      FROM nodes as n, links as l
