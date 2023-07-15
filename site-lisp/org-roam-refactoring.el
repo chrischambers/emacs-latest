@@ -64,7 +64,6 @@
 ; source: file link is located in
 ; dest: where link is going to
 (defun wibble ()
-  (interactive)
   (let* ((to-node (org-roam-node-read))
          (node-id (org-roam-node-id to-node))
          (links (org-roam-db-query
@@ -296,8 +295,7 @@ Implementation stolen from org-roam-db-map-links."
                    (move-marker (make-marker) pos buffer)))))))))
 
 (defun my/get-parent-headline ()
-  (let ((result (org-element-lineage (org-element-context) 'headline)))
-    result))
+  (org-element-lineage (org-element-context) 'headline))
 
 (defun org-transclusion-add-org-id-at-point (link plist)
   "Return a list for Org-ID LINK object and PLIST.
