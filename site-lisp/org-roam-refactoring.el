@@ -288,14 +288,11 @@ Implementation stolen from org-roam-db-map-links."
                            (find-file-noselect file))))
            (with-current-buffer buffer
              (goto-char pos)
-             (let* ((parent-headline (my/get-parent-headline))
-                    (new-pos (org-element-property :begin parent-headline)))
-               (if parent-headline
-                   (move-marker (make-marker) new-pos buffer)
-                   (move-marker (make-marker) pos buffer)))))))))
+             (org-back-to-heading-or-point-min t)
+             (move-marker (make-marker) (point) buffer)))))))
 
-(defun my/get-parent-headline ()
-  (org-element-lineage (org-element-context) 'headline))
+;; (defun my/get-parent-headline ()
+;;   (org-element-lineage (org-element-context) 'headline))
 
 (defun org-transclusion-add-org-id-at-point (link plist)
   "Return a list for Org-ID LINK object and PLIST.
@@ -313,7 +310,8 @@ Implementation stolen from org-roam-db-map-links."
                  (point) (org-current-line)))
         nil))))
 
-(push #'org-transclusion-add-org-id-at-point org-transclusion-add-functions)
+(with-eval-after-load 'org-transclusion
+  (push #'org-transclusion-add-org-id-at-point org-transclusion-add-functions))
 
 (defvar org-roam-refactoring-mode-map nil "Keymap for `org-roam-refactoring-mode'")
 
@@ -329,7 +327,56 @@ Implementation stolen from org-roam-db-map-links."
   (general-def 'insert org-roam-refactoring-mode-map
     "TAB" #'org-roam-refactoring-silly-keybinding))
 
-(defun my/org-roam-row-to-transclusion-block (row)
+;; ---------------------------------------------------------------------------
+(defun orr/get-link-at-point ()
+  (let ((node (org-element-context)))
+    (when (orr/org-element-is-link? node)
+      node)))
+
+(defun orr/org-element-is-link? (node)
+  (string= (org-element-type node) "link"))
+
+(defun orr/org-element-get-bounds (node)
+  (list (org-element-begin node)
+        (org-element-end node)))
+
+(defun orr/org-link-get-raw-link (node)
+  (org-element-property :raw-link node))
+
+(defun orr/org-link-get-description (node)
+  (buffer-substring-no-properties
+   (org-element-property :contents-begin node)
+   (org-element-property :contents-end node)))
+
+(defun orr/change-link-target-with-id:link (node id)
+  (let ((link (if (s-starts-with? "id:" id) id (format "id:%s" id))))
+    (org-link-make-string link (orr/org-link-get-description node))))
+
+(defun orr/change-link-description (node description)
+  (org-link-make-string (orr/org-link-get-raw-link node) description))
+
+(defun orr/replace-link-target-with-id:link ()
+  (interactive)
+  (when-let* ((node (orr/get-link-at-point))
+              (remove (orr/org-element-get-bounds node))
+              (id (org-roam-node-id (org-roam-node-read)))
+              (new-link (orr/change-link-target-with-id:link node id)))
+    (when remove (apply #'delete-region remove))
+    (insert new-link)))
+
+(defun orr/replace-link-description ()
+  (interactive)
+  (when-let* ((node (orr/get-link-at-point))
+              (remove (orr/org-element-get-bounds node))
+              (old-description (orr/org-link-get-description node))
+              (description (read-string "New description: " old-description))
+              (new-link (orr/change-link-description node description)))
+    (when remove (apply #'delete-region remove))
+    (insert new-link)))
+
+;; ---------------------------------------------------------------------------
+
+(defun orr/org-roam-row-to-transclusion-block (row)
   (pcase row
     (`(,title ,source ,pos ,dest ,file)
      (let ((link (format "[[id@point:%s:@%s][%s]]"
@@ -338,7 +385,7 @@ Implementation stolen from org-roam-db-map-links."
                          title)))
        (format "#+transclude: %s :level 2 :exclude-elements \"drawer keyword\"\n" link)))))
 
-(defun my/org-roam-row-to-link-text (row)
+(defun orr/org-roam-row-to-link-text (row)
   (cl-destructuring-bind (title id pos search-term _) row
     (format "* [[id@point:%s:@%s][%s]] (%s)"
             id
@@ -346,26 +393,49 @@ Implementation stolen from org-roam-db-map-links."
             title
             pos)))
 
-(defun my/render-org-roam-row (row)
+(defun orr/render-org-roam-row (row)
   (format "%s\n %s"
-          (my/org-roam-row-to-link-text row)
-          (my/org-roam-row-to-transclusion-block row)))
+          (orr/org-roam-row-to-link-text row)
+          (orr/org-roam-row-to-transclusion-block row)))
+
+(defun orr/-get-id-from-node-property (node)
+  (when (string= (org-element-property :key node) "ID")
+    (org-element-property :value node)))
+
+(defun orr/get-id-from-parent-section ()
+  (let* ((section (org-ml-parse-this-section))
+         (ids (org-element-map
+                  section
+                  'node-property
+                #'orr/-get-id-from-node-property))
+         (id (car ids)))
+    id))
 
 (defun org-roam-refactor ()
   "Easily update all the backlinks for a given node."
   (interactive)
-  (let* ((node (org-roam-node-read))
-         (id (org-roam-node-id node))
+  (let* ((link (orr/get-link-at-point))
+         (parent-id (orr/get-id-from-parent-section))
+         (id (cond
+              (link (let* ((initial-input (when link (orr/org-link-get-description link)))
+                           (node (org-roam-node-read initial-input))
+                           (id (org-roam-node-id node)))
+                      id))
+              (parent-id parent-id)
+              (t (let* ((node (org-roam-node-read))
+                        (id (org-roam-node-id node)))
+                   id))))
          (new-buffer (get-buffer-create org-roam-refactoring-buffer-name))
          (rows (org-roam-db-query
                 (format
                  "SELECT n.title, l.source, l.pos, l.dest, n.file
                      FROM nodes as n, links as l
                      WHERE n.id = l.source AND l.type = '\"id\"'
-                     AND l.dest = '\"%s\"'" id))))
+                     AND l.dest = '\"%s\"'
+                     ORDER BY n.title" id))))
     (switch-to-buffer new-buffer)
     (erase-buffer)
     (org-roam-refactoring-mode)
-    (insert (s-join "\n" (mapcar #'my/render-org-roam-row rows)))
+    (insert (s-join "\n" (mapcar #'orr/render-org-roam-row rows)))
     (goto-char (point-min))
     (org-transclusion-add-all)))

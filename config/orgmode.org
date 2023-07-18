@@ -1128,6 +1128,10 @@
     (load "org-roam-refactoring.el")
   #+end_src
 
+** Use org-ml for some operations
+   #+begin_src elisp
+     (use-package org-ml)
+   #+end_src
 ** Add link type for going directly to ~point~ value
    #+begin_src elisp
      (defun my/open-orgmode-id-at-point (id pos)
