@@ -291,9 +291,6 @@ Implementation stolen from org-roam-db-map-links."
              (org-back-to-heading-or-point-min t)
              (move-marker (make-marker) (point) buffer)))))))
 
-;; (defun my/get-parent-headline ()
-;;   (org-element-lineage (org-element-context) 'headline))
-
 (defun org-transclusion-add-org-id-at-point (link plist)
   "Return a list for Org-ID LINK object and PLIST.
     Return nil if not found."
@@ -318,20 +315,35 @@ Implementation stolen from org-roam-db-map-links."
 (define-derived-mode org-roam-refactoring-mode org-mode "org-roam-refactoring"
   (add-hook 'completion-at-point-functions 'org-roam-refactoring-completion-at-point nil 'local))
 
-(defun org-roam-refactoring-silly-keybinding ()
+(defun org-roam-refactoring-kill-buffer-ask ()
   (interactive)
-  (message "Hello!"))
+  (when-let ((buffer (get-buffer org-roam-refactoring-buffer-name)))
+    (kill-buffer-ask buffer)))
+
+(defun orr-refresh-transclusion ()
+  (interactive)
+  (if (org-transclusion-within-transclusion-p)
+      (org-transclusion-refresh)))
+
+(defun orr-edit-transclusion ()
+  (interactive)
+  (if (org-transclusion-within-transclusion-p)
+      (org-transclusion-live-sync-start)))
 
 (progn
   (setq org-roam-refactoring-mode-map (make-sparse-keymap))
-  (general-def 'insert org-roam-refactoring-mode-map
-    "TAB" #'org-roam-refactoring-silly-keybinding))
+  (general-def '(motion normal) org-roam-refactoring-mode-map
+    "q" #'org-roam-refactoring-kill-buffer-ask
+    "e" #'orr-edit-transclusion
+    "r" #'orr-refresh-transclusion
+    ))
 
 ;; ---------------------------------------------------------------------------
 (defun orr/get-link-at-point ()
-  (let ((node (org-element-context)))
-    (when (orr/org-element-is-link? node)
-      node)))
+  (when (derived-mode-p 'org-mode)
+    (let ((node (org-element-context)))
+      (when (orr/org-element-is-link? node)
+        node))))
 
 (defun orr/org-element-is-link? (node)
   (string= (org-element-type node) "link"))
@@ -411,6 +423,16 @@ Implementation stolen from org-roam-db-map-links."
          (id (car ids)))
     id))
 
+(defun my/link-overlay (link id)
+  (when-let* ((link (or link (orr/get-org-link)))
+              (bounds (-update-at 1 #'1- (orr/org-element-get-bounds link))))
+    (when (string= (org-element-property :path link) id)
+      (let ((overlay (apply #'make-overlay bounds)))
+        (overlay-put overlay 'face (cons 'background-color "darkolivegreen"))))))
+
+(defun my/add-link-overlay-with-id (id)
+  (org-element-map (org-element-parse-buffer) 'link (lambda (n) (my/link-overlay n id))))
+
 (defun org-roam-refactor ()
   "Easily update all the backlinks for a given node."
   (interactive)
@@ -418,11 +440,11 @@ Implementation stolen from org-roam-db-map-links."
          (parent-id (orr/get-id-from-parent-section))
          (id (cond
               (link (let* ((initial-input (when link (orr/org-link-get-description link)))
-                           (node (org-roam-node-read initial-input))
+                           (node (org-roam-node-read initial-input nil nil 'require-match))
                            (id (org-roam-node-id node)))
                       id))
               (parent-id parent-id)
-              (t (let* ((node (org-roam-node-read))
+              (t (let* ((node (org-roam-node-read nil nil nil 'require-match))
                         (id (org-roam-node-id node)))
                    id))))
          (new-buffer (get-buffer-create org-roam-refactoring-buffer-name))
@@ -434,8 +456,10 @@ Implementation stolen from org-roam-db-map-links."
                      AND l.dest = '\"%s\"'
                      ORDER BY n.title" id))))
     (switch-to-buffer new-buffer)
-    (erase-buffer)
-    (org-roam-refactoring-mode)
-    (insert (s-join "\n" (mapcar #'orr/render-org-roam-row rows)))
-    (goto-char (point-min))
-    (org-transclusion-add-all)))
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (org-roam-refactoring-mode)
+      (insert (s-join "\n" (mapcar #'orr/render-org-roam-row rows)))
+      (goto-char (point-min))
+      (org-transclusion-add-all)
+      (my/add-link-overlay-with-id id))))
