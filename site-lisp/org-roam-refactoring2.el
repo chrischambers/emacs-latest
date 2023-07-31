@@ -193,3 +193,20 @@ this predicate is not nil."
            (user-error "Invalid `org-roam-mode-sections' specification")))))
     (run-hooks 'org-roam-buffer-postrender-functions)
     (goto-char 0)))
+
+(defun orr-preview-function ()
+  "Return the preview content at point.
+
+This function returns the all contents under the current
+headline, up to the next headline."
+  (let ((beg (save-excursion
+               (if (org-current-level)
+                   (org-back-to-heading-or-point-min t)
+                 (org-roam-end-of-meta-data t))
+               (point)))
+        (end (save-excursion
+               (org-next-visible-heading 1)
+               (point))))
+    (string-trim (buffer-substring-no-properties beg end))))
+
+(customize-set-variable 'org-roam-preview-function #'orr-preview-function)
