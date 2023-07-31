@@ -843,7 +843,7 @@
 
        ;; (setq org-roam-node-display-template (concat "${icon:3}${title:50}"))
        (setq org-roam-node-display-template
-           (concat "${icon:3}${title:50} " (propertize "${tags:30}" 'face 'org-tag)))
+           (concat "${icon:3}${title:50} " (propertize "${tags:30}|" 'face 'org-tag)))
        ;; (setq org-roam-node-display-template
        ;;     (concat "${icon:3}${title:50}${relpath:40}" (propertize "${tags:30}" 'face 'org-tag)))
        ;; (setq org-roam-node-annotation-function
