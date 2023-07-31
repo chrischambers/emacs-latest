@@ -77,7 +77,14 @@
                          :point pos
                          :properties properties))))))
 
-(cl-defun orr-node-insert-section (&key source-node point properties)
+(defclass orr-node-section (magit-section)
+  ((keymap :initform 'org-roam-node-map)
+   (source-node :initform nil)
+   (target-node :initform nil))
+  "A `magit-section' used by `org-roam-mode' to outline NODE in its own heading.")
+
+
+(cl-defun orr-node-insert-section (&key source-node target-node point properties)
   "Insert section for a link from SOURCE-NODE to some other node.
 The other node is normally `org-roam-buffer-current-node'.
 
@@ -100,7 +107,7 @@ the same time:
    from SOURCE-NODE's file for the link (that references the
    other node) at POINT. Acts a child section of the previous
    one."
-  (magit-insert-section section (org-roam-node-section)
+  (magit-insert-section section (orr-node-section)
     (let ((outline (if-let ((outline (plist-get properties :outline)))
                        (mapconcat #'org-link-display-format outline " > ")
                      "Top")))
@@ -109,7 +116,8 @@ the same time:
                       (format " (%s)"
                               (propertize outline 'font-lock-face 'org-roam-olp)))))
     (magit-insert-heading)
-    (oset section node source-node)
+    (oset section source-node source-node)
+    (oset section target-node target-node)
     (magit-insert-section section (org-roam-preview-section)
       (insert (org-roam-fontify-like-in-org-mode
                (org-roam-preview-get-contents (org-roam-node-file source-node) point))
@@ -137,6 +145,7 @@ this predicate is not nil."
                        (funcall show-backlink-p backlink)))
           (orr-node-insert-section
            :source-node (org-roam-backlink-source-node backlink)
+           :target-node (org-roam-backlink-target-node backlink)
            :point (org-roam-backlink-point backlink)
            :properties (org-roam-backlink-properties backlink))))
       (insert ?\n))))
