@@ -367,6 +367,8 @@ Implementation stolen from org-roam-db-map-links."
 (defun orr/change-link-description (node description)
   (org-link-make-string (orr/org-link-get-raw-link node) description))
 
+;; save-excursion
+;; org-open-link-from-string "id@point:...
 (defun orr/replace-link-target-with-id:link ()
   (interactive)
   (when-let* ((node (orr/get-link-at-point))
