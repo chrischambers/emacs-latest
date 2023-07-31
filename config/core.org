@@ -142,7 +142,7 @@ which aren't absolutely necessary, but are very important.
                 (height . 50)  ; lines
                 )))
   #+end_src
-** Set window placement in OSX (laptop)
+** COMMENT Set window placement in OSX (laptop)
    #+begin_src elisp
      (when IS-MAC
        (progn
