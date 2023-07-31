@@ -150,6 +150,11 @@ which aren't absolutely necessary, but are very important.
          (add-to-list 'initial-frame-alist '(left . 5))))
    #+end_src
 
+* COMMENT Set Frame Title
+  #+begin_src elisp
+    (org-set-frame-title "Emacs: Doing Things")
+  #+end_src
+
 * Extend Evil
 ** <<<evil-collection>>>: evil-friendly bindings for various packages/modes ([[https://github.com/emacs-evil/evil-collection/blob/master/readme.org][source]])
    #+begin_src elisp
