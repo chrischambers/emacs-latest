@@ -3,6 +3,8 @@
 (require 'org-roam-node)
 (require 'dash)
 
+(customize-set-variable 'org-roam-mode-sections (list #'orr-backlinks-section))
+
 (defcustom org-roam-refactoring2-buffer-name "*org-roam-refactoring2*"
   "The name of the special org-roam-refactoring buffer"
   :group 'org-roam-refactoring
@@ -48,6 +50,87 @@
     (run-hooks 'org-roam-buffer-postrender-functions)
     (goto-char 0)))
 
+(cl-defun orr-backlinks-get (nodes &key unique)
+  "Return the backlinks for NODE.
+
+ When UNIQUE is nil, show all positions where references are found.
+ When UNIQUE is t, limit to unique sources."
+  (let* ((ids (seq--into-vector (-map #'org-roam-node-id nodes)))
+         (sql (if unique
+                  [:select :distinct [source dest pos properties]
+                   :from links
+                   :where (in dest $v1)
+                   :and (= type "id")
+                   :group :by source
+                   :having (funcall min pos)]
+                [:select [source dest pos properties]
+                 :from links
+                 :where (in dest $v1)
+                 :and (= type "id")]))
+         (backlinks (org-roam-db-query sql ids)))
+    (cl-loop for backlink in backlinks
+             collect (pcase-let ((`(,source-id ,dest-id ,pos ,properties) backlink))
+                       (org-roam-populate
+                        (org-roam-backlink-create
+                         :source-node (org-roam-node-create :id source-id)
+                         :target-node (org-roam-node-create :id dest-id)
+                         :point pos
+                         :properties properties))))))
+
+(cl-defun orr-backlinks-section (nodes &key (unique nil) (show-backlink-p nil))
+  "The backlinks section for NODES.
+
+When UNIQUE is nil, show all positions where references are found.
+When UNIQUE is t, limit to unique sources.
+
+When SHOW-BACKLINK-P is not null, only show backlinks for which
+this predicate is not nil."
+  (when-let ((backlinks
+              (seq-sort #'org-roam-backlinks-sort
+                        (orr-backlinks-get nodes :unique unique))))
+    (magit-insert-section (org-roam-backlinks)
+      (magit-insert-heading "Backlinks:")
+      (dolist (backlink backlinks)
+        (when (or (null show-backlink-p)
+                  (and (not (null show-backlink-p))
+                       (funcall show-backlink-p backlink)))
+          (org-roam-node-insert-section
+           :source-node (org-roam-backlink-source-node backlink)
+           :point (org-roam-backlink-point backlink)
+           :properties (org-roam-backlink-properties backlink))))
+      (insert ?\n))))
+
+(defun my/org-roam-node-read-multiple (&optional initial-input filter-fn sort-fn require-match prompt)
+  "Read and return an `org-roam-node'.
+    INITIAL-INPUT is the initial minibuffer prompt value.
+    FILTER-FN is a function to filter out nodes: it takes an `org-roam-node',
+    and when nil is returned the node will be filtered out.
+    SORT-FN is a function to sort nodes. See `org-roam-node-read-sort-by-file-mtime'
+    for an example sort function.
+    If REQUIRE-MATCH, the minibuffer prompt will require a match.
+    PROMPT is a string to show at the beginning of the mini-buffer, defaulting to \"Node: \""
+  (let* ((nodes (org-roam-node-read--completions filter-fn sort-fn))
+         (prompt (or prompt "Node: "))
+         (matches (completing-read-multiple
+                   prompt
+                   (lambda (string pred action)
+                     (if (eq action 'metadata)
+                         `(metadata
+                           ;; Preserve sorting in the completion UI if a sort-fn is used
+                           ,@(when sort-fn
+                               '((display-sort-function . identity)
+                                 (cycle-sort-function . identity)))
+                           (annotation-function
+                            . ,(lambda (title)
+                                 (funcall org-roam-node-annotation-function
+                                          (get-text-property 0 'node title))))
+                           (category . org-roam-node))
+                       (complete-with-action action nodes string pred)))
+                   nil require-match initial-input 'org-roam-node-history)))
+    (dolist (m matches)
+      (message "%s" m))
+    (-map (lambda (m) (assoc m nodes)) matches)))
+
 (defun org-roam-refactor2 ()
   "Easily update all the backlinks for a given node."
   (interactive)
@@ -68,3 +151,45 @@
     (org-roam-refactoring-render)
     (my/add-link-overlay-with-id id)
     (add-hook 'kill-buffer-hook #'org-roam-buffer--persistent-cleanup-h nil t)))
+
+(defun org-roam-refactor3 ()
+  "Easily update all the backlinks for a given node/nodes."
+  (interactive)
+  (let* ((link (orr/get-link-at-point))
+         (parent-id (orr/get-id-from-parent-section))
+         (nodes (cond
+                 (link (let* ((initial-input (when link (orr/org-link-get-description link)))
+                              (nodes (my/org-roam-node-read-multiple initial-input nil nil 'require-match)))
+                         nodes))
+                 (parent-id (list (org-roam-node-from-id parent-id)))
+                 (t (let* ((nodes (my/org-roam-node-read-multiple nil nil nil 'require-match)))
+                      nodes))))
+         (nodes (-map #'cdr nodes))
+         (new-buffer (get-buffer-create org-roam-refactoring2-buffer-name))
+         (ids (-map #'org-roam-node-id nodes)))
+    (switch-to-buffer new-buffer)
+    (setq org-roam-buffer-current-nodes nodes
+          org-roam-buffer-current-directory org-roam-directory)
+    (org-roam-refactoring2-render)
+    (-map #'my/add-link-overlay-with-id ids)))
+
+(defun org-roam-refactoring2-render ()
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    (org-roam-refactoring2-mode)
+    (setq-local default-directory org-roam-buffer-current-directory)
+    (setq-local org-roam-directory org-roam-buffer-current-directory)
+    (org-roam-buffer-set-header-line-format
+     (org-roam-node-title org-roam-buffer-current-node))
+    (magit-insert-section (org-roam)
+      (magit-insert-heading)
+      (dolist (section org-roam-mode-sections)
+        (pcase section
+          ((pred functionp)
+           (funcall section org-roam-buffer-current-nodes))
+          (`(,fn . ,args)
+           (apply fn (cons org-roam-buffer-current-nodes args)))
+          (_
+           (user-error "Invalid `org-roam-mode-sections' specification")))))
+    (run-hooks 'org-roam-buffer-postrender-functions)
+    (goto-char 0)))
