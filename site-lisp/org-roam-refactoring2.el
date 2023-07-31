@@ -180,7 +180,7 @@ this predicate is not nil."
     (setq-local default-directory org-roam-buffer-current-directory)
     (setq-local org-roam-directory org-roam-buffer-current-directory)
     (org-roam-buffer-set-header-line-format
-     (org-roam-node-title org-roam-buffer-current-node))
+     (mapconcat #'org-roam-node-title org-roam-buffer-current-nodes ", "))
     (magit-insert-section (org-roam)
       (magit-insert-heading)
       (dolist (section org-roam-mode-sections)
