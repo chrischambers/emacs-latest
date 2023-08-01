@@ -381,6 +381,18 @@ which aren't absolutely necessary, but are very important.
     #+end_src
 
 * Improving Emacs via Elisp Extensions
+** =inspect= function for pretty-printing and storing off a value for introspection
+   #+begin_src elisp
+     (defun inspect (contents)
+       (let ((new-buffer (get-buffer-create "*my-inspector*"))
+             (content (pp-to-string contents)))
+         (setq ins contents)
+         (switch-to-buffer new-buffer)
+         (erase-buffer)
+         (emacs-lisp-mode)
+         (insert content)
+         (goto-char (point-min))))
+   #+end_src
 ** Add utility libraries
 *** [[https://github.com/magnars/dash.el][dash]] - "a modern list library for emacs"
     #+begin_src elisp
