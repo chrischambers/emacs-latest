@@ -283,7 +283,7 @@ headline, up to the next headline."
            :left :join (as aliases a) :on (= a:node_id n:id)
            :where (in n:id $v1)
            :and (= n:file f:file)
-           :group :by n:title]
+           :group :by n:id]
           (seq--into-vector ids))))
     (-map #'my/row-to-node results)))
 
