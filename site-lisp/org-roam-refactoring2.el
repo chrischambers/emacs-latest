@@ -136,7 +136,7 @@ When SHOW-BACKLINK-P is not null, only show backlinks for which
 this predicate is not nil."
   (when-let ((backlinks
               (seq-sort #'org-roam-backlinks-sort
-                        (orr-backlinks-get nodes :unique unique))))
+                        (orr-backlinks-get2 nodes :unique unique))))
     (magit-insert-section (org-roam-backlinks)
       (magit-insert-heading "Backlinks:")
       (dolist (backlink backlinks)
@@ -285,7 +285,7 @@ headline, up to the next headline."
             :and (= n:file f:file)
             :group :by n:id]
            (seq--into-vector ids)))
-         (map (make-hash-table :size (length results))))
+         (map (make-hash-table :test #'equal :size (length results))))
     (dolist (row results)
       (let ((node (my/row-to-node row)))
         (puthash (car row) node map)))
@@ -319,3 +319,40 @@ headline, up to the next headline."
 ;;           (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
 ;;                 "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
 ;;                 )))
+
+(cl-defun orr-backlinks-get2 (nodes &key unique)
+  "Return the backlinks for NODES.
+
+ When UNIQUE is nil, show all positions where references are found.
+ When UNIQUE is t, limit to unique sources."
+  (let* ((ids (seq--into-vector (-map #'org-roam-node-id nodes)))
+         (node-ids (make-set))
+         (sql (if unique
+                  [:select :distinct [source dest pos properties]
+                   :from links
+                   :where (in dest $v1)
+                   :and (= type "id")
+                   :group :by source
+                   :having (funcall min pos)]
+                [:select [source dest pos properties]
+                 :from links
+                 :where (in dest $v1)
+                 :and (= type "id")]))
+         (backlinks (org-roam-db-query sql ids)))
+    (dolist (link backlinks)
+      (cl-destructuring-bind (source-id dest-id _ _) link
+        (set-add node-ids source-id)
+        (set-add node-ids dest-id)))
+    (let ((mapping (my/populate-nodes-from-ids (set-members node-ids))))
+      (cl-loop for link in backlinks collect
+               (cl-destructuring-bind (source-id dest-id pos properties) link
+                 (org-roam-backlink-create
+                  :source-node (gethash source-id mapping)
+                  :target-node (gethash dest-id mapping)
+                  :point pos
+                  :properties properties))))))
+
+;; (inspect (orr-backlinks-get2 (-map #'org-roam-node-from-id
+;;                         (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
+;;                               "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
+;;                               ))))

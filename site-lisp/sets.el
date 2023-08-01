@@ -12,11 +12,11 @@
 
 (defun set-length (set)
   "Returns length of SET."
-  (length (hash-table-keys set)))
+  (length (set-members set)))
 
 (defun set-add (set x)
   "ADDS X TO SET."
-  (PUTHASH X T SET))
+  (puthash x t set))
 
 (defun set-remove (set x)
   "Removes X from SET."
@@ -32,3 +32,7 @@
   (not (eq set-missing-member
            (gethash x set set-missing-member))))
 (defalias 'set-member? #'set-member-p)
+
+(defun set-members (set)
+  "Returns a sequence of the members of SET."
+  (hash-table-keys set))
