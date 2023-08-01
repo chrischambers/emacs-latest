@@ -260,3 +260,62 @@ headline, up to the next headline."
     (string-trim (buffer-substring-no-properties beg end))))
 
 (customize-set-variable 'org-roam-preview-function #'orr-preview-function)
+
+(defun my/populate-nodes-from-ids (ids)
+  "Takes a list of ids, and returns a corresponding list of `org-roam-node' objects."
+  (let ((results
+         (org-roam-db-query
+          [:select [n:id, n:file, n:level, n:pos, n:todo, n:priority, n:scheduled,
+                    n:deadline, n:title, n:properties, n:olp,
+                    f:atime, f:mtime, f:title,
+                    (as (funcall format '"(%s)"
+                          (funcall replace
+                            (funcall group_concat :distinct a:alias) '"," '"")) aliases)
+                    (as (funcall format '"(%s)"
+                          (funcall replace
+                            (funcall group_concat :distinct t:tag) '"," '"")) tags)
+                    (as (funcall format '"(%s)"
+                          (funcall replace
+                            (funcall group_concat :distinct r:ref) '"," '"")) refs)]
+           :from [(as nodes n), (as files f)]
+           :left :join (as tags t) :on (= t:node_id n:id)
+           :left :join (as refs r) :on (= r:node_id n:id)
+           :left :join (as aliases a) :on (= a:node_id n:id)
+           :where (in n:id $v1)
+           :and (= n:file f:file)
+           :group :by n:title]
+          (seq--into-vector ids))
+         ))
+    results))
+    ; (-map #'my/row-to-node results)))
+
+(defun my/row-to-node (row)
+  (cl-destructuring-bind
+      (id, file, level, pos, todo, priority, scheduled, deadline,
+       title, properties, olp, atime, ftime, file-title,
+       aliases, tags, refs) row
+    (let ((node (org-roam-node-create :id id)))
+      (setf (org-roam-node-file node) file
+            (org-roam-node-file-title node) file-title
+            (org-roam-node-file-atime node) atime
+            (org-roam-node-file-mtime node) mtime
+            (org-roam-node-level node) level
+            (org-roam-node-point node) pos
+            (org-roam-node-todo node) todo
+            (org-roam-node-priority node) priority
+            (org-roam-node-scheduled node) scheduled
+            (org-roam-node-deadline node) deadline
+            (org-roam-node-title node) title
+            (org-roam-node-properties node) properties
+            (org-roam-node-olp node) olp
+            (org-roam-node-tags node) tags
+            (org-roam-node-refs node) refs
+            (org-roam-node-aliases node) aliases)
+      node)))
+
+
+(my/populate-nodes-from-ids
+ (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
+       "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
+       "73A55019-DD32-4FE7-B5D6-4BE933B2C59C" ; foo,bar
+       ))

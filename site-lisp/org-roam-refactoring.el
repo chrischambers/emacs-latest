@@ -450,12 +450,11 @@ Implementation stolen from org-roam-db-map-links."
                    id))))
          (new-buffer (get-buffer-create org-roam-refactoring-buffer-name))
          (rows (org-roam-db-query
-                (format
                  "SELECT n.title, l.source, l.pos, l.dest, n.file
                      FROM nodes as n, links as l
                      WHERE n.id = l.source AND l.type = '\"id\"'
-                     AND l.dest = '\"%s\"'
-                     ORDER BY n.title" id))))
+                     AND l.dest = $s1
+                     ORDER BY n.title" id)))
     (switch-to-buffer new-buffer)
     (let ((inhibit-read-only t))
       (erase-buffer)
