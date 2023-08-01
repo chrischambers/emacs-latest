@@ -263,32 +263,35 @@ headline, up to the next headline."
 
 (defun my/populate-nodes-from-ids (ids)
   "Takes a list of ids, and returns a corresponding list of `org-roam-node' objects."
-  (let ((results
-         (org-roam-db-query
-          [:select [n:id, n:file, n:level, n:pos, n:todo, n:priority, n:scheduled,
-                    n:deadline, n:title, n:properties, n:olp,
-                    f:atime, f:mtime, f:title,
-                    (as (funcall format '"(%s)"
-                          (funcall replace
-                            (funcall group_concat :distinct a:alias) '"," '"")) aliases)
-                    (as (funcall format '"(%s)"
-                          (funcall replace
-                            (funcall group_concat :distinct t:tag) '"," '"")) tags)
-                    (as (funcall format '"(%s)"
-                          (funcall replace
-                            (funcall group_concat :distinct r:ref) '"," '"")) refs)]
-           :from [(as nodes n), (as files f)]
-           :left :join (as tags t) :on (= t:node_id n:id)
-           :left :join (as refs r) :on (= r:node_id n:id)
-           :left :join (as aliases a) :on (= a:node_id n:id)
-           :where (in n:id $v1)
-           :and (= n:file f:file)
-           :group :by n:id]
-          (seq--into-vector ids))))
-    (-map #'my/row-to-node results)))
+  (let* ((results
+          (org-roam-db-query
+           [:select [n:id, n:file, n:level, n:pos, n:todo, n:priority, n:scheduled,
+                     n:deadline, n:title, n:properties, n:olp,
+                     f:atime, f:mtime, f:title,
+                     (as (funcall format '"(%s)"
+                           (funcall replace
+                             (funcall group_concat :distinct a:alias) '"," '"")) aliases)
+                     (as (funcall format '"(%s)"
+                           (funcall replace
+                             (funcall group_concat :distinct t:tag) '"," '"")) tags)
+                     (as (funcall format '"(%s)"
+                           (funcall replace
+                             (funcall group_concat :distinct r:ref) '"," '"")) refs)]
+            :from [(as nodes n), (as files f)]
+            :left :join (as tags t) :on (= t:node_id n:id)
+            :left :join (as refs r) :on (= r:node_id n:id)
+            :left :join (as aliases a) :on (= a:node_id n:id)
+            :where (in n:id $v1)
+            :and (= n:file f:file)
+            :group :by n:id]
+           (seq--into-vector ids)))
+         (map (make-hash-table :size (length results))))
+    (dolist (row results)
+      (let ((node (my/row-to-node row)))
+        (puthash (car row) node map)))
+    map))
 
 (defun my/row-to-node (row)
-  (inspect row)
   (cl-destructuring-bind
       (id file level pos todo priority scheduled deadline
           title properties olp atime mtime file-title
@@ -312,8 +315,7 @@ headline, up to the next headline."
             (org-roam-node-aliases node) aliases)
       node)))
 
-(inspect (my/populate-nodes-from-ids
-          (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
-                "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
-                "73A55019-DD32-4FE7-B5D6-4BE933B2C59C" ; foo,bar
-                )))
+;; (inspect (my/populate-nodes-from-ids
+;;           (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
+;;                 "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
+;;                 )))
