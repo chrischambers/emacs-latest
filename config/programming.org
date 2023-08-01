@@ -309,6 +309,10 @@
           "s"  '(suggest :which-key "suggest functions")))
     #+end_src
 
+*** <<<Buttercup>>> ([[https://github.com/jorgenschaefer/emacs-buttercup][github]]): BDD for Elisp
+    #+begin_src elisp
+      (use-package buttercup)
+    #+end_src
 ** Scheme
    #+begin_src elisp
      (use-package geiser-racket
