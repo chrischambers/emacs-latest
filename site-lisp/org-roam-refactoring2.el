@@ -284,16 +284,15 @@ headline, up to the next headline."
            :where (in n:id $v1)
            :and (= n:file f:file)
            :group :by n:title]
-          (seq--into-vector ids))
-         ))
-    results))
-    ; (-map #'my/row-to-node results)))
+          (seq--into-vector ids))))
+    (-map #'my/row-to-node results)))
 
 (defun my/row-to-node (row)
+  (inspect row)
   (cl-destructuring-bind
-      (id, file, level, pos, todo, priority, scheduled, deadline,
-       title, properties, olp, atime, ftime, file-title,
-       aliases, tags, refs) row
+      (id file level pos todo priority scheduled deadline
+          title properties olp atime mtime file-title
+          aliases tags refs) row
     (let ((node (org-roam-node-create :id id)))
       (setf (org-roam-node-file node) file
             (org-roam-node-file-title node) file-title
@@ -313,9 +312,8 @@ headline, up to the next headline."
             (org-roam-node-aliases node) aliases)
       node)))
 
-
-(my/populate-nodes-from-ids
- (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
-       "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
-       "73A55019-DD32-4FE7-B5D6-4BE933B2C59C" ; foo,bar
-       ))
+(inspect (my/populate-nodes-from-ids
+          (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
+                "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
+                "73A55019-DD32-4FE7-B5D6-4BE933B2C59C" ; foo,bar
+                )))
