@@ -1,8 +1,5 @@
 ;;; sets.el --- A simple set implementation using hash-tables internally -*- lexical-binding: t; -*-
 
-(defconst set-missing-member :missing-set-member
-  "The sentinel object for missing set members.")
-
 (defun make-set (&rest args)
   "Creates a set-like structure using a hash-table."
   (let ((set (make-hash-table :test #'equal)))
@@ -29,8 +26,7 @@
 
 (defun set-member-p (set x)
   "True if X is in SET."
-  (not (eq set-missing-member
-           (gethash x set set-missing-member))))
+  (gethash x set set-missing-member))
 (defalias 'set-member? #'set-member-p)
 
 (defun set-members (set)
