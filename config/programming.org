@@ -113,6 +113,7 @@
        :general
        (leader
          "g"   '(:ignore t :which-key "git")
+         "gf"  '(magit-file-dispatch :which-key "file...")
          "gs"  'magit-status
          "gr"  '(magit-refresh-all :which-key "refresh diff-hl")))
    #+end_src
