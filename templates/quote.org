@@ -1,0 +1,11 @@
+#+author: Chris Chambers
+#+email: magma.chambers@gmail.com
+#+date: %<[%Y-%m-%d]>
+#+language: en-gb
+#+startup: align shrink inlineimages latexpreview showall
+#+filetags: :quote:
+
+#+begin_quote
+%c
+--
+#+end_quote

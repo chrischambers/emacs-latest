@@ -1,0 +1,9 @@
+#+title: Recipe: %(my/current-recipe-name)
+#+author: Chris Chambers
+#+email: magma.chambers@gmail.com
+#+date: %<[%Y-%m-%d]>
+#+language: en-gb
+#+startup: align shrink inlineimages latexpreview showall
+#+filetags: :recipe:
+
+%(my/recipe-as-string)

@@ -360,7 +360,7 @@
     #+begin_src elisp
       (use-package org-capture
         :init
-        (setq my/org-capture-templates (concat org-directory "/" "templates/"))
+        (setq my/org-capture-templates (concat user-emacs-directory "templates/"))
         (setq my/default-template (concat my/org-capture-templates "default.org"))
         :preface
         (defun my/get-filepath-from-title (&optional subdirectory date-prefix)
