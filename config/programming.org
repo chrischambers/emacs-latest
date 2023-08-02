@@ -418,9 +418,10 @@
                 "C-l"  'cider-repl-clear-buffer)
        ('(insert motion) clojure-mode-map
                 "C-a"  'lsp-execute-code-action)
-       ('motion '(clojure-mode-map cider-repl-mode-map)
-                "C-]"  'cider-find-var
-                "C-o"  'cider-pop-back))
+       ;; ('motion '(clojure-mode-map cider-repl-mode-map)
+       ;;          "C-]"  'cider-find-var
+       ;;          "C-o"  'cider-pop-back)
+       )
 
      (use-package clojure-mode-extra-font-locking)
 
