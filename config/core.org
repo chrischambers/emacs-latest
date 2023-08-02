@@ -512,15 +512,19 @@ which aren't absolutely necessary, but are very important.
           (let ((old-pos (point))
                 (old-buffer (current-buffer)))
             (apply oldfun args)
-            (when (not (equal old-buffer (current-buffer)))
+            (cond
+             ((not (equal old-buffer (current-buffer)))
               (save-excursion
                 (with-current-buffer old-buffer
-                  (better-jumper-set-jump old-pos))))))
+                  (better-jumper-set-jump old-pos))))
+             ((> (abs (- (line-number-at-pos old-pos)
+                         (line-number-at-pos (point))))
+                 1)
+              (better-jumper-set-jump old-pos)))))
 
         :init
         (require 'better-jumper)
         :custom
-        ;; this is the key to avoiding conflict with evils jumping stuff
         (better-jumper-use-evil-jump-advice nil)
 
         :config
@@ -533,11 +537,15 @@ which aren't absolutely necessary, but are very important.
             (better-jumper-set-jump pnt)))
 
         ;; jump scenarios
-        ; (advice-add 'evil-next-line :around #'my/jump-advice)
-        ; (advice-add 'evil-previous-line :around #'my/jump-advice)
+        (advice-add 'evil-next-line :around #'my/jump-advice)
+        (advice-add 'evil-previous-line :around #'my/jump-advice)
         (advice-add 'evil-goto-definition :around #'my/jump-advice)
         (advice-add 'evil-goto-mark  :around #'my/jump-advice)
         (advice-add 'evil-buffer :around #'my/jump-advice)
+        (advice-add 'evil-search-forward :around #'my/jump-advice)
+        (advice-add 'evil-search-previous :around #'my/jump-advice)
+        (advice-add 'evil-scroll-page-down :around #'my/jump-advice)
+        (advice-add 'evil-scroll-page-up :around #'my/jump-advice)
 
         (advice-add 'xref-find-definitions :around #'my/jump-advice)
         (advice-add 'consult-buffer :around #'my/jump-advice)
