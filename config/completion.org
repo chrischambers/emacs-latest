@@ -118,10 +118,13 @@
 * <<<embark>>> ([[https://github.com/oantolin/embark/][github]])
   #+begin_src elisp
     (use-package embark
+      :config
+      (advice-add 'embark-dwim  :around #'my/jump-advice)
       :general
       ('(motion normal)
-        "M-." 'embark-dwim
-        "C-." 'embark-act))
+       "C-]" 'embark-dwim ; override evil-jump-to-tag
+       "M-." 'embark-dwim
+       "C-." 'embark-act))
   #+end_src
 
 * <<<consult>>> ([[https://github.com/minad/consult][github]])

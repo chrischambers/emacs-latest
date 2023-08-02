@@ -504,11 +504,47 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 * Better jumper ([[https://github.com/gilbertw1/better-jumper][github]])
+  Source: [[https://www.reddit.com/r/emacs/comments/ntnhkc/how_i_jump_around_emacs_with_betterjumper/][How I jump around Emacs with better-jumper : emacs]]
   #+begin_src elisp
     (use-package better-jumper
-      :config
-      (require 'better-jumper)
-      (better-jumper-mode +1)
+        :preface
+        (defun my/jump-advice (oldfun &rest args)
+          (let ((old-pos (point))
+                (old-buffer (current-buffer)))
+            (apply oldfun args)
+            (when (not (equal old-buffer (current-buffer)))
+              (save-excursion
+                (with-current-buffer old-buffer
+                  (better-jumper-set-jump old-pos))))))
+
+        :init
+        (require 'better-jumper)
+        :custom
+        ;; this is the key to avoiding conflict with evils jumping stuff
+        (better-jumper-use-evil-jump-advice nil)
+
+        :config
+        (better-jumper-mode 1)
+        ;; this lets me toggle between two points (adapted from
+        ;; evil-jump-backward-swap)
+        (evil-define-motion better-jumper-toggle (count)
+          (let ((pnt (point)))
+            (better-jumper-jump-backward 1)
+            (better-jumper-set-jump pnt)))
+
+        ;; jump scenarios
+        ; (advice-add 'evil-next-line :around #'my/jump-advice)
+        ; (advice-add 'evil-previous-line :around #'my/jump-advice)
+        (advice-add 'evil-goto-definition :around #'my/jump-advice)
+        (advice-add 'evil-goto-mark  :around #'my/jump-advice)
+        (advice-add 'evil-buffer :around #'my/jump-advice)
+
+        (advice-add 'xref-find-definitions :around #'my/jump-advice)
+        (advice-add 'consult-buffer :around #'my/jump-advice)
+        (advice-add 'find-file :around #'my/jump-advice)
+
+        ;; ... whenever you want a new jump scenario just use the above pattern.
+
       :general (motion
         "C-o" 'better-jumper-jump-backward
         "C-i" 'better-jumper-jump-forward))
