@@ -248,7 +248,7 @@ Implementation stolen from org-roam-db-map-links."
   ;; (mapcar (lambda (node) `(,(org-roam-node-title node) . ,node)) (org-roam-node-list)))
   ;; (mapcar #'org-roam-node-title (org-roam-node-list)))
   (mapcar (lambda (node) `(,(org-roam-node-title node) .
-                      ,(format "[[%s][%s]]"
+                      ,(format "[[id:%s][%s]]"
                                (org-roam-node-id node)
                                (org-roam-node-title node))))
           (org-roam-node-list)))
@@ -260,6 +260,8 @@ Implementation stolen from org-roam-db-map-links."
          (end (cdr bds)))
     (list start end (my/org-roam-aliases) . nil )))
 
+;; ------------------------------------------------------------------------------
+;; Uses org-roam.db as a cache for opening files when using RET
 (defun my/org-roam-id-find (id &optional markerp pos)
   (let* ((rows (org-roam-db-query
                 [:select [n:file, n:pos]
@@ -278,6 +280,8 @@ Implementation stolen from org-roam-db-map-links."
       pair)))
 
 (advice-add #'org-id-find :override #'my/org-roam-id-find)
+
+;; ------------------------------------------------------------------------------
 
 (defun my/marker-for-parent-headline (id pos)
   (pcase (my/org-roam-id-find id nil pos)

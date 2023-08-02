@@ -3,7 +3,7 @@
 (require 'org-roam-node)
 (require 'dash)
 
-(customize-set-variable 'org-roam-mode-sections (list #'orr-backlinks-section))
+(customize-set-variable 'orr-mode-sections (list #'orr-backlinks-section))
 
 (defcustom org-roam-refactoring2-buffer-name "*org-roam-refactoring2*"
   "The name of the special org-roam-refactoring buffer"
@@ -39,14 +39,14 @@
      (org-roam-node-title org-roam-buffer-current-node))
     (magit-insert-section (org-roam)
       (magit-insert-heading)
-      (dolist (section org-roam-mode-sections)
+      (dolist (section orr-mode-sections)
         (pcase section
           ((pred functionp)
            (funcall section org-roam-buffer-current-node))
           (`(,fn . ,args)
            (apply fn (cons org-roam-buffer-current-node args)))
           (_
-           (user-error "Invalid `org-roam-mode-sections' specification")))))
+           (user-error "Invalid `orr-mode-sections' specification")))))
     (run-hooks 'org-roam-buffer-postrender-functions)
     (goto-char 0)))
 
@@ -233,14 +233,14 @@ this predicate is not nil."
      (mapconcat #'org-roam-node-title org-roam-buffer-current-nodes ", "))
     (magit-insert-section (org-roam)
       (magit-insert-heading)
-      (dolist (section org-roam-mode-sections)
+      (dolist (section orr-mode-sections)
         (pcase section
           ((pred functionp)
            (funcall section org-roam-buffer-current-nodes))
           (`(,fn . ,args)
            (apply fn (cons org-roam-buffer-current-nodes args)))
           (_
-           (user-error "Invalid `org-roam-mode-sections' specification")))))
+           (user-error "Invalid `orr-mode-sections' specification")))))
     (run-hooks 'org-roam-buffer-postrender-functions)
     (goto-char 0)))
 
@@ -251,7 +251,8 @@ This function returns the all contents under the current
 headline, up to the next headline."
   (let ((beg (save-excursion
                (if (org-current-level)
-                   (org-back-to-heading-or-point-min t)
+                   ;; (org-back-to-heading-or-point-min t)
+                   (org-roam-up-heading-or-point-min)
                  (org-roam-end-of-meta-data t))
                (point)))
         (end (save-excursion
@@ -276,6 +277,7 @@ headline, up to the next headline."
                              (funcall group_concat :distinct t:tag) '"," '"")) tags)
                      (as (funcall format '"(%s)"
                            (funcall replace
+                             ;; TODO: Need to incorporate functions used in org-roam-node-list
                              (funcall group_concat :distinct r:ref) '"," '"")) refs)]
             :from [(as nodes n), (as files f)]
             :left :join (as tags t) :on (= t:node_id n:id)
@@ -356,3 +358,5 @@ headline, up to the next headline."
 ;;                         (list "337E143C-6C0A-40D2-A2FC-4E15BBD8FF2B" ; emacs
 ;;                               "4CF6B36A-04B5-40CC-B0B3-9385AAD9D0AF" ; elisp
 ;;                               ))))
+
+;; (inspect (my/populate-nodes-from-ids (list "193C32A7-C7F6-426C-85A7-E8B7AD979A54")))
