@@ -379,10 +379,12 @@ Implementation stolen from org-roam-db-map-links."
   (save-excursion
     (org-with-wide-buffer
      (let* ((remove (orr/org-element-get-bounds node))
+            (link-start (car remove))
             (new-link (orr/change-link-target-with-id:link node id)))
-       (goto-char (car remove))
-       (when remove (apply #'delete-region remove))
-       (insert new-link)))))
+       (when remove
+         (goto-char (car link-start))
+         (apply #'delete-region remove)
+         (insert new-link))))))
 
 (defun orr/link-has-id? (link id)
   "True if link has id"
