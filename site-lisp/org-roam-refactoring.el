@@ -351,6 +351,10 @@ Implementation stolen from org-roam-db-map-links."
 (defun orr/org-element-is-link? (node)
   (string= (org-element-type node) "link"))
 
+(defun orr/link-has-id? (link id)
+  "True if link has id"
+  (s-contains? id (org-element-property :path link) id))
+
 (defun orr/org-element-get-bounds (node)
   (list (org-element-begin node)
         (org-element-end node)))
@@ -364,70 +368,80 @@ Implementation stolen from org-roam-db-map-links."
    (org-element-property :contents-end node)))
 
 ;; ---------------------------------------------------------------------------
-;;; functional: take node object + data, return link-string
-(defun orr/change-link-target-with-id:link (node id)
-  (let* ((link-id (if (s-starts-with? "id:" id) id (format "id:%s" id)))
-         (trailing-whitespace (org-element-property :post-blank node))
-         (link (org-link-make-string link-id (orr/org-link-get-description node))))
-    (s-pad-right (+ (length link) trailing-whitespace) " " link)))
+;;; functional:
+(cl-defun orr/node-to-link-string (node &key id description)
+  (when (orr/org-element-is-link? node)
+    (let* ((link (cond
+                ((not id) (orr/org-link-get-raw-link node))
+                ((s-starts-with? "id:" id :ignore-case) id)
+                (:else (format "id:%s" id))))
+           (description (if description
+                            description
+                          (orr/org-link-get-description node)))
+           (trailing-whitespace (org-element-property :post-blank node))
+           (link-text (org-link-make-string link description)))
+      (s-pad-right (+ (length link-text) trailing-whitespace) " " link-text))))
 
-(defun orr/change-link-description (node description)
-  (org-link-make-string (orr/org-link-get-raw-link node) description))
+(defun orr/change-node-conditionally (update &rest predicates)
+  "Changes NODE using UPDATE if all PREDICATES are truthy.
+
+The UPDATE function and all PREDICATES should be unary functions accepting NODE.
+"
+  (lambda (node)
+    (when (funcall (apply #'-andfn predicates) node)
+      (funcall update node))))
+
 ;; ---------------------------------------------------------------------------
 ;;; programmatic:
-(defun orr/change-link-target-with-id:link! (node id)
+(defun orr/change-node! (node thunk)
   (save-excursion
     (org-with-wide-buffer
      (let* ((remove (orr/org-element-get-bounds node))
             (link-start (car remove))
-            (new-link (orr/change-link-target-with-id:link node id)))
+            (new-link (funcall thunk)))
        (when remove
-         (goto-char (car link-start))
+         (goto-char link-start)
          (apply #'delete-region remove)
          (insert new-link))))))
 
-(defun orr/link-has-id? (link id)
-  "True if link has id"
-  (s-contains? id (org-element-property :path link) id))
+(defun orr/change-link-target-destination! (node id)
+  (orr/change-node! node (lambda () (orr/node-to-link-string node :id id))))
 
-(defun orr/change-link-id-if-id-matched (link old-id new-id)
-  (when (orr/link-has-id? link old-id)
-    (orr/change-link-target-with-id:link! link new-id)))
+(defun orr/change-link-target-description! (node description)
+  (orr/change-node!
+   node
+   (lambda () (orr/node-to-link-string node :description description))))
 
 (defun orr/replace-id-all-links (old-id new-id &optional interactive-save?)
   (let* ((files (org-roam-refactor/files-linked-to-id old-id))
          (buffers (-map #'find-file-noselect files)))
-    (message "buffers: %s" buffers)
-    (setq my/temp-results nil)
     (dolist (b buffers)
       (with-current-buffer b
-        (cl-flet ((update-link
-                   (link)
-                   (orr/change-link-id-if-id-matched link old-id new-id)))
-          (org-roam-db-map-links (list #'update-link)))))
-    (if interactive-save?
-        (save-some-buffers nil (lambda () (-contains? buffers (current-buffer))))
-      (save-some-buffers t (lambda () (-contains? buffers (current-buffer)))))))
+        (org-roam-db-map-links
+         (list (orr/change-node-conditionally
+                (lambda (node) (orr/change-link-target-destination! node new-id))
+                (lambda (node) (orr/link-has-id? node old-id)))))))
+    (save-some-buffers
+     (not interactive-save?)
+     (lambda () (-contains? buffers (current-buffer))))
+    (org-roam-db-sync)))
 
 ;; ---------------------------------------------------------------------------
 ;;; interactive
-;; save-excursion
+
 ;; org-open-link-from-string "id@point:...
-(defun orr/replace-link-target-with-id:link ()
+(defun orr/replace-link-destination ()
   (interactive)
   (when-let* ((node (orr/get-link-at-point))
               (id (org-roam-node-id (org-roam-node-read))))
-    (orr/change-link-target-with-id:link! node id)))
+    (orr/change-link-target-destination! node id)))
 
 (defun orr/replace-link-description ()
   (interactive)
   (when-let* ((node (orr/get-link-at-point))
-              (remove (orr/org-element-get-bounds node))
               (old-description (orr/org-link-get-description node))
-              (description (read-string "New description: " old-description))
-              (new-link (orr/change-link-description node description)))
-    (when remove (apply #'delete-region remove))
-    (insert new-link)))
+              (description (read-string "New description: " old-description)))
+    (orr/change-link-target-description! node description)))
 
 ;; ---------------------------------------------------------------------------
 
