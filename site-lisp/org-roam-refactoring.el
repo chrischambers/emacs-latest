@@ -343,9 +343,9 @@ Implementation stolen from org-roam-db-map-links."
 (defun orr/org-element-is-link? (node)
   (string= (org-element-type node) "link"))
 
-(defun orr/link-has-id? (link id)
-  "True if link has id"
-  (s-contains? id (org-element-property :path link) id))
+(defun orr/link-has-id? (link &rest ids)
+  "True if link is one of IDs"
+  (-any (lambda (id) (s-contains? id (org-element-property :path link) id)) ids))
 
 (defun orr/org-element-get-bounds (node)
   (list (org-element-begin node)
@@ -415,17 +415,17 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
    node
    (lambda () (orr/node-to-link-string node :description description))))
 
-(defun orr/replace-backlink-destinations! (target-id
+(defun orr/replace-backlink-destinations! (target-ids
                                            new-id
                                            &optional interactive-save?)
-  (let* ((files (org-roam-refactor/files-linked-to-id target-id))
+  (let* ((files (-mapcat #'org-roam-refactor/files-linked-to-id target-ids))
          (buffers (-map #'find-file-noselect files)))
     (dolist (b buffers)
       (with-current-buffer b
         (org-roam-db-map-links
          (list (orr/change-node-conditionally
                 (lambda (node) (orr/change-link-target-destination! node new-id))
-                (lambda (node) (orr/link-has-id? node old-id)))))))
+                (lambda (node) (apply (-partial #'orr/link-has-id? node) target-ids)))))))
     (save-some-buffers
      (not interactive-save?)
      (lambda () (-contains? buffers (current-buffer))))
@@ -448,6 +448,13 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
               (description (read-string "New description: " old-description)))
     (orr/change-link-target-description! node description)))
 
+(defun org-roam-refactor-replace-backlink-destination ()
+  (interactive)
+  (let ((target-ids (-map (-compose #'org-roam-node-id #'cdr)
+                          (my/org-roam-node-read-multiple nil nil nil t "Links to: ")))
+        (new-id (org-roam-node-id
+                 (org-roam-node-read nil nil nil t "Replacement node: "))))
+    (orr/replace-backlink-destinations! target-ids new-id)))
 ;; ---------------------------------------------------------------------------
 
 (defun orr/org-roam-row-to-transclusion-block (row)
