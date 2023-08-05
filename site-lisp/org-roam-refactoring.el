@@ -380,22 +380,32 @@ Implementation stolen from org-roam-db-map-links."
     (org-with-wide-buffer
      (let* ((remove (orr/org-element-get-bounds node))
             (new-link (orr/change-link-target-with-id:link node id)))
-       (message "%s: %s: %s" remove (current-buffer) new-link)
        (goto-char (car remove))
        (when remove (apply #'delete-region remove))
        (insert new-link)))))
 
-(defun orr/replace-id-all-links (old-id new-id)
+(defun orr/link-has-id? (link id)
+  "True if link has id"
+  (s-contains? id (org-element-property :path link) id))
+
+(defun orr/change-link-id-if-id-matched (link old-id new-id)
+  (when (orr/link-has-id? link old-id)
+    (orr/change-link-target-with-id:link! link new-id)))
+
+(defun orr/replace-id-all-links (old-id new-id &optional interactive-save?)
   (let* ((files (org-roam-refactor/files-linked-to-id old-id))
          (buffers (-map #'find-file-noselect files)))
     (message "buffers: %s" buffers)
     (setq my/temp-results nil)
     (dolist (b buffers)
       (with-current-buffer b
-        (let ((results (org-roam-refactor/buffer-get-links-to-id old-id)))
-          (push results my/temp-results)
-          (dolist (link results)
-            (orr/change-link-target-with-id:link! link new-id)))))))
+        (cl-flet ((update-link
+                   (link)
+                   (orr/change-link-id-if-id-matched link old-id new-id)))
+          (org-roam-db-map-links (list #'update-link)))))
+    (if interactive-save?
+        (save-some-buffers nil (lambda () (-contains? buffers (current-buffer))))
+      (save-some-buffers t (lambda () (-contains? buffers (current-buffer)))))))
 
 ;; ---------------------------------------------------------------------------
 ;;; interactive
@@ -404,11 +414,8 @@ Implementation stolen from org-roam-db-map-links."
 (defun orr/replace-link-target-with-id:link ()
   (interactive)
   (when-let* ((node (orr/get-link-at-point))
-              (remove (orr/org-element-get-bounds node))
-              (id (org-roam-node-id (org-roam-node-read)))
-              (new-link (orr/change-link-target-with-id:link node id)))
-    (when remove (apply #'delete-region remove))
-    (insert new-link)))
+              (id (org-roam-node-id (org-roam-node-read))))
+    (orr/change-link-target-with-id:link! node id)))
 
 (defun orr/replace-link-description ()
   (interactive)
