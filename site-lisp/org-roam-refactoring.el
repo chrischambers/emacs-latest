@@ -363,13 +363,42 @@ Implementation stolen from org-roam-db-map-links."
    (org-element-property :contents-begin node)
    (org-element-property :contents-end node)))
 
+;; ---------------------------------------------------------------------------
+;;; functional: take node object + data, return link-string
 (defun orr/change-link-target-with-id:link (node id)
-  (let ((link (if (s-starts-with? "id:" id) id (format "id:%s" id))))
-    (org-link-make-string link (orr/org-link-get-description node))))
+  (let* ((link-id (if (s-starts-with? "id:" id) id (format "id:%s" id)))
+         (trailing-whitespace (org-element-property :post-blank node))
+         (link (org-link-make-string link-id (orr/org-link-get-description node))))
+    (s-pad-right (+ (length link) trailing-whitespace) " " link)))
 
 (defun orr/change-link-description (node description)
   (org-link-make-string (orr/org-link-get-raw-link node) description))
+;; ---------------------------------------------------------------------------
+;;; programmatic:
+(defun orr/change-link-target-with-id:link! (node id)
+  (save-excursion
+    (org-with-wide-buffer
+     (let* ((remove (orr/org-element-get-bounds node))
+            (new-link (orr/change-link-target-with-id:link node id)))
+       (message "%s: %s: %s" remove (current-buffer) new-link)
+       (goto-char (car remove))
+       (when remove (apply #'delete-region remove))
+       (insert new-link)))))
 
+(defun orr/replace-id-all-links (old-id new-id)
+  (let* ((files (org-roam-refactor/files-linked-to-id old-id))
+         (buffers (-map #'find-file-noselect files)))
+    (message "buffers: %s" buffers)
+    (setq my/temp-results nil)
+    (dolist (b buffers)
+      (with-current-buffer b
+        (let ((results (org-roam-refactor/buffer-get-links-to-id old-id)))
+          (push results my/temp-results)
+          (dolist (link results)
+            (orr/change-link-target-with-id:link! link new-id)))))))
+
+;; ---------------------------------------------------------------------------
+;;; interactive
 ;; save-excursion
 ;; org-open-link-from-string "id@point:...
 (defun orr/replace-link-target-with-id:link ()
