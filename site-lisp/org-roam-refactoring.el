@@ -415,9 +415,22 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
    node
    (lambda () (orr/node-to-link-string node :description description))))
 
+(defun orr/link-description-matching-function (patterns &optional case-sensitive?)
+  (if patterns
+      (lambda (node)
+        (let* ((description (orr/org-link-get-description node))
+               (case-fold-search (not case-sensitive?))
+               (matches (-map (lambda (pattern)
+                                   (s-match pattern description)) patterns)))
+          (-all? #'identity matches)))
+    #'always))
+
 (defun orr/replace-backlink-destinations! (target-ids
                                            new-id
-                                           &optional interactive-save?)
+                                           &optional
+                                           patterns
+                                           case-sensitive?
+                                           interactive-save?)
   (let* ((files (-mapcat #'org-roam-refactor/files-linked-to-id target-ids))
          (buffers (-map #'find-file-noselect files)))
     (dolist (b buffers)
@@ -425,7 +438,8 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
         (org-roam-db-map-links
          (list (orr/change-node-conditionally
                 (lambda (node) (orr/change-link-target-destination! node new-id))
-                (lambda (node) (apply (-partial #'orr/link-has-id? node) target-ids)))))))
+                (lambda (node) (apply (-partial #'orr/link-has-id? node) target-ids))
+                (orr/link-description-matching-function patterns case-sensitive?))))))
     (save-some-buffers
      (not interactive-save?)
      (lambda () (-contains? buffers (current-buffer))))
