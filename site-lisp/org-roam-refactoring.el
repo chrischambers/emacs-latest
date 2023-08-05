@@ -75,14 +75,6 @@
     (seq-let [id pos] first
          (org-roam-populate (org-roam-node-create :id id)))))
 ;; ------------------------------------------------------------------------------
-;; Potentially Useful:
-(defun org-roam-link-replace-all ()
-  "Replace all \"roam:\" links in buffer with \"id:\" links."
-  (interactive)
-  (org-with-point-at 1
-    (while (re-search-forward org-link-bracket-re nil t)
-      (org-roam-link-replace-at-point))))
-
 (defun my/print-link (link)
   (message "%s" link))
 
@@ -263,14 +255,14 @@ Implementation stolen from org-roam-db-map-links."
 ;; ------------------------------------------------------------------------------
 ;; Uses org-roam.db as a cache for opening files when using RET
 (defun my/org-roam-id-find (id &optional markerp pos)
-  (let* ((rows (org-roam-db-query
-                [:select [n:file, n:pos]
-                         :from [(as nodes n)]
-                         :where (= n:id $s1)] id))
-         (row (car rows))
-         (file (car row))
-         (pos (if pos pos (cadr row)))
-         (pair (cons file pos)))
+  (when-let* ((rows (org-roam-db-query
+                     [:select [n:file, n:pos]
+                      :from [(as nodes n)]
+                      :where (= n:id $s1)] id))
+              (row (car rows))
+              (file (car row))
+              (pos (or pos (cadr row)))
+              (pair (cons file pos)))
     (if markerp
         (unwind-protect
             (let ((buffer (or (find-buffer-visiting file)
@@ -369,15 +361,26 @@ Implementation stolen from org-roam-db-map-links."
 
 ;; ---------------------------------------------------------------------------
 ;;; functional:
+
 (cl-defun orr/node-to-link-string (node &key id description)
+  "When NODE is a valid org link, return its textual representation (e.g. [[id:foo][bar]]).
+
+When keyword arguments ID and/or DESCRIPTION are provided, they can be used to
+modify the textual link returned.
+
+- If the id provided matches one created by org's UUIDGEN, it can
+  be provided with or without its 'id:' prefix - irrespective,
+  this function will do the right thing.
+
+- Importantly, this function preserves the original link's
+  trailing whitespace (which `org-link-make-string' necessarily
+  cannot do)."
   (when (orr/org-element-is-link? node)
     (let* ((link (cond
-                ((not id) (orr/org-link-get-raw-link node))
-                ((s-starts-with? "id:" id :ignore-case) id)
-                (:else (format "id:%s" id))))
-           (description (if description
-                            description
-                          (orr/org-link-get-description node)))
+                  ((not id) (orr/org-link-get-raw-link node))
+                  ((org-uuidgen-p id) (format "id:%s" id))
+                  (:else id)))
+           (description (or description (orr/org-link-get-description node)))
            (trailing-whitespace (org-element-property :post-blank node))
            (link-text (org-link-make-string link description)))
       (s-pad-right (+ (length link-text) trailing-whitespace) " " link-text))))
@@ -412,8 +415,10 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
    node
    (lambda () (orr/node-to-link-string node :description description))))
 
-(defun orr/replace-id-all-links (old-id new-id &optional interactive-save?)
-  (let* ((files (org-roam-refactor/files-linked-to-id old-id))
+(defun orr/replace-backlink-destinations! (target-id
+                                           new-id
+                                           &optional interactive-save?)
+  (let* ((files (org-roam-refactor/files-linked-to-id target-id))
          (buffers (-map #'find-file-noselect files)))
     (dolist (b buffers)
       (with-current-buffer b
@@ -430,13 +435,13 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
 ;;; interactive
 
 ;; org-open-link-from-string "id@point:...
-(defun orr/replace-link-destination ()
+(defun org-roam-refactor-replace-link-destination ()
   (interactive)
   (when-let* ((node (orr/get-link-at-point))
               (id (org-roam-node-id (org-roam-node-read))))
     (orr/change-link-target-destination! node id)))
 
-(defun orr/replace-link-description ()
+(defun org-roam-refactor-replace-link-description ()
   (interactive)
   (when-let* ((node (orr/get-link-at-point))
               (old-description (orr/org-link-get-description node))
