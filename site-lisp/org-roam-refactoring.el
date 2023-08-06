@@ -336,34 +336,35 @@ Implementation stolen from org-roam-db-map-links."
 ;; ---------------------------------------------------------------------------
 (defun orr/get-link-at-point ()
   (when (derived-mode-p 'org-mode)
-    (let ((node (org-element-context)))
-      (when (orr/org-element-is-link? node)
-        node))))
+    (let ((element (org-element-context)))
+      (when (orr/org-element-is-link? element)
+        element))))
 
-(defun orr/org-element-is-link? (node)
-  (string= (org-element-type node) "link"))
+(defun orr/org-element-is-link? (element)
+  (string= (org-element-type element) "link"))
 
-(defun orr/link-has-id? (link &rest ids)
-  "True if link is one of IDs"
-  (-any (lambda (id) (s-contains? id (org-element-property :path link) id)) ids))
+(defun orr/link-path-contains (link &rest ids)
+  "True if the LINK path matches one of the specified IDS"
+  (let ((path (org-element-property :path link)))
+    (-any (lambda (id) (s-contains? id path)) ids)))
 
-(defun orr/org-element-get-bounds (node)
-  (list (org-element-begin node)
-        (org-element-end node)))
+(defun orr/org-element-get-bounds (element)
+  (list (org-element-begin element)
+        (org-element-end element)))
 
-(defun orr/org-link-get-raw-link (node)
-  (org-element-property :raw-link node))
+(defun orr/org-link-get-raw-link (element)
+  (org-element-property :raw-link element))
 
-(defun orr/org-link-get-description (node)
+(defun orr/org-link-get-description (element)
   (buffer-substring-no-properties
-   (org-element-property :contents-begin node)
-   (org-element-property :contents-end node)))
+   (org-element-property :contents-begin element)
+   (org-element-property :contents-end element)))
 
 ;; ---------------------------------------------------------------------------
 ;;; functional:
 
-(cl-defun orr/node-to-link-string (node &key id description)
-  "When NODE is a valid org link, return its textual representation (e.g. [[id:foo][bar]]).
+(cl-defun orr/element-to-link-string (element &key id description)
+  "When ELEMENT is a valid org link, return its textual representation (e.g. [[id:foo][bar]]).
 
 When keyword arguments ID and/or DESCRIPTION are provided, they can be used to
 modify the textual link returned.
@@ -375,31 +376,31 @@ modify the textual link returned.
 - Importantly, this function preserves the original link's
   trailing whitespace (which `org-link-make-string' necessarily
   cannot do)."
-  (when (orr/org-element-is-link? node)
+  (when (orr/org-element-is-link? element)
     (let* ((link (cond
-                  ((not id) (orr/org-link-get-raw-link node))
+                  ((not id) (orr/org-link-get-raw-link element))
                   ((org-uuidgen-p id) (format "id:%s" id))
                   (:else id)))
-           (description (or description (orr/org-link-get-description node)))
-           (trailing-whitespace (org-element-property :post-blank node))
+           (description (or description (orr/org-link-get-description element)))
+           (trailing-whitespace (org-element-property :post-blank element))
            (link-text (org-link-make-string link description)))
       (s-pad-right (+ (length link-text) trailing-whitespace) " " link-text))))
 
-(defun orr/change-node-conditionally (update &rest predicates)
-  "Changes NODE using UPDATE if all PREDICATES are truthy.
+(defun orr/change-element-conditionally (update &rest predicates)
+  "Changes ELEMENT using UPDATE if all PREDICATES are truthy.
 
-The UPDATE function and all PREDICATES should be unary functions accepting NODE.
-"
-  (lambda (node)
-    (when (funcall (apply #'-andfn predicates) node)
-      (funcall update node))))
+The UPDATE function and all PREDICATES should be unary functions
+accepting ELEMENT."
+  (lambda (element)
+    (when (funcall (apply #'-andfn predicates) element)
+      (funcall update element))))
 
 ;; ---------------------------------------------------------------------------
 ;;; programmatic:
-(defun orr/change-node! (node thunk)
+(defun orr/change-element! (element thunk)
   (save-excursion
     (org-with-wide-buffer
-     (let* ((remove (orr/org-element-get-bounds node))
+     (let* ((remove (orr/org-element-get-bounds element))
             (link-start (car remove))
             (new-link (funcall thunk)))
        (when remove
@@ -407,18 +408,20 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
          (apply #'delete-region remove)
          (insert new-link))))))
 
-(defun orr/change-link-target-destination! (node id)
-  (orr/change-node! node (lambda () (orr/node-to-link-string node :id id))))
+(defun orr/change-link-target-destination! (element id)
+  (orr/change-element!
+   element
+   (lambda () (orr/element-to-link-string element :id id))))
 
-(defun orr/change-link-target-description! (node description)
-  (orr/change-node!
-   node
-   (lambda () (orr/node-to-link-string node :description description))))
+(defun orr/change-link-target-description! (element description)
+  (orr/change-element!
+   element
+   (lambda () (orr/element-to-link-string element :description description))))
 
 (defun orr/link-description-matching-function (patterns &optional case-sensitive?)
   (if patterns
-      (lambda (node)
-        (let* ((description (orr/org-link-get-description node))
+      (lambda (element)
+        (let* ((description (orr/org-link-get-description element))
                (case-fold-search (not case-sensitive?))
                (matches (-map (lambda (pattern)
                                    (s-match pattern description)) patterns)))
@@ -436,9 +439,9 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
     (dolist (b buffers)
       (with-current-buffer b
         (org-roam-db-map-links
-         (list (orr/change-node-conditionally
-                (lambda (node) (orr/change-link-target-destination! node new-id))
-                (lambda (node) (apply (-partial #'orr/link-has-id? node) target-ids))
+         (list (orr/change-element-conditionally
+                (lambda (el) (orr/change-link-target-destination! el new-id))
+                (lambda (el) (apply (-partial #'orr/link-path-contains el) target-ids))
                 (orr/link-description-matching-function patterns case-sensitive?))))))
     (save-some-buffers
      (not interactive-save?)
@@ -451,16 +454,16 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
 ;; org-open-link-from-string "id@point:...
 (defun org-roam-refactor-replace-link-destination ()
   (interactive)
-  (when-let* ((node (orr/get-link-at-point))
+  (when-let* ((el (orr/get-link-at-point))
               (id (org-roam-node-id (org-roam-node-read))))
-    (orr/change-link-target-destination! node id)))
+    (orr/change-link-target-destination! el id)))
 
 (defun org-roam-refactor-replace-link-description ()
   (interactive)
-  (when-let* ((node (orr/get-link-at-point))
-              (old-description (orr/org-link-get-description node))
+  (when-let* ((el (orr/get-link-at-point))
+              (old-description (orr/org-link-get-description el))
               (description (read-string "New description: " old-description)))
-    (orr/change-link-target-description! node description)))
+    (orr/change-link-target-description! el description)))
 
 (defun org-roam-refactor-replace-backlink-destination ()
   (interactive)
@@ -493,16 +496,16 @@ The UPDATE function and all PREDICATES should be unary functions accepting NODE.
           (orr/org-roam-row-to-link-text row)
           (orr/org-roam-row-to-transclusion-block row)))
 
-(defun orr/-get-id-from-node-property (node)
-  (when (string= (org-element-property :key node) "ID")
-    (org-element-property :value node)))
+(defun orr/-get-id-from-element-property (element)
+  (when (string= (org-element-property :key element) "ID")
+    (org-element-property :value element)))
 
 (defun orr/get-id-from-parent-section ()
   (let* ((section (org-ml-parse-this-section))
          (ids (org-element-map
                   section
                   'node-property
-                #'orr/-get-id-from-node-property))
+                #'orr/-get-id-from-element-property))
          (id (car ids)))
     id))
 
