@@ -192,8 +192,9 @@ Implementation stolen from org-roam-db-map-links."
            ((eq type 'link)
             (setq link element))
            ((and (member type org-roam-db-extra-links-elements)
-                 (not (member-ignore-case (org-element-property :key element)
-                                          (cdr (assoc type org-roam-db-extra-links-exclude-keys))))
+                 (not (member-ignore-case
+                       (org-element-property :key element)
+                       (cdr (assoc type org-roam-db-extra-links-exclude-keys))))
                  (setq link (save-excursion
                               (goto-char begin)
                               (save-match-data (org-element-link-parser)))))))
@@ -370,8 +371,8 @@ When keyword arguments ID and/or DESCRIPTION are provided, they can be used to
 modify the textual link returned.
 
 - If the id provided matches one created by org's UUIDGEN, it can
-  be provided with or without its 'id:' prefix - irrespective,
-  this function will do the right thing.
+  be optionally have an 'id:' prefix - irrespective, this function
+  will do the right thing.
 
 - Importantly, this function preserves the original link's
   trailing whitespace (which `org-link-make-string' necessarily
@@ -384,7 +385,9 @@ modify the textual link returned.
            (description (or description (orr/org-link-get-description element)))
            (trailing-whitespace (org-element-property :post-blank element))
            (link-text (org-link-make-string link description)))
-      (s-pad-right (+ (length link-text) trailing-whitespace) " " link-text))))
+      (s-pad-right (+ (length link-text) trailing-whitespace)
+                   " "
+                   link-text))))
 
 (defun orr/change-element-conditionally (update &rest predicates)
   "Changes ELEMENT using UPDATE if all PREDICATES are truthy.
@@ -418,14 +421,13 @@ accepting ELEMENT."
    element
    (lambda () (orr/element-to-link-string element :description description))))
 
-(defun orr/link-description-matching-function (patterns &optional case-sensitive?)
+(defun orr/-make-link-description-matching-function (patterns
+                                                     &optional case-sensitive?)
   (if patterns
       (lambda (element)
-        (let* ((description (orr/org-link-get-description element))
-               (case-fold-search (not case-sensitive?))
-               (matches (-map (lambda (pattern)
-                                   (s-match pattern description)) patterns)))
-          (-all? #'identity matches)))
+        (let ((description (orr/org-link-get-description element))
+              (case-fold-search (not case-sensitive?)))
+          (-all? (lambda (pattern) (s-match pattern description)) patterns)))
     #'always))
 
 (defun orr/replace-backlink-destinations! (target-ids
@@ -442,7 +444,9 @@ accepting ELEMENT."
          (list (orr/change-element-conditionally
                 (lambda (el) (orr/change-link-target-destination! el new-id))
                 (lambda (el) (apply (-partial #'orr/link-path-contains el) target-ids))
-                (orr/link-description-matching-function patterns case-sensitive?))))))
+                (orr/-make-link-description-matching-function
+                 patterns
+                 case-sensitive?))))))
     (save-some-buffers
      (not interactive-save?)
      (lambda () (-contains? buffers (current-buffer))))
@@ -454,8 +458,8 @@ accepting ELEMENT."
 ;; org-open-link-from-string "id@point:...
 (defun org-roam-refactor-replace-link-destination ()
   (interactive)
-  (when-let* ((el (orr/get-link-at-point))
-              (id (org-roam-node-id (org-roam-node-read))))
+  (when-let ((el (orr/get-link-at-point))
+             (id (org-roam-node-id (org-roam-node-read))))
     (orr/change-link-target-destination! el id)))
 
 (defun org-roam-refactor-replace-link-description ()
@@ -468,7 +472,8 @@ accepting ELEMENT."
 (defun org-roam-refactor-replace-backlink-destination ()
   (interactive)
   (let ((target-ids (-map (-compose #'org-roam-node-id #'cdr)
-                          (my/org-roam-node-read-multiple nil nil nil t "Links to: ")))
+                          (my/org-roam-node-read-multiple
+                           nil nil nil t "Links to: ")))
         (new-id (org-roam-node-id
                  (org-roam-node-read nil nil nil t "Replacement node: "))))
     (orr/replace-backlink-destinations! target-ids new-id)))
@@ -517,7 +522,10 @@ accepting ELEMENT."
         (overlay-put overlay 'face (cons 'background-color "darkolivegreen"))))))
 
 (defun my/add-link-overlay-with-id (id)
-  (org-element-map (org-element-parse-buffer) 'link (lambda (n) (my/link-overlay n id))))
+  (org-element-map
+      (org-element-parse-buffer)
+      'link
+    (lambda (n) (my/link-overlay n id))))
 
 (defun org-roam-refactor ()
   "Easily update all the backlinks for a given node."
@@ -525,9 +533,10 @@ accepting ELEMENT."
   (let* ((link (orr/get-link-at-point))
          (parent-id (orr/get-id-from-parent-section))
          (id (cond
-              (link (let* ((initial-input (when link (orr/org-link-get-description link)))
-                           (node (org-roam-node-read initial-input nil nil 'require-match))
-                           (id (org-roam-node-id node)))
+              (link
+               (let* ((initial-input (when link (orr/org-link-get-description link)))
+                      (node (org-roam-node-read initial-input nil nil 'require-match))
+                      (id (org-roam-node-id node)))
                       id))
               (parent-id parent-id)
               (t (let* ((node (org-roam-node-read nil nil nil 'require-match))
