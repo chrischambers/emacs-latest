@@ -471,12 +471,15 @@ accepting ELEMENT."
 
 (defun org-roam-refactor-replace-backlink-destination ()
   (interactive)
-  (let ((target-ids (-map (-compose #'org-roam-node-id #'cdr)
+  (let* ((target-ids (-map (-compose #'org-roam-node-id #'cdr)
                           (my/org-roam-node-read-multiple
                            nil nil nil t "Links to: ")))
         (new-id (org-roam-node-id
-                 (org-roam-node-read nil nil nil t "Replacement node: "))))
-    (orr/replace-backlink-destinations! target-ids new-id)))
+                 (org-roam-node-read nil nil nil t "Replacement node: ")))
+        (pattern (read-string "Supply (optional) regex for filtering description: "))
+        (pattern (when (not (string-empty-p pattern)) pattern))
+        (patterns (when pattern (list pattern))))
+    (orr/replace-backlink-destinations! target-ids new-id patterns)))
 ;; ---------------------------------------------------------------------------
 
 (defun orr/org-roam-row-to-transclusion-block (row)
