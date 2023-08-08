@@ -127,6 +127,11 @@
        "C-." 'embark-act))
   #+end_src
 
+** <<<embark-consult>>>
+  #+begin_src elisp
+    (use-package embark-consult)
+  #+end_src
+
 * <<<consult>>> ([[https://github.com/minad/consult][github]])
   #+begin_quote
   Consult provides search and navigation commands based on the Emacs completion
