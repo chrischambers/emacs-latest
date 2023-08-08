@@ -210,11 +210,10 @@ this predicate is not nil."
          (nodes (cond
                  (link (let* ((initial-input (when link (orr/org-link-get-description link)))
                               (nodes (my/org-roam-node-read-multiple initial-input nil nil 'require-match)))
-                         nodes))
+                         (-map #'cdr nodes)))
                  (parent-id (list (org-roam-node-from-id parent-id)))
                  (t (let* ((nodes (my/org-roam-node-read-multiple nil nil nil 'require-match)))
-                      nodes))))
-         (nodes (-map #'cdr nodes))
+                      (-map #'cdr nodes)))))
          (new-buffer (get-buffer-create org-roam-refactoring2-buffer-name))
          (ids (-map #'org-roam-node-id nodes)))
     (switch-to-buffer new-buffer)
