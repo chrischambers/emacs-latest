@@ -355,7 +355,7 @@ which aren't absolutely necessary, but are very important.
          ,(replace-regexp-in-string abbreviated-home-dir "~/" no-littering-var-directory)
          ,no-littering-var-directory
          ,no-littering-etc-directory))
-      (recentf-max-saved-items 100))
+      (recentf-max-saved-items 500))
   #+end_src
 
 * <<<savehist>>>: Persist history across emacs sessions
