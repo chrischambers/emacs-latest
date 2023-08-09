@@ -54,7 +54,7 @@
 
 ;; We can then group by container pos, sort by source node pos, and iterate
 (defclass orr-backlink-container-section (magit-section)
-  ((keymap :initform 'org-roam-node-map)
+  ((keymap :initform 'orr/mode-map)
    (backlinks :initform nil)
    (target-node :initform nil))
   )
@@ -223,6 +223,7 @@ headline, up to the next headline."
              (`(,heading-pos ,backlinks)
               (magit-insert-section section (orr4-heading-section)
                 (oset section heading-pos heading-pos)
+                (oset section file path)
                 (let* ((properties (orr-backlink-properties (car backlinks)))
                        (outline (if-let ((outline (plist-get properties :outline)))
                                     (mapconcat #'org-link-display-format outline " > ")
@@ -254,18 +255,125 @@ headline, up to the next headline."
                 ))))
          )))))
 
+(defvar orr/mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map org-roam-mode-map)
+    (define-key map [C-return]  'org-roam-buffer-visit-thing)
+    (define-key map (kbd "C-m") 'org-roam-buffer-visit-thing)
+    (define-key map [remap revert-buffer] 'org-roam-buffer-refresh)
+    (define-key map (kbd "SPC") nil)
+    map))
+
+(defvar orr/file-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map orr/mode-map)
+    (define-key map [remap org-roam-buffer-visit-thing] 'orr/file-visit)
+    map))
+
+(defvar orr/heading-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map orr/mode-map)
+    (define-key map [remap org-roam-buffer-visit-thing] 'orr/heading-visit)
+    map))
+
 (defclass orr4-file-section (magit-section)
-  ((keymap :initform 'org-roam-node-map)
+  ((keymap :initform 'orr/file-mode-map)
    (file :initform nil)))
 
 (defclass orr4-heading-section (magit-section)
-  ((keymap :initform 'org-roam-node-map)
+  ((keymap :initform 'orr/heading-mode-map)
+   (file :initform nil)
    (heading-pos :initform nil)))
+
+(defvar orr/preview-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map org-roam-preview-map)
+    (define-key map [remap org-roam-buffer-visit-thing] 'orr/preview-visit)
+    (define-key map (kbd "SPC") nil)
+    map))
 
 ;; TODO
 (defclass orr4-preview-section (magit-section)
-  ((keymap :initform 'org-roam-preview-map)
+  ((keymap :initform 'orr/preview-map)
    (file :initform nil)
    (point :initform nil))
   "A `magit-section' used by `org-roam-mode' to contain preview content.
 The preview content comes from FILE, and the link as at POINT.")
+
+(defun orr/node-at-point (&optional assert)
+  "Return the node at point.
+If ASSERT, throw an error if there is no node at point.
+This function also returns the node if it has yet to be cached in the
+database. In this scenario, only expect `:id' and `:point' to be
+populated."
+  (or (magit-section-case
+        (org-roam-node-section (oref it node))
+        (org-roam-preview-section (save-excursion
+                                    (magit-section-up)
+                                    (org-roam-node-at-point)))
+        (t (org-with-wide-buffer
+            (while (not (or (org-roam-db-node-p)
+                            (bobp)
+                            (eq (funcall outline-level)
+                                (save-excursion
+                                  (org-roam-up-heading-or-point-min)
+                                  (funcall outline-level)))))
+              (org-roam-up-heading-or-point-min))
+            (when-let ((id (org-id-get)))
+              (org-roam-populate
+               (org-roam-node-create
+                :id id
+                :point (point)))))))
+      (and assert (user-error "No node at point"))))
+
+(advice-add #'org-roam-node-at-point :override #'orr/node-at-point)
+
+(defun orr/buffer-file-at-point (&optional assert)
+  "Return the file at point in the current `org-roam-mode' based buffer.
+If ASSERT, throw an error."
+  (if-let ((file (magit-section-case
+                   (org-roam-node-section (org-roam-node-file (oref it node)))
+                   (org-roam-grep-section (oref it file))
+                   (org-roam-preview-section (oref it file))
+                   (orr4-file-section (oref it file))
+                   (orr4-heading-section (oref it file))
+                   (orr4-preview-section (oref it file))
+                   (t (cl-assert (derived-mode-p 'org-roam-mode))))))
+      file
+    (when assert
+      (user-error "No file at point"))))
+(advice-add #'org-roam-buffer-file-at-point :override #'orr/buffer-file-at-point)
+
+;; ------------------------------------------------------------------------------
+(defun orr--visit (file point &optional other-window)
+  (let ((buf (find-file-noselect file))
+        (display-buffer-fn (if other-window
+                               #'switch-to-buffer-other-window
+                             #'pop-to-buffer-same-window)))
+    (funcall display-buffer-fn buf)
+    (with-current-buffer buf
+      (widen)
+      (goto-char point))
+    (when (org-invisible-p) (org-show-context))
+    buf))
+
+(defun orr/file-visit (file &optional other-window)
+  (interactive (list (org-roam-buffer-file-at-point 'assert)
+                     current-prefix-arg))
+  (orr--visit file 1 other-window))
+
+(defun orr/heading-visit (file heading-pos &optional other-window)
+  (interactive (list (org-roam-buffer-file-at-point 'assert)
+                     (oref (magit-current-section) heading-pos)
+                     current-prefix-arg))
+  (orr--visit file heading-pos other-window))
+
+(defun orr/preview-visit (file point &optional other-window)
+  "Visit FILE at POINT and return the visited buffer.
+With OTHER-WINDOW non-nil do so in another window.
+In interactive calls OTHER-WINDOW is set with
+`universal-argument'."
+  (interactive (list (org-roam-buffer-file-at-point 'assert)
+                     (oref (magit-current-section) point)
+                     current-prefix-arg))
+  (orr--visit file point other-window))
