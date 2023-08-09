@@ -79,7 +79,8 @@
                  :where (in dest $v1)
                  :and (= l:source nodes:id)
                  :and (= nodes:file f:file)
-                 :and (= l:type "id")]))
+                 :and (= l:type "id")
+                 :order :by [f:title l:heading-pos]]))
          (backlinks (org-roam-db-query sql ids)))
     (dolist (link backlinks)
       (cl-destructuring-bind (source-id dest-id _ _ _ _ _ _) link
@@ -141,24 +142,32 @@
     (run-hooks 'org-roam-buffer-postrender-functions)
     (goto-char 0)))
 
-(defun orr--sort-alist (x y)
-  (pcase (cons x y)
-    (`(((,file1 . ,pos1) . ,nodes1) . ((,file2 . ,pos2) . ,nodes2))
-     (let ((f1 (file-name-base file1))
-           (f2 (file-name-base file2)))
-       (if (string= f1 f2) (< pos1 pos2) (string< f1 f2))))))
+(cl-defstruct (orr-file (:constructor orr-file-create)
+                        (:copier nil))
+  title path)
 
-(defun orr/backlinks-grouped-sorted (nodes &optional unique)
-  (let* ((set-backlinks (orr/get-backlinks nodes))
-         (grouped
-          (-group-by (lambda (bl)
-                       (let ((node (orr-backlink-source-node bl)))
-                         (cons (org-roam-node-file node) (orr-backlink-heading-pos bl))))
-                     set-backlinks))
-         (sorted (sort grouped #'orr--sort-alist)))
-    sorted))
+(defun orr--accumulate-backlinks (bl acc)
+  (let* ((file (orr-file-create :title (orr-backlink-file-title bl)
+                                :path (orr-backlink-file bl)))
+         (new-title (orr-file-title file))
+         (new-heading-pos (orr-backlink-heading-pos bl)))
+    (pcase acc
+      (`((,file2 ((,current-pos ,backlinks) . ,positions)) . ,rest)
+       (if (string= (orr-file-title file2) new-title)
+           (if (= current-pos new-heading-pos)
+               (cons (list file (cons (list current-pos (cons bl backlinks)) (cdadar acc))) rest)
+             (cons (list file (cons (list new-heading-pos (list bl)) (cadar acc))) rest))
+         (cons (list file (list (list new-heading-pos (list bl)))) acc))))))
 
-;; (inspect (orr/backlinks-grouped-sorted (list (org-roam-node-from-id "608130E1-5C55-41CF-AAC8-AB1DE5ABC788"))))
+(defun orr/backlinks-grouped (nodes &optional unique)
+  (let* ((backlinks (orr/get-backlinks nodes :unique unique))
+         (reduced (-reduce-r-from
+                   #'orr--accumulate-backlinks
+                   `((,(orr-file-create :title "foo" :path "~/foo.txt") ((1 (foo))))) backlinks))
+         (result (-drop-last 1 reduced)))
+    result))
+
+;; (inspect (orr/backlinks-grouped (list (org-roam-node-from-id "608130E1-5C55-41CF-AAC8-AB1DE5ABC788"))))
 
 (cl-defun orr4-backlinks-section (nodes &key (unique nil) (show-backlink-p nil))
   "The backlinks section for NODES.
@@ -168,40 +177,82 @@ When UNIQUE is t, limit to unique sources.
 
 When SHOW-BACKLINK-P is not null, only show backlinks for which
 this predicate is not nil."
-  (when-let ((grouped-backlinks (orr/backlinks-grouped-sorted nodes unique)))
+  (when-let ((grouped-backlinks (orr/backlinks-grouped nodes unique)))
+    (inspect grouped-backlinks t)
     (magit-insert-section (org-roam-backlinks)
       (magit-insert-heading "Backlinks:")
       (dolist (group grouped-backlinks)
-        (pcase group
-          (`((,file . ,heading-pos) . ,backlinks)
-           (orr4-build-sections file heading-pos backlinks)
-           ))))
+        (orr4-build-sections group)))
       (insert ?\n)))
 
-(defun orr4-build-sections (file heading-pos backlinks)
-  (magit-insert-section section (orr4-file-section)
-      (insert (propertize (orr-backlink-file-title (car backlinks)) 'font-lock-face 'org-roam-title))
-      (oset section file file)
-      (insert ?\n)
-      (magit-insert-section section (orr4-heading-section)
-      (oset section heading-pos heading-pos)
-        (let* ((properties (orr-backlink-properties (car backlinks)))
-               (outline (if-let ((outline (plist-get properties :outline)))
-                            (mapconcat #'org-link-display-format outline " > ")
-                          "Top")))
-      (insert (concat (propertize (format "  %s" (orr-backlink-heading-title (car backlinks)))
-                                  'font-lock-face 'org-roam-header-line)
-                      (format " (%s)"
-                              (propertize outline 'font-lock-face 'org-roam-olp)))))
-        (magit-insert-heading)
-    ;; (magit-insert-section section (orr4-preview-section)
-    ;;   (insert (org-roam-fontify-like-in-org-mode
-    ;;            (org-roam-preview-get-contents (org-roam-node-file source-node) point))
-    ;;           "\n")
-    ;;   (oset section file (org-roam-node-file source-node))
-    ;;   (oset section point point)
-    ;;   (insert ?\n))
-    )))
+(defun orr-preview-function ()
+  "Return the preview content at point.
+
+This function returns the all contents under the current
+headline, up to the next headline."
+  (let ((beg (save-excursion
+               (org-roam-end-of-meta-data t)
+               (point)))
+        (end (save-excursion
+               (org-next-visible-heading 1)
+               (point))))
+    (string-trim (buffer-substring-no-properties beg end))))
+
+(defun orr-preview-get-contents (file pt)
+  "Get preview content for FILE at PT."
+  (save-excursion
+    (org-roam-with-temp-buffer file
+      (org-with-wide-buffer
+       (goto-char pt)
+       (let ((s (funcall #'orr-preview-function)))
+         (dolist (fn org-roam-preview-postprocess-functions)
+           (setq s (funcall fn s)))
+         s)))))
+
+(defun orr4-build-sections (group)
+  (pcase group
+    (`(,file ,matches)
+     (magit-insert-section section (orr4-file-section)
+       (let ((path (orr-file-path file))
+             (title (orr-file-title file)))
+         (insert (propertize title 'font-lock-face 'org-roam-title))
+         (oset section file path)
+         (insert ?\n)
+         (dolist (match matches)
+           (pcase match
+             (`(,heading-pos ,backlinks)
+              (magit-insert-section section (orr4-heading-section)
+                (oset section heading-pos heading-pos)
+                (let* ((properties (orr-backlink-properties (car backlinks)))
+                       (outline (if-let ((outline (plist-get properties :outline)))
+                                    (mapconcat #'org-link-display-format outline " > ")
+                                  "Top")))
+                  (insert (concat (propertize (org-roam-fontify-like-in-org-mode
+                                               (format "  %s" (orr-backlink-heading-title (car backlinks)))))
+                                  (format " (%s)"
+                                          (propertize outline 'font-lock-face 'org-roam-olp)))))
+                ;; (insert (concat (propertize (format "  %s" (orr-backlink-heading-title (car backlinks)))
+                ;;                             'font-lock-face 'org-roam-header-line)
+                ;;                 (format " (%s)"
+                ;;                         (propertize outline 'font-lock-face 'org-roam-olp)))))
+                (magit-insert-heading)
+                (insert ?\n)
+                (let* ((backlink (car backlinks))
+                       (source-node (orr-backlink-source-node backlink))
+                       (point (orr-backlink-point backlink)))
+                  (magit-insert-section section (orr4-preview-section)
+                    (insert (org-roam-fontify-like-in-org-mode
+                             (orr-preview-get-contents
+                              (org-roam-node-file source-node)
+                              heading-pos))
+                            "\n")
+                    ;; (dolist (backlink backlinks)
+                    ;;   )
+                    (oset section file (org-roam-node-file source-node))
+                    (oset section point point)
+                    (insert ?\n)))
+                ))))
+         )))))
 
 (defclass orr4-file-section (magit-section)
   ((keymap :initform 'org-roam-node-map)
