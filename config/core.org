@@ -553,6 +553,7 @@ which aren't absolutely necessary, but are very important.
         (advice-add 'xref-find-definitions :around #'my/jump-advice)
         (advice-add 'consult-buffer :around #'my/jump-advice)
         (advice-add 'find-file :around #'my/jump-advice)
+        (advice-add 'switch-to-buffer :around #'my/jump-advice)
 
         ;; ... whenever you want a new jump scenario just use the above pattern.
 
