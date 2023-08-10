@@ -238,19 +238,16 @@ headline, up to the next headline."
                 ;;                         (propertize outline 'font-lock-face 'org-roam-olp)))))
                 (magit-insert-heading)
                 (insert ?\n)
-                (let* ((backlink (car backlinks))
-                       (source-node (orr-backlink-source-node backlink))
-                       (point (orr-backlink-point backlink)))
+                (let ((source-node (orr-backlink-source-node (car backlinks)))
+                      (points (-map #'orr-backlink-point backlinks)))
                   (magit-insert-section section (orr4-preview-section)
                     (insert (org-roam-fontify-like-in-org-mode
                              (orr-preview-get-contents
                               (org-roam-node-file source-node)
                               heading-pos))
                             "\n")
-                    ;; (dolist (backlink backlinks)
-                    ;;   )
                     (oset section file (org-roam-node-file source-node))
-                    (oset section point point)
+                    (oset section points points)
                     (insert ?\n)))
                 ))))
          )))))
@@ -292,41 +289,10 @@ headline, up to the next headline."
     (define-key map (kbd "SPC") nil)
     map))
 
-;; TODO
 (defclass orr4-preview-section (magit-section)
   ((keymap :initform 'orr/preview-map)
    (file :initform nil)
-   (point :initform nil))
-  "A `magit-section' used by `org-roam-mode' to contain preview content.
-The preview content comes from FILE, and the link as at POINT.")
-
-(defun orr/node-at-point (&optional assert)
-  "Return the node at point.
-If ASSERT, throw an error if there is no node at point.
-This function also returns the node if it has yet to be cached in the
-database. In this scenario, only expect `:id' and `:point' to be
-populated."
-  (or (magit-section-case
-        (org-roam-node-section (oref it node))
-        (org-roam-preview-section (save-excursion
-                                    (magit-section-up)
-                                    (org-roam-node-at-point)))
-        (t (org-with-wide-buffer
-            (while (not (or (org-roam-db-node-p)
-                            (bobp)
-                            (eq (funcall outline-level)
-                                (save-excursion
-                                  (org-roam-up-heading-or-point-min)
-                                  (funcall outline-level)))))
-              (org-roam-up-heading-or-point-min))
-            (when-let ((id (org-id-get)))
-              (org-roam-populate
-               (org-roam-node-create
-                :id id
-                :point (point)))))))
-      (and assert (user-error "No node at point"))))
-
-(advice-add #'org-roam-node-at-point :override #'orr/node-at-point)
+   (points :initform nil)))
 
 (defun orr/buffer-file-at-point (&optional assert)
   "Return the file at point in the current `org-roam-mode' based buffer.
@@ -368,12 +334,16 @@ If ASSERT, throw an error."
                      current-prefix-arg))
   (orr--visit file heading-pos other-window))
 
-(defun orr/preview-visit (file point &optional other-window)
-  "Visit FILE at POINT and return the visited buffer.
-With OTHER-WINDOW non-nil do so in another window.
-In interactive calls OTHER-WINDOW is set with
-`universal-argument'."
+(defun orr/preview-visit (file points &optional other-window)
   (interactive (list (org-roam-buffer-file-at-point 'assert)
-                     (oref (magit-current-section) point)
+                     (oref (magit-current-section) points)
                      current-prefix-arg))
-  (orr--visit file point other-window))
+  (let ((point (orr--nearest-point-to (point) points)))
+    (orr--visit file point other-window)))
+
+(defun orr--nearest-point-to (point points)
+  (let* ((differences (-map (-compose #'abs (-partial #'- point)) points))
+         (mapping (-zip-pair differences points))
+         (map (make-hash-table)))
+    (pcase-dolist (`(,diff . ,point) mapping) (puthash diff point map))
+    (gethash (apply #'min differences) map)))
