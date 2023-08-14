@@ -10,24 +10,6 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* COMMENT <<<selectrum>>> ([[https://github.com/raxod502/selectrum][github]])
-  #+begin_src elisp
-    (use-package selectrum
-      :init
-      (selectrum-mode)
-      :after orderless
-      :custom
-      ;; Optimizations (source: https://github.com/raxod502/selectrum)
-      (selectrum-highlight-candidates-function #'orderless-highlight-matches)
-      (orderless-skip-highlighting (lambda () selectrum-is-active))
-      :general
-      ('insert selectrum-minibuffer-map
-       "C-<return>"    'selectrum-submit-exact-input
-       "C-o"           'embark-export
-       "C-n"           'next-line-or-history-element
-       "C-p"           'previous-line-or-history-element))
-  #+end_src
-
 * COMMENT <<<hotfuzz>>> ([[https://github.com/axelf4/hotfuzz][github]])
   A fuzzy-file matching like =flx=, but that has better sorting than the in-built
   =flex= matcher or =orderless-flex=.
@@ -67,7 +49,7 @@
        "C-p"            #'previous-line-or-history-element))
   #+end_src
 
-* <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
+* COMMENT <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
   #+begin_quote
   The way completion styles work, when one style cannot match anything, Emacs
   tries the next one on the list, until one of them yields results. As such, it
@@ -244,4 +226,68 @@
 
     (use-package company-box
       :hook (company-mode . company-box-mode))
+  #+end_src
+
+* Testing
+  #+begin_src elisp
+    ;; (setq fussy-filter-fn 'fussy-filter-default)
+    ;; (setq fussy-filter-fn 'fussy-filter-orderless)
+    ;; (setq fussy-score-fn 'flx-score)
+    ;; (setq fussy-default-regex-fn 'fussy-pattern-flex-2)
+    (use-package orderless
+      :ensure t)
+
+    ;; (use-package flx-rs
+    ;;   :straight (flx-rs :repo "jcs-elpa/flx-rs" :fetcher github :files (:defaults "bin"))
+    ;;   :config
+    ;;   (setq fussy-score-fn 'flx-rs-score)
+    ;;   (flx-rs-load-dyn))
+
+    (use-package fuz
+      :straight (fuz :type git :host github :repo "rustify-emacs/fuz.el")
+      :config
+      (setq fussy-score-fn 'fussy-fuz-score)
+      (unless (require 'fuz-core nil t)
+        (fuz-build-and-load-dymod)))
+
+    ;; (use-package liquidmetal
+    ;;   :ensure t
+    ;;   :straight t
+    ;;   :config
+    ;;   (setq fussy-score-fn 'fussy-liquidmetal-score))
+
+    ;; (use-package fzf-native
+    ;;   :ensure t
+    ;;   :straight
+    ;;   (fzf-native
+    ;;    :repo "dangduc/fzf-native"
+    ;;    :host github
+    ;;    :files (:defaults "bin"))
+    ;;   :config
+    ;;   (setq fussy-score-fn 'fussy-fzf-native-score)
+    ;;   (fzf-native-load-dyn))
+
+    ;; (use-package hotfuzz
+    ;;   :config
+    ;;   (setq fussy-score-fn 'fussy-hotfuzz-score))
+
+    (use-package fussy
+      :straight (fussy :type git :host github :repo "jojojames/fussy")
+      :custom
+      (fussy-use-cache t)
+      (fussy-compare-same-score-fn 'fussy-histlen->strlen<)
+
+      ;; For example, project-find-file uses 'project-files which uses
+      ;; substring completion by default. Set to nil to make sure it's using
+      ;; flx.
+      (completion-category-defaults nil)
+      (completion-category-overrides nil)
+      :config
+      (setq fussy-filter-fn 'fussy-filter-orderless-flex)
+      (push 'fussy completion-styles)
+
+      ;; `eglot' defaults to flex, so set an override to point to fussy instead.
+      (with-eval-after-load 'eglot
+        (add-to-list 'completion-category-overrides
+                     '(eglot (styles fussy basic)))))
   #+end_src
