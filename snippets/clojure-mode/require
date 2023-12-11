@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: require
+# key: req
+# --
+
+(require '[${1:clojure.pprint} :as ${2:pp}]$3)
+$0
