@@ -1,0 +1,8 @@
+# key: sf
+# name: spec fdef
+# --
+(s/fdef $1
+  :args (s/cat $2)
+  :ret $3
+  ${4::fn $5})
+$0

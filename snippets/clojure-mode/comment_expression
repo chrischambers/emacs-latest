@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: Comment expression (for repl-based development)
-# key: cm
+# key: c
 # --
 (comment
         $1

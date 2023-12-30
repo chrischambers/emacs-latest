@@ -1,0 +1,7 @@
+# key: if
+# name: if
+# --
+(if ${1:<pred>}
+  ${2:<consequent>}
+  ${3:<alternative>})
+$0

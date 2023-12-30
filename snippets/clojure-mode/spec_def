@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: spec def
+# key: sd
+# --
+(s/def ::${1:name} $2)$0
