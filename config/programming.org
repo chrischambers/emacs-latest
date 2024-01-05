@@ -269,29 +269,20 @@
          "eb" '(mine/eval-region-or-buffer :which-key "buffer/region")))
    #+end_src
 
-** Re-bind backtrace-mode keys correctly
+** Structural Editing
+*** COMMENT Testing symex
+    #+begin_src elisp
+      (use-package symex
+        :config
+        (symex-initialize)
+        (global-set-key (kbd "s-;") 'symex-mode-interface))
+    #+end_src
+*** Evil Smartparens
    #+begin_src elisp
-     (general-def '(normal motion) backtrace-mode-map
-       "#" 'backtrace-toggle-print-circle
-       "+" 'backtrace-multi-line
-       "-" 'backtrace-single-line)
-
-     (local-leader backtrace-mode-map
-       "+" '(backtrace-expand-ellipses :which-key "expand ellipses")
-
-       "t"  '(:ignore t :major-modes backtrace-mode :which-key "toggle")
-       "tv" '(backtrace-toggle-locals :which-key "variables")
-       "tg" '(backtrace-toggle-print-gensym :which-key "gensyms")
-
-       "n" '(backtrace-forward-frame :which-key "forward frame")
-       "p" '(backtrace-backward-frame :which-key "previous frame"))
-   #+end_src
-** COMMENT Testing symex
-   #+begin_src elisp
-     (use-package symex
-       :config
-       (symex-initialize)
-       (global-set-key (kbd "s-;") 'symex-mode-interface))
+     (use-package evil-smartparens
+       :hook ((clojure-mode . smartparens-mode)
+              (cider-repl-mode . smartparens-mode)
+              (smartparens-mode . evil-smartparens-mode)))
    #+end_src
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
    #+begin_src elisp
@@ -316,6 +307,23 @@
          "er" '(eval-region :which-key "region")
          "eb" '(eval-buffer :which-key "buffer")))
    #+end_src
+*** Re-bind backtrace-mode keys correctly
+    #+begin_src elisp
+      (general-def '(normal motion) backtrace-mode-map
+        "#" 'backtrace-toggle-print-circle
+        "+" 'backtrace-multi-line
+        "-" 'backtrace-single-line)
+
+      (local-leader backtrace-mode-map
+        "+" '(backtrace-expand-ellipses :which-key "expand ellipses")
+
+        "t"  '(:ignore t :major-modes backtrace-mode :which-key "toggle")
+        "tv" '(backtrace-toggle-locals :which-key "variables")
+        "tg" '(backtrace-toggle-print-gensym :which-key "gensyms")
+
+        "n" '(backtrace-forward-frame :which-key "forward frame")
+        "p" '(backtrace-backward-frame :which-key "previous frame"))
+    #+end_src
 *** <<<eros>>> ([[https://github.com/xiongtx/eros][github]]): Display evaluation results inline
     #+begin_src elisp
       (use-package eros
@@ -367,13 +375,7 @@
    #+end_src
 
 ** Clojure
-   #+begin_src elisp
-     (use-package evil-smartparens
-       :hook ((clojure-mode . smartparens-mode)
-              (cider-repl-mode . smartparens-mode)
-              (smartparens-mode . evil-smartparens-mode)))
-   #+end_src
-
+*** Clojure Mode
    #+begin_src elisp
      (use-package clojure-mode
        :preface
@@ -393,14 +395,6 @@
            (when clojure-file?
              (find-file other-file))))
 
-       ;; Source: https://adereth.github.io/blog/2014/05/29/custom-clojure-evaluation-keybindings-in-emacs/
-       (defun my/clojure-benchmark-last-expression ()
-         (interactive)
-         (cider-interactive-eval
-          (format "(require 'criterium.core)
-                  (criterium.core/quick-bench %s :verbose)"
-                  (cider-last-sexp))))
-
        ;; (defun my/clojure-setup ()
        ;;   (interactive)
        ;;   (font-lock-add-keywords
@@ -412,217 +406,229 @@
        ;;   (define-clojure-indent (fact 1))
        ;;   (define-clojure-indent (facts 1)))
        ;; :hook (clojure-mode . #'my/clojure-setup)
+
+       :custom
+       ;; When evaluating a comment block, this will return the inner value instead
+       ;; of nil:
+       (clojure-toplevel-inside-comment-form t)
+
        :mode
        ("\\.edn$" . clojure-mode)
        ("\\.boot$" . clojure-mode)
-       ("\\.cljs.*$" . clojure-mode)
-       :custom
-       ;; go right to the REPL buffer when it's finished connecting
-       (cider-repl-pop-to-buffer-on-connect t)
+       ("\\.cljs.*$" . clojure-mode))
+   #+end_src
 
-       ;; When there's a cider error, show its buffer
-       (cider-show-error-buffer t)
-       ;; (cider-auto-select-error-buffer t)
+*** Clojure Mode Extra Font Locking
+    #+begin_src elisp
+      (use-package clojure-mode-extra-font-locking)
+    #+end_src
 
-       (cider-popup-stacktraces nil)
-       (cider-repl-popup-stacktraces t)
-       (nrepl-hide-special-buffers t)
+*** Cider
+    #+begin_src elisp
+      (use-package cider
+        :preface
+        ;; Source: https://adereth.github.io/blog/2014/05/29/custom-clojure-evaluation-keybindings-in-emacs/
+        (defun my/clojure-benchmark-last-expression ()
+          (interactive)
+          (cider-interactive-eval
+           (format "(require 'criterium.core)
+                   (criterium.core/quick-bench %s :verbose)"
+                   (cider-last-sexp))))
+        :config
+        (require 'ob-clojure)
+        :custom
+        (org-babel-clojure-backend 'cider)
+        (cider-repl-display-help-banner nil)
+        (cider-eldoc-display-for-symbol-at-point nil)
 
-       (cider-repl-use-pretty-printing t)
-       (cider-font-lock-dynamically nil)
+        (cider-repl-pop-to-buffer-on-connect t)
 
-       ;; When evaluating buffer just save, don't prompt:
-       (cider-save-file-on-load t)
+        (cider-show-error-buffer t)
+        ;; (cider-auto-select-error-buffer t)
+        (cider-popup-stacktraces nil)
+        (cider-repl-popup-stacktraces t)
 
-       ;; Add javadoc information
-       (cider-enrich-classpath t)
+        (nrepl-hide-special-buffers t)
 
-       ;; Set a reasonable size limit for the REPL buffer so performance doesn't
-       ;; suffer.
-       (cider-repl-buffer-size-limit 100000)
+        (cider-repl-use-pretty-printing t)
+        (cider-font-lock-dynamically nil)
 
-       ;; Auto-require namespace when setting it
-       (cider-repl-require-ns-on-set t)
+        (cider-save-file-on-load t) ; When evaluating buffer just save (no prompt)
 
-       ;; When evaluating a comment block, this will return the inner value insstead
-       ;; of the nil:
-       (clojure-toplevel-inside-comment-form t)
+        (cider-enrich-classpath t) ; Add javadoc information
+        (cider-repl-buffer-size-limit 100000) ; performance
 
-       (cider-test-show-report-on-success t)
+        ;; Auto-require namespace when setting it
+        (cider-repl-require-ns-on-set t)
 
-       ;; Where to store the cider history (no-littering).
-       (cider-repl-history-file (concat no-littering-var-directory "cider-history"))
-       ;; Wrap when navigating history.
-       (cider-repl-wrap-history t)
+        (cider-test-show-report-on-success t)
+
+        (cider-repl-history-file (concat no-littering-var-directory "cider-history"))
+        (cider-repl-wrap-history t)
+
+        :general
+        (local-leader '(clojure-mode-map cider-repl-mode-map)
+          "d"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "docs")
+          "dc"   '(cider-clojuredocs :which-key "clojuredocs")
+          "dj"   '(cider-javadoc  :which-key "javadocs")
+
+          "D"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "debug")
+          "De"   '(cider-enlighten-mode :which-key "enlighten on/off")
+
+          "e"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "eval")
+          "ec"   '(cider-pprint-eval-last-sexp-to-comment :which-key "expr -> comment")
+          "ed"   '(cider-eval-all-files :which-key "directory")
+          "ee"   '(cider-eval-sexp-at-point :which-key "expression")
+          "ef"   '(cider-eval-defun-at-point :which-key "function")
+          "em"   '(my/clojure-benchmark-last-expression :which-key "measure / benchmark")
+          "er"   '(cider-eval-dwim :which-key "region")
+          "eR"   '(cider-eval-last-sexp-and-replace :which-key "replace")
+          "eq"   '(cider-interrupt :which-key "quit (evaluation)")
+
+          "i"    '(cider-inspect :which-key "inspect")
+
+          "m"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "macro")
+          "me"   '(cider-macroexpand-1 :which-key "expand (once)")
+          "mE"   '(cider-macroexpand-all :which-key "expand (all)")
+
+          "n"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "namespace")
+          "nb"   '(cider-browse-ns :which-key "browse")
+          "nr"   '(cider-ns-refresh :which-key "refresh")
+          "ns"   '(cider-repl-set-ns :which-key "set")
+
+          "t"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "test")
+          "ta"   '(cider-test-run-project-tests :which-key "all")
+          "tA"   '(cider-auto-test-mode :which-key "toggle auto-test")
+          "tc"   '(cider-test-run-test :which-key "current")
+          "tf"   '(cider-test-toggle-fail-fast :which-key "fail-fast?")
+          "tl"   '(cider-test-run-loaded-tests :which-key "loaded namespaces")
+          "tn"   '(cider-test-run-ns-tests :which-key "namespace")
+          "tj"   '(my/clojure-test-jump :which-key "jump")
+          "tr"   '(cider-test-rerun-test :which-key "re-run last")
+          "tR"   '(cider-test-rerun-failed-tests :which-key "re-run all failed")
+
+          "v"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "view")
+          "vc"   '(cider-classpath :which-key "classpath")
+          "vn"   '(cider-browse-ns :which-key "namespaces")
+          "vN"   '(cider-browse-ns-all :which-key "namespaces (all)")
+          "vs"   '(cider-browse-spec :which-key "specs")
+          "vS"   '(cider-browse-spec-all :which-key "specs (all)")
+
+          "?"    '(cider-view-refcard :which-key "quickref"))
+
+        (local-leader clojure-mode-map
+          "eb"   '(cider-load-buffer :which-key "buffer")
+          "eB"   '(cider-load-buffer-and-switch-to-repl-buffer :which-key "buffer (and switch)")
+          "eF"   '(cider-load-buffer :which-key "file"))
+
+        (local-leader cider-repl-mode-map
+          "h"    '(cider-repl-history :which-key "history"))
+
+        (local-leader cider-repl-history-mode-map
+          "/"    '(cider-repl-history-occur :which-key "filter"))
+
+        ('(insert motion) cider-repl-history-mode-map
+         "q"    'cider-repl-history-quit)
+
+        ('(insert motion) cider-repl-mode-map
+         "C-l"  'cider-repl-clear-buffer
+         "C-r"  'cider-repl-previous-matching-input)
+
+        ('(insert normal motion) cider-classpath-mode-map
+         "RET"    'cider-classpath-operate-on-point
+         "q"      'cider-popup-buffer-quit-function)
+
+        ;; Prevent evil from clobbering important bindings:
+        ('(insert normal) cider-browse-ns-mode-map
+         "RET" 'cider-browse-ns-operate-at-point
+         "^"   'cider-browse-ns-all
+         "q"   'cider-popup-buffer-quit-function
+         "s"   'cider-browse-ns-find-at-point
+         "d"   'cider-browse-ns-doc-at-point))
+
+      ;; format edn?
+      ;; cider-tap...
+      ;; cider-inspector
+      ;; cider-profile
+
+      ;; ;; key bindings
+      ;; ;; these help me out with the way I usually develop web apps
+      ;; (defun cider-start-http-server ()
+      ;;   (interactive)
+      ;;   (cider-load-current-buffer)
+      ;;   (let ((ns (cider-current-ns)))
+      ;;     (cider-repl-set-ns ns)
+      ;;     (cider-interactive-eval (format "(println '(def server (%s/start))) (println 'server)" ns))
+      ;;     (cider-interactive-eval (format "(def server (%s/start)) (println server)" ns))))
+      ;;
+      ;;
+      ;; (defun cider-refresh ()
+      ;;   (interactive)
+      ;;   (cider-interactive-eval (format "(user/reset)")))
+      ;;
+      ;; (defun cider-user-ns ()
+      ;;   (interactive)
+      ;;   (cider-repl-set-ns "user"))
+      ;;
+      ;; (eval-after-load 'cider
+      ;;   '(progn
+      ;;      (define-key clojure-mode-map (kbd "C-c C-v") 'cider-start-http-server)
+      ;;      (define-key clojure-mode-map (kbd "C-M-r") 'cider-refresh)
+      ;;      (define-key clojure-mode-map (kbd "C-c u") 'cider-user-ns)
+      ;;      (define-key cider-mode-map (kbd "C-c u") 'cider-user-ns)))
+    #+end_src
+
+*** CLJR / CLJ refactor
+    #+begin_src elisp
+      (use-package clj-refactor
+        :preface
+        (defun my/clojure-refactor ()
+          (cljr-add-keybindings-with-prefix "C-s")
+          (clj-refactor-mode))
+        :hook (clojure-mode . my/clojure-refactor)
+        ;; :custom
+        ;; conflicts with clojure-lsp providing same facility:
+        ;; (cljr-add-ns-to-blank-clj-files nil)
+        :config
+        (dolist (mapping '(("s"  .       "clojure.spec.alpha")
+                           ("gen" .      "clojure.spec.gen.alpha")
+                           ("stest" .    "clojure.spec.test.alpha")
+                           ("match" .    "clojure.core.match")
+                           ("combo" .    "clojure.math.combinatorics")
+                           ("browse" .   "clojure.java.browse")
+                           ("pprint" .   "clojure.pprint")
+                           ("shell" .    "clojure.java.shell")))
+          (add-to-list 'cljr-magic-require-namespaces mapping t))
+        :general
+        (local-leader cider-mode-map
+          "r" '(hydra-cljr-help-menu/body :which-key "refactor")))
+    #+end_src
+
+*** Clojure LSP
+   #+begin_src elisp
+     (use-package clojure-lsp
+       :no-require t
+       :straight nil
+       :hook ((clojure-mode . lsp)
+              (clojurescript-mode . lsp)
+              (clojurec-mode . lsp))
        :general
-       (local-leader '(clojure-mode-map cider-repl-mode-map)
-         "d"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                          :which-key "docs")
-         "dc"   '(cider-clojuredocs :which-key "clojuredocs")
-         "dj"   '(cider-javadoc  :which-key "javadocs")
-
-         "D"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                          :which-key "debug")
-         "De"   '(cider-enlighten-mode :which-key "enlighten on/off")
-
-         "e"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                          :which-key "eval")
-         "ec"   '(cider-pprint-eval-last-sexp-to-comment :which-key "expr -> comment")
-         "ed"   '(cider-eval-all-files :which-key "directory")
-         "ee"   '(cider-eval-sexp-at-point :which-key "expression")
-         "ef"   '(cider-eval-defun-at-point :which-key "function")
-         "em"   '(my/clojure-benchmark-last-expression :whichk-key "measure / benchmark")
-         "er"   '(cider-eval-dwim :which-key "region")
-         "eR"   '(cider-eval-last-sexp-and-replace :which-key "replace")
-         "eq"   '(cider-interrupt :which-key "quit (evaluation)")
-
-         "i"    '(cider-inspect :which-key "inspect")
-
-         "m"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                          :which-key "macro")
-         "me"   '(cider-macroexpand-1 :which-key "expand (once)")
-         "mE"   '(cider-macroexpand-all :which-key "expand (all)")
-
-         "n"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                          :which-key "namespace")
-         "nb"   '(cider-browse-ns :which-key "browse")
-         "nr"   '(cider-ns-refresh :which-key "refresh")
-         "ns"   '(cider-repl-set-ns :which-key "set")
-
-         "t"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                          :which-key "test")
-         "ta"   '(cider-test-run-project-tests :which-key "all")
-         "tA"   '(cider-auto-test-mode :which-key "toggle auto-test")
-         "tc"   '(cider-test-run-test :which-key "current")
-         "tf"   '(cider-test-toggle-fail-fast :which-key "fail-fast?")
-         "tl"   '(cider-test-run-loaded-tests :which-key "loaded namespaces")
-         "tn"   '(cider-test-run-ns-tests :which-key "namespace")
-         "tj"   '(my/clojure-test-jump :which-key "jump")
-         "tr"   '(cider-test-rerun-test :which-key "re-run last")
-         "tR"   '(cider-test-rerun-failed-tests :which-key "re-run all failed")
-
-         "v"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                          :which-key "view")
-         "vc"   '(cider-classpath :which-key "classpath")
-         "vn"   '(cider-browse-ns :which-key "namespaces")
-         "vN"   '(cider-browse-ns-all :which-key "namespaces (all)")
-         "vs"   '(cider-browse-spec :which-key "specs")
-         "vS"   '(cider-browse-spec-all :which-key "specs (all)")
-
-         "?"    '(cider-view-refcard :which-key "quickref"))
-
        (local-leader clojure-mode-map
          "a"    '(lsp-execute-code-action :which-key "action")
-         "eb"   '(cider-load-buffer :which-key "buffer")
-         "eB"   '(cider-load-buffer-and-switch-to-repl-buffer :which-key "buffer (and switch)")
-         "eF"   '(cider-load-buffer :which-key "file")
          "f"    '(:ignore t :major-modes clojure-mode :which-key "find")
          "fd"   '(lsp-find-definition :which-key "definition")
          "fD"   '(lsp-find-declaration :which-key "declaration")
          "fi"   '(lsp-find-implementation :which-key "implementation (protocol/multimethod)")
          "fr"   '(lsp-find-references :which-key "references"))
-
-       (local-leader cider-repl-mode-map
-         "h"    '(cider-repl-history :which-key "history"))
-
-       (local-leader cider-repl-history-mode-map
-         "/"    '(cider-repl-history-occur :which-key "filter"))
-
-       ('(insert motion) cider-repl-history-mode-map
-         "q"    'cider-repl-history-quit)
-
-       ('(insert motion) cider-repl-mode-map
-         "C-l"  'cider-repl-clear-buffer
-         "C-r"  'cider-repl-previous-matching-input)
-
-       ('(insert normal motion) cider-classpath-mode-map
-          "RET"    'cider-classpath-operate-on-point
-          "q"      'cider-popup-buffer-quit-function)
-
        ('(insert motion) clojure-mode-map
-         "C-a"  'lsp-execute-code-action)
-       ;; ('motion '(clojure-mode-map cider-repl-mode-map)
-       ;;          "C-]"  'cider-find-var
-       ;;          "C-o"  'cider-pop-back)
-       )
-
-     ;; format edn?
-     ;; cider-tap...
-     ;; cider-inspector
-     ;; cider-profile
-
-     (use-package clojure-mode-extra-font-locking)
-
-     (use-package cider
-       :custom
-       (org-babel-clojure-backend 'cider)
-       (cider-repl-display-help-banner nil)
-       (cider-eldoc-display-for-symbol-at-point nil)
-       :config
-       (require 'ob-clojure)
-       :general
-       ;; Prevent evil from clobbering important bindings:
-       ('(insert normal) cider-browse-ns-mode-map
-        "RET" 'cider-browse-ns-operate-at-point
-        "^"   'cider-browse-ns-all
-        "q"   'cider-popup-buffer-quit-function
-        "s"   'cider-browse-ns-find-at-point
-        "d"   'cider-browse-ns-doc-at-point))
-
-     (use-package clj-refactor
-       :preface
-       (defun my/clojure-refactor ()
-         (cljr-add-keybindings-with-prefix "C-s")
-         (clj-refactor-mode))
-       :hook (clojure-mode . my/clojure-refactor)
-       ;; :custom
-       ;; conflicts with clojure-lsp providing same facility:
-       ;; (cljr-add-ns-to-blank-clj-files nil)
-       :config
-       (dolist (mapping '(("s"  . "clojure.spec.alpha")
-                         ("gen" . "clojure.spec.gen.alpha")
-                         ("stest" . "clojure.spec.test.alpha")
-                         ("match" .  "clojure.core.match")
-                         ("combo" .  "clojure.math.combinatorics")
-                         ("browse" .  "clojure.java.browse")
-                         ("pprint" .  "clojure.pprint")
-                         ("shell" .  "clojure.java.shell")))
-               (add-to-list 'cljr-magic-require-namespaces mapping t))
-       :general
-       (local-leader cider-mode-map
-         "r" '(hydra-cljr-help-menu/body :which-key "refactor")))
-
-     ;; ;; key bindings
-     ;; ;; these help me out with the way I usually develop web apps
-     ;; (defun cider-start-http-server ()
-     ;;   (interactive)
-     ;;   (cider-load-current-buffer)
-     ;;   (let ((ns (cider-current-ns)))
-     ;;     (cider-repl-set-ns ns)
-     ;;     (cider-interactive-eval (format "(println '(def server (%s/start))) (println 'server)" ns))
-     ;;     (cider-interactive-eval (format "(def server (%s/start)) (println server)" ns))))
-     ;;
-     ;;
-     ;; (defun cider-refresh ()
-     ;;   (interactive)
-     ;;   (cider-interactive-eval (format "(user/reset)")))
-     ;;
-     ;; (defun cider-user-ns ()
-     ;;   (interactive)
-     ;;   (cider-repl-set-ns "user"))
-     ;;
-     ;; (eval-after-load 'cider
-     ;;   '(progn
-     ;;      (define-key clojure-mode-map (kbd "C-c C-v") 'cider-start-http-server)
-     ;;      (define-key clojure-mode-map (kbd "C-M-r") 'cider-refresh)
-     ;;      (define-key clojure-mode-map (kbd "C-c u") 'cider-user-ns)
-     ;;      (define-key cider-mode-map (kbd "C-c u") 'cider-user-ns)))
-   #+end_src
-
-   #+begin_src elisp
-     (add-hook 'clojure-mode-hook 'lsp)
-     (add-hook 'clojurescript-mode-hook 'lsp)
-     (add-hook 'clojurec-mode-hook 'lsp)
+        "C-a"  'lsp-execute-code-action))
    #+end_src
 * Other Languages
 ** Python
