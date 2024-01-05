@@ -502,7 +502,23 @@
        (defun my/clojure-refactor ()
          (cljr-add-keybindings-with-prefix "C-s")
          (clj-refactor-mode))
-       :hook (clojure-mode . my/clojure-refactor))
+       :hook (clojure-mode . my/clojure-refactor)
+       ;; :custom
+       ;; conflicts with clojure-lsp providing same facility:
+       ;; (cljr-add-ns-to-blank-clj-files nil)
+       :config
+       (dolist (mapping '(("s"  . "clojure.spec.alpha")
+                         ("gen" . "clojure.spec.gen.alpha")
+                         ("stest" . "clojure.spec.test.alpha")
+                         ("match" .  "clojure.core.match")
+                         ("combo" .  "clojure.math.combinatorics")
+                         ("browse" .  "clojure.java.browse")
+                         ("pprint" .  "clojure.pprint")
+                         ("shell" .  "clojure.java.shell")))
+               (add-to-list 'cljr-magic-require-namespaces mapping t))
+       :general
+       (local-leader cider-mode-map
+         "r" '(hydra-cljr-help-menu/body :which-key "refactor")))
 
      ;; ;; key bindings
      ;; ;; these help me out with the way I usually develop web apps
