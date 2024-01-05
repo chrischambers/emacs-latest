@@ -393,6 +393,14 @@
            (when clojure-file?
              (find-file other-file))))
 
+       ;; Source: https://adereth.github.io/blog/2014/05/29/custom-clojure-evaluation-keybindings-in-emacs/
+       (defun my/clojure-benchmark-last-expression ()
+         (interactive)
+         (cider-interactive-eval
+          (format "(require 'criterium.core)
+                  (criterium.core/quick-bench %s :verbose)"
+                  (cider-last-sexp))))
+
        ;; (defun my/clojure-setup ()
        ;;   (interactive)
        ;;   (font-lock-add-keywords
@@ -447,37 +455,101 @@
        ;; Wrap when navigating history.
        (cider-repl-wrap-history t)
        :general
+       (local-leader '(clojure-mode-map cider-repl-mode-map)
+         "d"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                          :which-key "docs")
+         "dc"   '(cider-clojuredocs :which-key "clojuredocs")
+         "dj"   '(cider-javadoc  :which-key "javadocs")
+
+         "D"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                          :which-key "debug")
+         "De"   '(cider-enlighten-mode :which-key "enlighten on/off")
+
+         "e"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                          :which-key "eval")
+         "ec"   '(cider-pprint-eval-last-sexp-to-comment :which-key "expr -> comment")
+         "ed"   '(cider-eval-all-files :which-key "directory")
+         "ee"   '(cider-eval-sexp-at-point :which-key "expression")
+         "ef"   '(cider-eval-defun-at-point :which-key "function")
+         "em"   '(my/clojure-benchmark-last-expression :whichk-key "measure / benchmark")
+         "er"   '(cider-eval-dwim :which-key "region")
+         "eR"   '(cider-eval-last-sexp-and-replace :which-key "replace")
+         "eq"   '(cider-interrupt :which-key "quit (evaluation)")
+
+         "i"    '(cider-inspect :which-key "inspect")
+
+         "m"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                          :which-key "macro")
+         "me"   '(cider-macroexpand-1 :which-key "expand (once)")
+         "mE"   '(cider-macroexpand-all :which-key "expand (all)")
+
+         "n"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                          :which-key "namespace")
+         "nb"   '(cider-browse-ns :which-key "browse")
+         "nr"   '(cider-ns-refresh :which-key "refresh")
+         "ns"   '(cider-repl-set-ns :which-key "set")
+
+         "t"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                          :which-key "test")
+         "ta"   '(cider-test-run-project-tests :which-key "all")
+         "tA"   '(cider-auto-test-mode :which-key "toggle auto-test")
+         "tc"   '(cider-test-run-test :which-key "current")
+         "tf"   '(cider-test-toggle-fail-fast :which-key "fail-fast?")
+         "tl"   '(cider-test-run-loaded-tests :which-key "loaded namespaces")
+         "tn"   '(cider-test-run-ns-tests :which-key "namespace")
+         "tj"   '(my/clojure-test-jump :which-key "jump")
+         "tr"   '(cider-test-rerun-test :which-key "re-run last")
+         "tR"   '(cider-test-rerun-failed-tests :which-key "re-run all failed")
+
+         "v"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                          :which-key "view")
+         "vc"   '(cider-classpath :which-key "classpath")
+         "vn"   '(cider-browse-ns :which-key "namespaces")
+         "vN"   '(cider-browse-ns-all :which-key "namespaces (all)")
+         "vs"   '(cider-browse-spec :which-key "specs")
+         "vS"   '(cider-browse-spec-all :which-key "specs (all)")
+
+         "?"    '(cider-view-refcard :which-key "quickref"))
+
        (local-leader clojure-mode-map
-                "a"    '(lsp-execute-code-action :which-key "action")
-                "e"    '(:ignore t :major-modes clojure-mode :which-key "eval")
-                "ee"   '(cider-eval-sexp-at-point :which-key "expression")
-                "ef"   '(cider-eval-defun-at-point :which-key "function")
-                "eF"   '(cider-load-buffer :which-key "file")
-                "er"   '(cider-eval-region :which-key "region")
-                "eb"   '(cider-eval-buffer :which-key "buffer")
-                "f"    '(:ignore t :major-modes clojure-mode :which-key "find")
-                "fd"   '(lsp-find-definition :which-key "definition")
-                "fD"   '(lsp-find-declaration :which-key "declaration")
-                "fi"   '(lsp-find-implementation :which-key "implementation (protocol/multimethod)")
-                "fr"   '(lsp-find-references :which-key "references")
-                "i"    '(cider-inspect :which-key "inspect")
-                "t"    '(:ignore t :major-modes clojure-mode :which-key "test")
-                "ta"   '(cider-test-run-project-tests :which-key "all")
-                "tc"   '(cider-test-run-test :which-key "current")
-                "tj"   '(my/clojure-test-jump :which-key "jump")
-                "tr"   '(cider-test-rerun-failed-tests :which-key "re-run failed"))
+         "a"    '(lsp-execute-code-action :which-key "action")
+         "eb"   '(cider-load-buffer :which-key "buffer")
+         "eB"   '(cider-load-buffer-and-switch-to-repl-buffer :which-key "buffer (and switch)")
+         "eF"   '(cider-load-buffer :which-key "file")
+         "f"    '(:ignore t :major-modes clojure-mode :which-key "find")
+         "fd"   '(lsp-find-definition :which-key "definition")
+         "fD"   '(lsp-find-declaration :which-key "declaration")
+         "fi"   '(lsp-find-implementation :which-key "implementation (protocol/multimethod)")
+         "fr"   '(lsp-find-references :which-key "references"))
+
        (local-leader cider-repl-mode-map
-                "e"    '(:ignore t  :major-modes cider-repl-mode :which-key "eval")
-                "ee"   '(cider-eval-sexp-at-point :which-key "expression")
-                "er"   '(cider-eval-region :which-key "region"))
+         "h"    '(cider-repl-history :which-key "history"))
+
+       (local-leader cider-repl-history-mode-map
+         "/"    '(cider-repl-history-occur :which-key "filter"))
+
+       ('(insert motion) cider-repl-history-mode-map
+         "q"    'cider-repl-history-quit)
+
        ('(insert motion) cider-repl-mode-map
-                "C-l"  'cider-repl-clear-buffer)
+         "C-l"  'cider-repl-clear-buffer
+         "C-r"  'cider-repl-previous-matching-input)
+
+       ('(insert normal motion) cider-classpath-mode-map
+          "RET"    'cider-classpath-operate-on-point
+          "q"      'cider-popup-buffer-quit-function)
+
        ('(insert motion) clojure-mode-map
-                "C-a"  'lsp-execute-code-action)
+         "C-a"  'lsp-execute-code-action)
        ;; ('motion '(clojure-mode-map cider-repl-mode-map)
        ;;          "C-]"  'cider-find-var
        ;;          "C-o"  'cider-pop-back)
        )
+
+     ;; format edn?
+     ;; cider-tap...
+     ;; cider-inspector
+     ;; cider-profile
 
      (use-package clojure-mode-extra-font-locking)
 
