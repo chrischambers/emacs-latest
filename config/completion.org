@@ -49,7 +49,7 @@
        "C-p"            #'previous-line-or-history-element))
   #+end_src
 
-* COMMENT <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
+* <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
   #+begin_quote
   The way completion styles work, when one style cannot match anything, Emacs
   tries the next one on the list, until one of them yields results. As such, it
@@ -228,7 +228,7 @@
       :hook (company-mode . company-box-mode))
   #+end_src
 
-* Testing
+* COMMENT Testing
   #+begin_src elisp
     ;; (setq fussy-filter-fn 'fussy-filter-default)
     ;; (setq fussy-filter-fn 'fussy-filter-orderless)
