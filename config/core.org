@@ -676,6 +676,7 @@ which aren't absolutely necessary, but are very important.
       :custom
       (company-backends (mapcar #'company-mode/backend-with-yas company-backends))
       (yas-snippet-dirs `(,(concat user-emacs-directory "snippets")))
+      (yas/triggers-in-field t)
       :general
       (leader
         "s"   '(:ignore t :which-key "snippets")
