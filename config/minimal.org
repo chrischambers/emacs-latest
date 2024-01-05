@@ -142,14 +142,17 @@ you can work with.
 
         "hb"   'describe-bindings
         "hc"   'describe-command
+        "he"   '(elisp-index-search :which-key "emacs lisp search")
         "hf"   'describe-function
         "hk"   'describe-key
         "hK"   'describe-keymap
         "hm"   'describe-mode
         "hp"   'describe-package
+        "hq"   '(shortdoc-display-group :which-key "quickref (shortdoc)")
         "hv"   'describe-variable
 
-        "hi"   '(info :which-key "info")
+        "hi"   '(info :which-key "info index")
+        "hI"   '(info-apropos :which-key "info search")
 
         ;; Insert operations
         "i"    '(:ignore t :which-key "insert")
