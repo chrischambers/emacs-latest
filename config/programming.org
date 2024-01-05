@@ -34,22 +34,33 @@
    #+begin_src elisp
      (use-package repl-toggle
        :preface
-       (defun clojure-repl ()
+       (defun my/cider-set-ns (&rest r)
+         (run-with-timer 0.5 nil 'cider-repl-set-ns my/cider-current-ns)
+         (remove-hook 'cider-repl-mode-hook #'my/cider-set-ns))
+
+       (defun my/cider-startup ()
+         "Jack in, set current ns and provide a handy cider usage tip as well."
+         (setq my/cider-current-ns (cider-current-ns))
+         (add-hook 'cider-repl-mode-hook #'my/cider-set-ns)
+         (and (cider-jack-in nil)
+              (cider-drink-a-sip)))
+
+       (defun my/clojure-repl ()
          (interactive)
          (if (cider-current-repl)
-             ;; Switch to repl, ensuring namespace matches current buffer:
-             (cider-switch-to-repl-buffer t)
-           ;; Jack in, and provide a handy cider usage tip as well:
-           (and (cider-jack-in '()) (cider-drink-a-sip))))
+             (cider-switch-to-repl-buffer)
+           (my/cider-startup)))
+
        (defun scheme-repl ()
          (interactive)
          (geiser-mode-switch-to-repl nil))
+
        :hook (prog-mode . repl-toggle-mode)
        :custom
        (rtog/goto-buffer-fun 'pop-to-buffer)
        ;; (rtog/fullscreen t) ; not sure about this
        (rtog/mode-repl-alist
-	'((emacs-lisp-mode . ielm)
+        '((emacs-lisp-mode . ielm)
           (ruby-mode . inf-ruby)
           (js-mode . skewer-repl)
           (haskell-mode . haskell-interactive-switch)
@@ -61,7 +72,7 @@
           (python-mode . elpy-shell-switch-to-shell)))
        :general
        (local-leader 'clojure-mode-map
-         ","  '(clojure-repl :which-key "REPL"))
+         ","  '(my/clojure-repl :which-key "REPL"))
        (local-leader 'cider-repl-mode-map
          ","  '(cider-switch-to-last-clojure-buffer :which-key "REPL"))
        (local-leader '(prog-mode-map comint-mode-map)
