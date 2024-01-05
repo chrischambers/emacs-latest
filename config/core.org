@@ -406,6 +406,11 @@ which aren't absolutely necessary, but are very important.
     #+end_src
 
 * Improving Emacs via Elisp Extensions
+** =require= useful in-built libraries
+   #+begin_src elisp
+     (require 'seq)
+     (require 'thunk)
+   #+end_src
 ** =inspect= function for pretty-printing and storing off a value for introspection
    #+begin_src elisp
      (defun inspect (contents &optional no-switch)
