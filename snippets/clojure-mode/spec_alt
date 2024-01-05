@@ -1,0 +1,6 @@
+# key: sa
+# name: spec alt
+# --
+(s/alt
+  :${1:branch1} (s/cat $2)
+  :${3:branch2} (s/cat $4))
