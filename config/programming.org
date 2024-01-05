@@ -161,12 +161,13 @@
       :init
       (setq lsp-before-save-edits t
             ;; lsp-inhibit-message t
+            lsp-use-plists t
             lsp-lens-enable t
             lsp-semantic-tokens-enable t
             lsp-eldoc-render-all nil
             lsp-highlight-symbol-at-point nil
             ;; read-process-output-max (* 1024 1024)
-            lsp-idle-delay 0.500))
+            lsp-idle-delay 0.900))
   #+end_src
 
 ** LSP-UI
