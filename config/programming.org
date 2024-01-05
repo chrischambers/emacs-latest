@@ -269,6 +269,23 @@
          "eb" '(mine/eval-region-or-buffer :which-key "buffer/region")))
    #+end_src
 
+** Re-bind backtrace-mode keys correctly
+   #+begin_src elisp
+     (general-def '(normal motion) backtrace-mode-map
+       "#" 'backtrace-toggle-print-circle
+       "+" 'backtrace-multi-line
+       "-" 'backtrace-single-line)
+
+     (local-leader backtrace-mode-map
+       "+" '(backtrace-expand-ellipses :which-key "expand ellipses")
+
+       "t"  '(:ignore t :major-modes backtrace-mode :which-key "toggle")
+       "tv" '(backtrace-toggle-locals :which-key "variables")
+       "tg" '(backtrace-toggle-print-gensym :which-key "gensyms")
+
+       "n" '(backtrace-forward-frame :which-key "forward frame")
+       "p" '(backtrace-backward-frame :which-key "previous frame"))
+   #+end_src
 ** COMMENT Testing symex
    #+begin_src elisp
      (use-package symex
