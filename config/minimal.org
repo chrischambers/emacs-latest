@@ -180,7 +180,10 @@ you can work with.
 
         ;; View operations
         "v"    '(:ignore t :which-key "view")
+        "vc"   '(list-colors-display :which-key "colours")
+        "vi"   '(what-cursor-position :which-key "information")
         "vw"   '(toggle-truncate-lines :which-key "wrap lines (toggle)")
+        "vt"   '(describe-text-properties :which-key "text properties")
 
         ;; Window operations
         "w"    '(:ignore t :which-key "window")
