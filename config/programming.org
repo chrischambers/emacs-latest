@@ -384,14 +384,14 @@
                 (clojure-file? (s-ends-with? ".clj" fname))
                 (test-file? (s-ends-with? "_test.clj" fname))
                 (other-file (if test-file?
-                              (replace-regexp-in-string
-                               "/test/\\([^.]+\\)_test\\.clj$"
-                               "/src/\\1.clj" fname)
+                                (replace-regexp-in-string
+                                 "/test/\\([^.]+\\)_test\\.clj$"
+                                 "/src/\\1.clj" fname)
                               (replace-regexp-in-string
                                "/src/\\([^.]+\\)\\.clj$"
                                "/test/\\1_test.clj" fname))))
            (when clojure-file?
-               (find-file other-file))))
+             (find-file other-file))))
 
        ;; (defun my/clojure-setup ()
        ;;   (interactive)
