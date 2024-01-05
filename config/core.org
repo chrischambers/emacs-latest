@@ -80,7 +80,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 * Text-wrapping
-** Wrap paragraphs (fill) automatically
+** Hard-wrap paragraphs (fill) automatically
     Org mode inherits from text mode, so both will benefit from the following:
 
     #+begin_src elisp
