@@ -424,7 +424,7 @@
        (cider-font-lock-dynamically nil)
 
        ;; Where to store the cider history (no-littering).
-       (cider-repl-history-file (concat user-emacs-directory "var/" "cider-history"))
+       (cider-repl-history-file (concat no-littering-var-directory "cider-history"))
        ;; Wrap when navigating history.
        (cider-repl-wrap-history t)
        :general
