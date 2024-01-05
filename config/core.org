@@ -665,23 +665,23 @@ which aren't absolutely necessary, but are very important.
       :after company company-box
       :preface
       (defun company-mode/backend-with-yas (backend)
-	(if (and (listp backend) (member 'company-yasnippet backend))
-	    backend
-	  (append (if (consp backend) backend (list backend))
-		  '(:with company-yasnippet))))
+        (if (and (listp backend) (member 'company-yasnippet backend))
+            backend
+          (append (if (consp backend) backend (list backend))
+                  '(:with company-yasnippet))))
 
       (defun add-company-backend (backend)
-	"Inserts a backend onto company-backend, enabling yasnippet completion where appropriate."
-	(push (company-mode/backend-with-yas backend) company-backends))
+        "Inserts a backend onto company-backend, enabling yasnippet completion where appropriate."
+        (push (company-mode/backend-with-yas backend) company-backends))
       :custom
       (company-backends (mapcar #'company-mode/backend-with-yas company-backends))
       (yas-snippet-dirs `(,(concat user-emacs-directory "snippets")))
       :general
       (leader
-	"s"   '(:ignore t :which-key "snippets")
-	"si"  '(yas-insert-snippet :which-key "insert")
-	"se"  '(yas-visit-snippet-file :which-key "edit")
-	"sc"  '(yas-new-snippet :which-key "create")))
+        "s"   '(:ignore t :which-key "snippets")
+        "si"  '(yas-insert-snippet :which-key "insert")
+        "se"  '(yas-visit-snippet-file :which-key "edit")
+        "sc"  '(yas-new-snippet :which-key "create")))
   #+end_src
 
 * <<<ripgrep>>>
