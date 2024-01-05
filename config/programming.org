@@ -423,6 +423,25 @@
        (cider-repl-use-pretty-printing t)
        (cider-font-lock-dynamically nil)
 
+       ;; When evaluating buffer just save, don't prompt:
+       (cider-save-file-on-load t)
+
+       ;; Add javadoc information
+       (cider-enrich-classpath t)
+
+       ;; Set a reasonable size limit for the REPL buffer so performance doesn't
+       ;; suffer.
+       (cider-repl-buffer-size-limit 100000)
+
+       ;; Auto-require namespace when setting it
+       (cider-repl-require-ns-on-set t)
+
+       ;; When evaluating a comment block, this will return the inner value insstead
+       ;; of the nil:
+       (clojure-toplevel-inside-comment-form t)
+
+       (cider-test-show-report-on-success t)
+
        ;; Where to store the cider history (no-littering).
        (cider-repl-history-file (concat no-littering-var-directory "cider-history"))
        ;; Wrap when navigating history.
