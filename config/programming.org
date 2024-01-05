@@ -485,6 +485,7 @@
        :custom
        (org-babel-clojure-backend 'cider)
        (cider-repl-display-help-banner nil)
+       (cider-eldoc-display-for-symbol-at-point nil)
        :config
        (require 'ob-clojure)
        :general
