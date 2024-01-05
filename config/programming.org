@@ -269,7 +269,7 @@
          "eb" '(mine/eval-region-or-buffer :which-key "buffer/region")))
    #+end_src
 
-** Testing symex
+** COMMENT Testing symex
    #+begin_src elisp
      (use-package symex
        :config
