@@ -412,9 +412,9 @@
        ;; go right to the REPL buffer when it's finished connecting
        (cider-repl-pop-to-buffer-on-connect t)
 
-       ;; When there's a cider error, show its buffer and switch to it
+       ;; When there's a cider error, show its buffer
        (cider-show-error-buffer t)
-       (cider-auto-select-error-buffer t)
+       ;; (cider-auto-select-error-buffer t)
 
        (cider-popup-stacktraces nil)
        (cider-repl-popup-stacktraces t)
