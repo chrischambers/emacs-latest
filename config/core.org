@@ -144,36 +144,40 @@ which aren't absolutely necessary, but are very important.
 * Set [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Frame-Parameters.html][frame parameters]]
   Full list available [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Frame-Parameters.html#Frame-Parameters][here]].
 
-  : #+begin_src elisp
-  :   (when IS-MAC
-  :     (progn
-  :       (add-to-list 'default-frame-alist '(undecorated-round . t))
-  :       ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  :       (add-to-list 'default-frame-alist '(ns-appearance . light))))
-  : #+end_src
-
+** Initial display (laptop)
   #+begin_src elisp
     (if (display-graphic-p)
-        (setq initial-frame-alist
-              '(
-                (name . "Emacs")
-                (internal-border-width . 24)  ; padding, ala nano-emacs
-                (tool-bar-lines . 0)
-                (width . 171)  ; chars
-                (height . 50)  ; lines
-                )))
+        (progn
+          (setq frame-resize-pixelwise 1)
+          (setq initial-frame-alist
+                '((internal-border-width . 24)  ; padding, ala nano-emacs
+                  (tool-bar-lines . 0)
+                  (width . 172)  ; chars
+                  (height . 44)  ; lines
+                  ))))
   #+end_src
-** COMMENT Set window placement in OSX (laptop)
+
+** COMMENT Rounded/Transparent title bars
+  #+begin_src elisp
+    (when IS-MAC
+      (progn
+        (add-to-list 'default-frame-alist '(undecorated-round . t))
+        ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+        (add-to-list 'default-frame-alist '(ns-appearance . light))))
+  #+end_src
+
+** Set window placement in OSX (laptop)
    #+begin_src elisp
      (when IS-MAC
        (progn
-         (add-to-list 'initial-frame-alist '(top . 35))
-         (add-to-list 'initial-frame-alist '(left . 5))))
+         (add-to-list 'initial-frame-alist '(top . 0))
+         (add-to-list 'initial-frame-alist '(left . 0))))
    #+end_src
 
-* COMMENT Set Frame Title
+* Set Frame Title
   #+begin_src elisp
-    (org-set-frame-title "Emacs: Doing Things")
+    ;; (org-set-frame-title "Chris Chambers - Emacs")
+    (setq frame-title-format "%b -- Emacs")
   #+end_src
 
 * Extend Evil
