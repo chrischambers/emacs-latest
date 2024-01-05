@@ -147,4 +147,4 @@
 ;; aspiring malicious third party.
 (setq auth-sources (list "~/.authinfo.gpg"))
 
-(setq native-comp-deferred-compilation-deny-list nil)
+(customize-set-variable 'native-comp-async-query-on-exit t)
