@@ -13,15 +13,36 @@ which aren't absolutely necessary, but are very important.
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* Silence compiler warnings
-  These can be pretty disruptive with native-compilation enabled:
+* Customize Warnings
+** Silence compiler warnings
+   These can be pretty disruptive with native-compilation enabled:
 
-  #+begin_src elisp
-    (when (>= emacs-major-version 28)
-      (setq native-comp-async-report-warnings-errors nil)
-      (setq comp-async-report-warnings-errors nil))
-    (setq warning-minimum-level :error)
-  #+end_src
+   #+begin_src elisp
+     (when (>= emacs-major-version 28)
+       (customize-set-variable 'native-comp-async-report-warnings-errors 'silent)
+       (customize-set-variable 'comp-async-report-warnings-errors 'silent))
+   #+end_src
+
+** Set display severity
+   #+begin_src elisp
+     (customize-set-variable 'warning-minimum-level :error)
+   #+end_src
+
+** Include timestamp in =*Warnings*= buffer
+   #+begin_src elisp
+     (defun my/warning-prefix-function (severity warning-levels)
+       (let ((timestamp (format-time-string "[%d/%m/%Y %H:%M:%S] ")))
+         (insert (propertize timestamp 'face 'org-date)))
+       warning-levels)
+
+     (customize-set-variable 'warning-prefix-function #'my/warning-prefix-function)
+   #+end_src
+
+: ** Enable wrapping in =*Warnings*= buffer
+:    #+begin_src elisp
+:      (with-current-buffer "*Warnings*"
+:        (setq truncate-lines nil))
+:    #+end_src
 
 * Startup message (timestamp)
   #+begin_src elisp
