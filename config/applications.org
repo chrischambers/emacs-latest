@@ -138,18 +138,37 @@
   file tree:
 
   #+begin_src elisp
-    (require 'dired)
-    (general-define-key
-     :states '(normal)
-     :keymaps 'dired-mode-map
-     "RET" 'dired-find-alternate-file
-     "^" (lambda () (interactive) (find-alternate-file "..")))
+    (use-package dired
+      :no-require t
+      :straight nil
+      :config
+      (require 'dired)
+      :custom
+      (dired-dwim-target t)
+      :general
+      ('normal dired-mode-map
+        ;; "RET" 'dired-find-alternate-file
+        ;; "C-RET" 'dired-find-file ; useful for splitting
+        "^"    (lambda () (interactive) (find-alternate-file ".."))))
   #+end_src
+
+** <<<dired-narrow>>>: narrow files by regex (=s=) / fuzzy string ([[https://github.com/Fuco1/dired-hacks#dired-narrow][github]])
+   Use =g r= to revert the buffer (i.e. remove any narrowing).
+
+   #+begin_src elisp
+     (use-package dired-narrow
+       :custom
+       (dired-auto-revert-buffer t))
+   #+end_src
+
+** <<<dired-subtree>>>: =TAB= to toggle quick-view of directory contents
+   #+begin_src elisp
+     (use-package dired-subtree)
+   #+end_src
 
 * <<<treemacs>>> ([[https://github.com/Alexander-Miller/treemacs][github]]): file drawer
   #+begin_src elisp
     (use-package treemacs
-      :init
       :custom
       (treemacs-width 30)
       (treemacs-tag-follow-delay 0.5)
@@ -203,12 +222,15 @@
       :after treemacs projectile)
     (use-package treemacs-magit
       :after treemacs magit)
-    (use-package treemacs-icons-dired
-      :after treemacs dired
-      :config (treemacs-icons-dired-mode))
-
     (if (require 'persp-mode nil 'noerror)
         (use-package treemacs-persp
           :after treemacs persp-mode
           :config (treemacs-set-scope-type 'Perspectives)))
   #+end_src
+
+** Use treemacs icons in dired
+   #+begin_src elisp
+     (use-package treemacs-icons-dired
+       :hook (dired-mode . treemacs-icons-dired-mode)
+       :config (treemacs-icons-dired-mode))
+   #+end_src
