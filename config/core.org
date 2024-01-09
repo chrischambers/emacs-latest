@@ -285,6 +285,12 @@ which aren't absolutely necessary, but are very important.
            "-" 'my/dec-timestamp-or-number))
    #+end_src
 
+** <<<evil-lion>>>: Left/right align on symbols like =:= with =gl= / =gL= ([[https://github.com/edkolev/evil-lion][github]])
+   #+begin_src elisp
+     (use-package evil-lion
+       :config
+       (evil-lion-mode))
+   #+end_src
 ** Provide function for fixing interaction between (minor) mode and evil
    #+begin_src elisp
      (defun my/keymap-fix-with-evil-mode (mode &optional hook map)
