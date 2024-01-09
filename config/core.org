@@ -258,8 +258,8 @@ which aren't absolutely necessary, but are very important.
      (use-package evil-numbers
        :general
        ('motion '(text-mode-map prog-mode-map)
-	"+" 'evil-numbers/inc-at-pt
-	"-" 'evil-numbers/dec-at-pt))
+	"+" 'evil-numbers/inc-at-pt-incremental
+	"-" 'evil-numbers/dec-at-pt-incremental))
    #+end_src
 
 *** Increment/decrement timestamp or number at point in org-mode
@@ -271,14 +271,14 @@ which aren't absolutely necessary, but are very important.
            (interactive "p")
            (if (org-at-timestamp-p 'lax)
                (org-timestamp-up-day amount)
-             (evil-numbers/inc-at-pt amount nil)))
+             (evil-numbers/inc-at-pt-incremental amount nil)))
 
          (defun my/dec-timestamp-or-number (amount)
            "Decrements the timestamp or number at point."
            (interactive "p")
            (if (org-at-timestamp-p 'lax)
                (org-timestamp-down-day amount)
-             (evil-numbers/dec-at-pt amount nil)))
+             (evil-numbers/dec-at-pt-incremental amount nil)))
 
          (general-def 'motion org-mode-map
            "+" 'my/inc-timestamp-or-number
