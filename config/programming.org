@@ -288,7 +288,7 @@
     #+begin_src elisp
       (use-package smartparens
         :hook ((lisp-mode . smartparens-mode)
-               (emacs-lisp-mode . evil-cleverparens-mode)
+               (emacs-lisp-mode . smartparens-mode)
                (clojure-mode . smartparens-mode)
                (clojurec-mode . smartparens-mode)
                (clojurescript-mode . smartparens-mode)
