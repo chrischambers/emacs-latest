@@ -1029,7 +1029,8 @@
         (setq lsp-haskell-server-path "haskell-language-server-wrapper")
         (setq lsp-haskell-server-args ())
         ;; Comment/uncomment this line to see interactions between lsp client/server.
-        (setq lsp-log-io t))
+        ;; (setq lsp-log-io t)
+        )
     #+end_src
 
 *** =haskell-doc-mode=: displays type signature of function & uses smart indentation
