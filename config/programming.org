@@ -154,22 +154,22 @@
    #+end_src
 
 * LSP / Language Server Protocol
-  #+begin_src elisp
-    (use-package lsp-mode
-      :commands (lsp lsp-deferred)
-      :hook (lsp-mode . lsp-enable-which-key-integration)
-      :init
-      (setq lsp-before-save-edits t
-            ;; lsp-inhibit-message t
-            lsp-use-plists t
-            lsp-lens-enable t
-            lsp-semantic-tokens-enable t
-            lsp-eldoc-render-all nil
-            lsp-highlight-symbol-at-point nil
-            ;; read-process-output-max (* 1024 1024)
-            lsp-idle-delay 0.900))
-  #+end_src
-
+** LSP
+   #+begin_src elisp
+     (use-package lsp-mode
+       :commands (lsp lsp-deferred)
+       :hook (lsp-mode . lsp-enable-which-key-integration)
+       :init
+       (setq lsp-before-save-edits t
+             ;; lsp-inhibit-message t
+             lsp-use-plists t
+             lsp-lens-enable t
+             lsp-semantic-tokens-enable t
+             lsp-eldoc-render-all nil
+             lsp-highlight-symbol-at-point nil
+             read-process-output-max (* 4 1024 1024)
+             lsp-idle-delay 0.900))
+   #+end_src
 ** LSP-UI
    To understand which options affect what, see:
    [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A guide on disabling/enabling lsp-mode features]]
@@ -460,6 +460,11 @@
            (format "(require 'criterium.core)
                    (criterium.core/quick-bench %s :verbose)"
                    (cider-last-sexp))))
+
+        (defun my/debug-clojure-expression ()
+          (interactive)
+          (cider-eval-defun-at-point t))
+
         :config
         (require 'ob-clojure)
         :custom
@@ -497,11 +502,13 @@
           "d"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "docs")
           "dc"   '(cider-clojuredocs :which-key "clojuredocs")
+          "dC"   '(cider-clojuredocs-web :which-key "clojuredocs (web)")
           "dj"   '(cider-javadoc  :which-key "javadocs")
 
           "D"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "debug")
-          "De"   '(cider-enlighten-mode :which-key "enlighten on/off")
+          "De"   '(my/debug-clojure-expression :which-key "debug")
+          "DE"   '(cider-enlighten-mode :which-key "enlighten on/off")
 
           "e"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "eval")
@@ -526,6 +533,9 @@
           "nb"   '(cider-browse-ns :which-key "browse")
           "nr"   '(cider-ns-refresh :which-key "refresh")
           "ns"   '(cider-repl-set-ns :which-key "set")
+
+          "r"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "refactor")
 
           "t"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "test")
@@ -619,7 +629,8 @@
           (cljr-add-keybindings-with-prefix "C-s")
           (clj-refactor-mode))
         :hook (clojure-mode . my/clojure-refactor)
-        ;; :custom
+        :custom
+        (cljr-warn-on-eval nil)
         ;; conflicts with clojure-lsp providing same facility:
         ;; (cljr-add-ns-to-blank-clj-files nil)
         :config
@@ -634,7 +645,12 @@
           (add-to-list 'cljr-magic-require-namespaces mapping t))
         :general
         (local-leader cider-mode-map
-          "r" '(hydra-cljr-help-menu/body :which-key "refactor")))
+          "rr"   '(lsp-rename :which-key "rename")
+          "ra"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+                           :which-key "add")
+          "rap"  '(cljr-add-project-dependency :which-key "project deps")
+          "rad"  '(cljr-add-declaration :which-key "declaration")
+          "R"    '(hydra-cljr-help-menu/body :which-key "refactor (hydra)")))
     #+end_src
 
 *** Clojure LSP
