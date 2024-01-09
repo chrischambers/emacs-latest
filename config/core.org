@@ -291,6 +291,20 @@ which aren't absolutely necessary, but are very important.
        :config
        (evil-lion-mode))
    #+end_src
+** <<<evil-commentary>>>: Comment out via =gc<text-object>= or =gcc= (line) ([[https://github.com/linktohack/evil-commentary][github]])
+   #+begin_src elisp
+     (use-package evil-commentary
+       :config
+       (evil-commentary-mode))
+   #+end_src
+
+   - =S-/= also comments out a line (in insert or normal mode)
+   - Can also be used in ex mode:
+
+     #+begin_example
+     :g/TODO/evil-commentary
+     #+end_example
+
 ** Provide function for fixing interaction between (minor) mode and evil
    #+begin_src elisp
      (defun my/keymap-fix-with-evil-mode (mode &optional hook map)
