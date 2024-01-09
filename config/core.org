@@ -669,6 +669,7 @@ which aren't absolutely necessary, but are very important.
       (avy-background nil)
       :general
       ('insert "M-s" 'avy-goto-word-1)
+      ;; (:states 'normal :keymaps 'override
       ('normal
        ;; "s" 'avy-goto-word-1
        "s"   'avy-goto-char
