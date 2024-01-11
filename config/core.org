@@ -184,6 +184,8 @@ which aren't absolutely necessary, but are very important.
 ** <<<evil-collection>>>: evil-friendly bindings for various packages/modes ([[https://github.com/emacs-evil/evil-collection/blob/master/readme.org][source]])
    #+begin_src elisp
      (use-package evil-collection
+       :init
+       (setq evil-want-keybinding nil)
        :after evil
        :custom
        (evil-collection-setup-minibuffer t)
