@@ -38,12 +38,39 @@
          (run-with-timer 0.5 nil 'cider-repl-set-ns my/cider-current-ns)
          (remove-hook 'cider-repl-mode-hook #'my/cider-set-ns))
 
+       (defun my/notes-active-within-buffer? ()
+         (interactive)
+         (s-starts-with? my/notes-directory (buffer-file-name) t))
+
+       (defun my/possibly-launch-project-repl (expanded _params &optional cljs-p)
+         "Evaluate EXPANDED code block using cider.
+     When CLJS-P is non-nil, use a cljs connection instead of clj.
+     The PARAMS from Babel are not used in this function."
+         (org-require-package 'cider "Cider")
+         (let* ((connection (cider-current-connection (if cljs-p "cljs" "clj"))))
+           (unless connection
+             (if (my/notes-active-within-buffer?)
+                 (cider-jack-in `(:project-dir ,my/notes-directory))
+               (sesman-start-session 'CIDER)))
+           (if (not connection)
+               ;; Display in the result instead of using `user-error'
+               "Please reevaluate when nREPL is connected"
+             (let ((response (nrepl-sync-request:eval expanded connection)))
+               (or (nrepl-dict-get response "root-ex")
+                   (nrepl-dict-get response "ex")
+                   (nrepl-dict-get response "out"))))))
+
+       (advice-add 'ob-clojure-eval-with-cider :override #'my/possibly-launch-project-repl)
+
        (defun my/cider-startup ()
          "Jack in, set current ns and provide a handy cider usage tip as well."
          (setq my/cider-current-ns (cider-current-ns))
          (add-hook 'cider-repl-mode-hook #'my/cider-set-ns)
-         (and (cider-jack-in nil)
-              (cider-drink-a-sip)))
+         (let ((params (if (my/notes-active-within-buffer?)
+                           (:project-dir my/notes-directory)
+                         nil)))
+           (and (cider-jack-in params)
+                (cider-drink-a-sip))))
 
        (defun my/clojure-repl ()
          (interactive)
