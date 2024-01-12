@@ -355,6 +355,7 @@
        (local-leader emacs-lisp-mode-map
          "e"  '(:ignore t :major-modes emacs-lisp-mode :which-key "eval")
          "ee" '(eval-last-sexp :which-key "expression")
+         "eE" '(eval-print-last-sexp :which-key "expression (print)")
          "ef" '(eval-defun :which-key "function")
          "eF" '(load-file :which-key "file")
          "er" '(eval-region :which-key "region")
