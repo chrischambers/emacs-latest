@@ -869,8 +869,8 @@
       :straight (org-ref :type git :host github :repo "jkitchin/org-ref")
       ;; :custom
       ;; (reftex-default-bibliography '("~/org/bibliography/references.bib")) ??
-      :config
-      (require 'org-ref-ivy)
+      ;; :config
+      ;; (require 'org-ref-ivy)
       :general
       (local-leader org-mode-map
         "c"   '(org-ref-insert-link-hydra/body :which-key "cite"))
