@@ -362,8 +362,10 @@
         :init
         (setq my/org-capture-templates (concat user-emacs-directory "templates/"))
         (setq my/default-template (concat my/org-capture-templates "default.org"))
+
         :preface
         (defvar my/captured-title  nil)
+
         (defun my/get-filepath-from-title (&optional subdirectory date-prefix)
           "Prompt for a title, return filepath located under org-directory.
 
@@ -386,8 +388,10 @@
             (make-directory path t)
             file-path))
 
-        ;; (defun my/capture-title ()
-        ;;   (setq my/captured-title (s-titleize (car minibuffer-history))))
+        (defun my/captured-title ()
+          "Let's exploit the fact that emacs is a lisp/2."
+          ;; (setq my/captured-title (s-titleize (car minibuffer-history)))
+          my/captured-title)
 
         (defun my/auto-add-roam-alias-on-capture ()
           (org-roam-alias-add my/captured-title))
