@@ -363,12 +363,15 @@
         (setq my/org-capture-templates (concat user-emacs-directory "templates/"))
         (setq my/default-template (concat my/org-capture-templates "default.org"))
         :preface
+        (defvar my/captured-title  nil)
         (defun my/get-filepath-from-title (&optional subdirectory date-prefix)
           "Prompt for a title, return filepath located under org-directory.
 
       If `subdirectory' is specified, that will be included in the path.
 
-      SIDE-EFFECT: Creates ancestor directories for `file-path' if they do not exist."
+      SIDE-EFFECTS:
+      - Creates ancestor directories for `file-path' if they do not exist.
+      - Sets my/captured-title, for use in templates."
           (let* ((p (or subdirectory "/"))
                  (p (if (not (s-starts-with? "/" p)) (s-prepend "/" p) p))
                  (p (if (not (s-ends-with? "/" p))   (s-append  "/" p) p))
@@ -379,8 +382,16 @@
                            (concat (format-time-string "%Y-%m") "-" slug)
                          slug))
                  (file-path (concat path slug ".org")))
+            (setq my/captured-title title)
             (make-directory path t)
             file-path))
+
+        ;; (defun my/capture-title ()
+        ;;   (setq my/captured-title (s-titleize (car minibuffer-history))))
+
+        (defun my/auto-add-roam-alias-on-capture ()
+          (org-roam-alias-add my/captured-title))
+
         :straight nil
         :custom
         (org-default-notes-file (concat org-directory "/todo.org"))
@@ -388,8 +399,11 @@
          `(("t" "Task" entry
             (file+headline "todo.org" "Inbox")
             "* TODO %?")
+           ("b" "Book Notes" plain
+            (file (lambda () (my/get-filepath-from-title "sources")))
+            (file ,(concat my/org-capture-templates "book-notes.org")))
            ("p" "Project" plain
-            (file (lambda () (my/get-filepath-from-title "projects" t)))
+            (file (lambda () (my/get-filepath-from-title "projects" :date)))
             (file ,(concat my/org-capture-templates "project.org")))
            ("w" "Word" plain
             (file (lambda () (my/get-filepath-from-title "memex/#words")))

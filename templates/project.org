@@ -1,5 +1,5 @@
-#+title: Project: %((lambda () (concat (s-titleize (car minibuffer-history)) " (" (format-time-string "%m/%Y") ")")))
-#+author: Chris Chambers
+#+title: Project: %(concat (s-titleize (car minibuffer-history)) " (" (format-time-string "%m/%Y") ")")
+#+author: %n
 #+email: magma.chambers@gmail.com
 #+date: %<[%Y-%m-%d]>
 #+language: en-gb
