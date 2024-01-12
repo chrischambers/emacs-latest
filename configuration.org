@@ -10,13 +10,16 @@
     ;; -*- lexical-binding: t -*-
   #+end_src
 
-* Set personal information
+*
+Set personal information
   #+begin_src elisp
     (setq user-full-name "Chris Chambers"
           user-mail-address "magma.chambers@gmail.com"
           calendar-latitude 51.501476
           calendar-longitude -0.140634
-          calendar-location-name "London, UK")
+          calendar-location-name "London, UK"
+          straight-host-usernames '((github . "chrischambers")
+                                    (gitlab . "chrischambers")))
   #+end_src
 
 * Set file paths
