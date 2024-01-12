@@ -1,4 +1,4 @@
-#+title: Lexicon: %((lambda () (s-titleize (car minibuffer-history))))
+#+title: Lexicon: %(my/captured-title)
 #+author: Chris Chambers
 #+email: magma.chambers@gmail.com
 #+date: %<[%Y-%m-%d]>
@@ -6,12 +6,12 @@
 #+startup: align shrink inlineimages latexpreview showall
 #+filetags: :lexicon:
 
-* %((lambda () (s-titleize (car minibuffer-history)))) %((lambda () (org-set-tags '("lexicon" "drill"))))
+* %(my/captured-title) %(org-set-tags '("lexicon" "drill"))
   :PROPERTIES:
   :ID:           %(org-id-new)
   :ROAM_ALIASES: %(my/roam-alias-default)
   :END:
-  %((lambda () (s-titleize (car minibuffer-history))))
+  %(my/captured-title)
 
 ** Definition
    %?

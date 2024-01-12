@@ -1,5 +1,5 @@
-#+author: Chris Chambers
-#+email: magma.chambers@gmail.com
+#+author: %n
+#+email: %(message-user-mail-address)
 #+date: %<[%Y-%m-%d]>
 #+language: en-gb
 #+startup: align shrink inlineimages latexpreview content

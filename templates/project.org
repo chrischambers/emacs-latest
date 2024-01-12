@@ -1,6 +1,6 @@
-#+title: Project: %(concat (s-titleize (car minibuffer-history)) " (" (format-time-string "%m/%Y") ")")
+#+title: Project: %(concat my/captured-title " (" (format-time-string "%m/%Y") ")")
 #+author: %n
-#+email: magma.chambers@gmail.com
+#+email: %(message-user-mail-address)
 #+date: %<[%Y-%m-%d]>
 #+language: en-gb
 #+startup: align shrink inlineimages latexpreview content

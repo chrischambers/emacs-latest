@@ -1,12 +1,14 @@
 :PROPERTIES:
 :ID:           %(org-id-new)
-:ROAM_ALIASES: %((lambda () my/captured-title))
+:ROAM_ALIASES: %(my/captured-title)
 :ROAM_REFS:    %(format "[[cite:&%s]]" (org-ref-read-key))
 :END:
-#+title: Book Notes: %((lambda () my/captured-title))
+#+title: Book Notes: %(my/captured-title)
 #+author: %n
-#+email: %((lambda () user-mail-address))
+#+email: %(message-user-mail-address)
 #+date: %<[%Y-%m-%d]>
 #+language: en-gb
 #+startup: align shrink inlineimages latexpreview content
 #+filetags: :book-notes:
+
+%?
