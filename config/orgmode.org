@@ -901,8 +901,41 @@
       :custom
       (org-noter-default-notes-file-names nil)
       (org-noter-notes-search-path `(,(f-join my/notes-directory "sources")))
+      (org-noter-prefer-root-as-file-level t)
+      (org-noter-always-create-frame nil)
+      (org-noter-use-indirect-buffer nil)
+      (org-noter-doc-property-in-notes t)
+      (org-noter-highlight-selected-text t)
+
+      :preface
+      (setq my/book-notes-directory (f-join my/notes-directory "sources"))
+
+      (defun my/notes-file-for-ebook (path)
+        (f-join my/book-notes-directory (f-swap-ext (f-filename path) "org")))
+
+      (defun my/org-noter-session-from-document-file (&optional arg document-path)
+        (let ((document-path
+               (or (run-hook-with-args-until-success
+                    'org-noter-get-buffer-file-name-hook major-mode)
+                   document-path)))
+          (when (f-ancestor-of? my/ebooks-directory document-path)
+            (let ((target (my/notes-file-for-ebook document-path)))
+              (message target)
+              ;; (with-current-buffer (find-file-noselect target)
+              ;;   (goto-char (point-max))
+              ;;   (insert "This worked!")
+              ;;   )
+              ))))
       :config
       (require 'org-noter)
+
+      (remove-hook
+       'org-noter-create-session-from-document-hook
+       #'org-noter--create-session-from-document-file-default)
+
+      (add-hook
+       'org-noter-create-session-from-document-hook
+       #'my/org-noter-session-from-document-file)
 
       ;; :preface
       ;; (defun my/org-noter-precise-note ()
