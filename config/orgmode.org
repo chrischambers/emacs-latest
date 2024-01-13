@@ -356,65 +356,6 @@
          "K" '(org-habit-toggle-display-in-agenda :which-key "toggle habits")))
    #+end_src
 
-** IN-PROGRESS <<<org-capture>>>
-    #+begin_src elisp
-      (use-package org-capture
-        :init
-        (setq my/org-capture-templates (concat user-emacs-directory "templates/"))
-        (setq my/default-template (concat my/org-capture-templates "default.org"))
-
-        :preface
-        (defvar my/captured-title  nil)
-
-        (defun my/get-filepath-from-title (&optional subdirectory date-prefix)
-          "Prompt for a title, return filepath located under org-directory.
-
-      If `subdirectory' is specified, that will be included in the path.
-
-      SIDE-EFFECTS:
-      - Creates ancestor directories for `file-path' if they do not exist.
-      - Sets my/captured-title, for use in templates."
-          (let* ((p (or subdirectory "/"))
-                 (p (if (not (s-starts-with? "/" p)) (s-prepend "/" p) p))
-                 (p (if (not (s-ends-with? "/" p))   (s-append  "/" p) p))
-                 (path (concat org-directory p))
-                 (title (read-string "Title: "))
-                 (slug (slugify title))
-                 (slug (if date-prefix
-                           (concat (format-time-string "%Y-%m") "-" slug)
-                         slug))
-                 (file-path (concat path slug ".org")))
-            (setq my/captured-title title)
-            (make-directory path t)
-            file-path))
-
-        (defun my/captured-title ()
-          "Let's exploit the fact that emacs is a lisp/2."
-          ;; (setq my/captured-title (s-titleize (car minibuffer-history)))
-          my/captured-title)
-
-        (defun my/auto-add-roam-alias-on-capture ()
-          (org-roam-alias-add my/captured-title))
-
-        :straight nil
-        :custom
-        (org-default-notes-file (concat org-directory "/todo.org"))
-        (org-capture-templates
-         `(("t" "Task" entry
-            (file+headline "todo.org" "Inbox")
-            "* TODO %?")
-           ("b" "Book Notes" plain
-            (file (lambda () (my/get-filepath-from-title "sources")))
-            (file ,(concat my/org-capture-templates "book-notes.org")))
-           ("p" "Project" plain
-            (file (lambda () (my/get-filepath-from-title "projects" :date)))
-            (file ,(concat my/org-capture-templates "project.org")))
-           ("w" "Word" plain
-            (file (lambda () (my/get-filepath-from-title "memex/#words")))
-            (file ,(concat my/org-capture-templates "word.org")))
-           )))
-    #+end_src
-
 ** Provide special binding for opening org files via projectile
    #+begin_src elisp
      (with-eval-after-load 'org 'projectile 'general
@@ -650,25 +591,7 @@
     (require 'org-protocol)
   #+end_src
 
-* <<<org-journal>>> ([[https://github.com/bastibe/org-journal][github]])
-  #+begin_src elisp
-    (use-package org-journal
-      :custom
-      (org-journal-dir (concat org-directory "/" "journals"))
-      (org-journal-file-format "%Y-%m-%d.org")
-      (org-journal-carryover-items "/!-DONE-CANCELLED")
-      :general
-      (local-leader org-journal-mode-map
-        "p" '(org-journal-previous-entry :which-key "prev")
-        "n" '(org-journal-next-entry :which-key "next")
-        "c" '(org-journal-new-entry :which-key "create")
-        "/" '(org-journal-search :which-key "search")
-        )
-      (leader
-        "j" '(org-journal-new-entry :which-key "journal")))
-  #+end_src
-
-* <<<org roam>>>: Superior backlinking and hyperlinking
+* <<<org roam>>> ([[https://github.com/chrischambers/org-roam][github]]): Superior backlinking and hyperlinking
   #+begin_src elisp
     (use-package emacsql-sqlite)
 
@@ -680,47 +603,13 @@
       :custom
       ;; Further filtering can be done on backlinks, see:
       ;; https://github.com/org-roam/org-roam/commit/f9228ce31969cab9ca46ad4890e82e2ea7de3738
-      (org-roam-mode-sections '((org-roam-backlinks-section :unique t) org-roam-reflinks-section))
+      (org-roam-mode-sections
+       '((org-roam-backlinks-section :unique t) org-roam-reflinks-section))
+
       (org-default-properties (append
                                org-default-properties
                                '("ROAM_ALIASES" "ROAM_EXCLUDE" "filetags")))
       (org-roam-completion-everywhere t)
-      (org-roam-capture-templates
-       `(("d" "default" plain (file ,(concat my/org-capture-templates "default.org"))
-          :if-new (file+head "memex/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-         ("q" "quote" plain (file ,(concat my/org-capture-templates "quote.org"))
-          :if-new (file+head "memex/#quotes/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-         ("p" "person" plain (file ,(concat my/org-capture-templates "default.org"))
-          :if-new (file+head "memex/#people/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-
-         ("c" "category theory" plain (file ,(concat my/org-capture-templates "category_theory.org"))
-          :if-new (file+head "memex/#category_theory/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-         ("e" "exercise" plain (file ,(concat my/org-capture-templates "exercise.org"))
-          :if-new (file+head "memex/#exercises/${slug}.org" "#+title: Exercise: ${title}\n")
-          :unnarrowed t)
-         ("l" "language")
-         ("ln" "natural language" plain (file ,(concat my/org-capture-templates "default.org"))
-          :if-new (file+head "memex/#languages/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-         ("lp" "programming language" plain (file ,(concat my/org-capture-templates "programming_language.org"))
-          :if-new (file+head "memex/#programming_languages/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-         ("m" "math" plain (file ,(concat my/org-capture-templates "math.org"))
-          :if-new (file+head "memex/#math/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-         ("n" "nutrient" plain (file ,(concat my/org-capture-templates "nutrient.org"))
-          :if-new (file+head "memex/#nutrients/${slug}.org" "#+title: Nutrient: ${title}\n")
-          :unnarrowed t)
-         ("t" "trail" plain (file ,(concat my/org-capture-templates "trail.org"))
-          :if-new (file+head "memex/##trails/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)
-         ("b" "book" plain (file ,(concat my/org-capture-templates "default.org"))
-          :if-new (file+head "sources/${slug}.org" "#+title: ${title}\n")
-          :unnarrowed t)))
       :config
       (if IS-MAC
         ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
@@ -737,39 +626,18 @@
                      (window-height . fit-window-to-buffer)))
       :general
       (leader "fn" '(org-roam-node-find :which-key "node (roam)"))
-      (general-def 'insert org-mode-map
-        "C-l" 'org-roam-node-insert :which-key "insert roam link")
+      (general-def 'insert org-mode-map "C-l" 'org-roam-node-insert)
       (local-leader org-mode-map
-        "w"   '(:ignore t :major-modes org-mode :which-key "wiki (roam)")
+        "w"    '(:ignore t :major-modes org-mode :which-key "wiki (roam)")
         "wb"   '(org-roam-buffer-toggle :which-key "backlinks (roam)")
         "wg"   '(org-roam-graph :which-key "graph")
-        "wi"    '(org-roam-jump-to-index :which-key "index")
+        "wi"   '(org-roam-jump-to-index :which-key "index")
         "wa"   '(:ignore t :major-modes org-mode :which-key "aliases")
-        "waa"   '(org-roam-alias-add :which-key "add")
-        "war"   '(org-roam-alias-remove :which-key "remove")
+        "waa"  '(org-roam-alias-add :which-key "add")
+        "war"  '(org-roam-alias-remove :which-key "remove")
         "wr"   '(:ignore t :major-modes org-mode :which-key "refs")
-        "wra"   '(org-roam-ref-add :which-key "add")
-        "wrr"   '(org-roam-ref-remove :which-key "remove")))
-    #+end_src
-
-** Convenience function when capturing: set =ROAM-ALIASES= to sensible default
-   #+begin_src elisp
-     (with-eval-after-load 'org 's
-       (defun my/roam-alias-default ()
-         "Sets the org-roam alias to a sensible default."
-         (let* ((title (car minibuffer-history))
-                (title (if (s-matches? "\s" title)
-                           (s-format "\"{$0}\"" (list title))
-                         title)))
-               title)))
-   #+end_src
-
-** When using standard org-capture, automatically add id and sync with roam DB
-    #+begin_src elisp
-      (with-eval-after-load
-          'org 'org-roam
-          (add-hook 'org-capture-mode-hook #'org-id-get-create)
-          (add-hook 'org-capture-after-finalize-hook #'org-roam-db-sync))
+        "wra"  '(org-roam-ref-add :which-key "add")
+        "wrr"  '(org-roam-ref-remove :which-key "remove")))
     #+end_src
 
 ** Org-roam Refactoring Functions
@@ -855,6 +723,161 @@
 	     (lambda (node) (org-roam-node-relpath node))))
    #+end_src
 
+* Capturing via =org-capture= or =org-roam=
+  #+begin_src elisp
+    (use-package org-capture
+      :straight nil
+      :init
+      (setq my/org-capture-templates (concat user-emacs-directory "templates/"))
+      (setq my/default-template (concat my/org-capture-templates "default.org"))
+      :preface
+      (defvar my/captured-title nil)
+
+      (defun my/get-filepath-from-title (&optional subdirectory date-prefix)
+        "Prompt for a title, return filepath located under org-directory.
+
+    If `subdirectory' is specified, that will be included in the path.
+
+    SIDE-EFFECTS:
+    - Creates ancestor directories for `file-path' if they do not exist.
+    - Sets my/captured-title, for use in templates."
+        (let* ((path (cond
+                      ((not subdirectory) org-directory)
+                      ((and (f-absolute? subdirectory)
+                            (not (f-ancestor-of? org-directory subdirectory)))
+                       (user-error "my/get-filepath-from-title only works for files under the org-directory."))
+                      ((f-absolute? subdirectory) subdirectory)
+                      (:else (f-join org-directory subdirectory))))
+               (path (f-slash path))
+               (title (if org-roam-capture--node
+                          (org-roam-node-title org-roam-capture--node)
+                        (read-string "Title: ")))
+               (slug (slugify title))
+               (slug (if date-prefix
+                         (concat (format-time-string "%Y-%m") "-" slug)
+                       slug))
+               (file-path (concat path slug ".org")))
+          (setq my/captured-title (s-titleize title))
+          (make-directory path t)
+          file-path))
+
+      (defun my/captured-title ()
+        "Let's exploit the fact that emacs is a lisp/2."
+        ;; (s-titleize (car minibuffer-history))
+        my/captured-title)
+
+      (defun my/auto-add-roam-alias-on-capture ()
+        (org-roam-alias-add my/captured-title))
+
+      (defun my/new-node-id ()
+        (if org-roam-capture--node
+            (org-roam-node-id org-roam-capture--node)
+          (org-id-new)))
+
+      :custom
+      (org-default-notes-file (concat org-directory "/todo.org"))
+
+      (org-capture-templates
+       `(("t" "Task" entry
+          (file+headline "todo.org" "Inbox")
+          "* TODO %?")
+         ("b" "Book Notes" plain
+          (file (lambda () (my/get-filepath-from-title my/book-notes-directory)))
+          (file ,(concat my/org-capture-templates "book-notes.org")))
+         ("p" "Project" plain
+          (file (lambda () (my/get-filepath-from-title "projects" :date)))
+          (file ,(concat my/org-capture-templates "project.org")))
+         ("w" "Word" plain
+          (file (lambda () (my/get-filepath-from-title "memex/#words")))
+          (file ,(concat my/org-capture-templates "word.org")))))
+
+      (org-roam-capture-templates
+       `(("d" "default" plain (file ,(concat my/org-capture-templates "default.org"))
+          :if-new (file+head "memex/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+         ("q" "quote" plain (file ,(concat my/org-capture-templates "quote.org"))
+          :if-new (file+head "memex/#quotes/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+         ("p" "person" plain (file ,(concat my/org-capture-templates "default.org"))
+          :if-new (file+head "memex/#people/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+
+         ("c" "category theory" plain (file ,(concat my/org-capture-templates "category_theory.org"))
+          :if-new (file+head "memex/#category_theory/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+         ("e" "exercise" plain (file ,(concat my/org-capture-templates "exercise.org"))
+          :if-new (file+head "memex/#exercises/${slug}.org" "#+title: Exercise: ${title}\n")
+          :unnarrowed t)
+         ("l" "language")
+         ("ln" "natural language" plain (file ,(concat my/org-capture-templates "default.org"))
+          :if-new (file+head "memex/#languages/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+         ("lp" "programming language" plain (file ,(concat my/org-capture-templates "programming_language.org"))
+          :if-new (file+head "memex/#programming_languages/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+         ("m" "math" plain (file ,(concat my/org-capture-templates "math.org"))
+          :if-new (file+head "memex/#math/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+         ("n" "nutrient" plain (file ,(concat my/org-capture-templates "nutrient.org"))
+          :if-new (file+head "memex/#nutrients/${slug}.org" "#+title: Nutrient: ${title}\n")
+          :unnarrowed t)
+         ("t" "trail" plain (file ,(concat my/org-capture-templates "trail.org"))
+          :if-new (file+head "memex/##trails/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
+         ("w" "word" plain (file ,(concat my/org-capture-templates "word.org"))
+          :if-new (file (lambda () (my/get-filepath-from-title "memex/#words")))
+          :unnarrowed t :disable-auto-id t)
+         ("b" "book" plain (file ,(concat my/org-capture-templates "book-notes.org"))
+          :if-new (file+head ,(concat my/book-notes-directory "/${slug}.org") "#+title: ${title}\n")
+          :unnarrowed t))))
+  #+end_src
+
+** Convenience function when capturing: set =ROAM-ALIASES= to sensible default
+   #+begin_src elisp
+     (with-eval-after-load 'org 's
+       (defun my/roam-alias-default ()
+         "Sets the org-roam alias to a sensible default."
+         (let* ((title (my/captured-title))
+                (title (if (s-matches? "\s" title)
+                           (s-format "\"{$0}\"" (list title))
+                         title)))
+               title)))
+   #+end_src
+
+** After capturing, automatically sync with roam DB
+    #+begin_src elisp
+      (with-eval-after-load
+          'org 'org-roam
+          (add-hook 'org-capture-after-finalize-hook #'org-roam-db-sync))
+    #+end_src
+
+** When using standard org-capture, automatically add id
+    #+begin_src elisp
+      (with-eval-after-load 'org 'org-roam
+          (defun my/-capture-create-id-conditionally ()
+            (unless (org-roam-capture-p)
+              (org-id-get-create)))
+          (add-hook 'org-capture-mode-hook #'my/-capture-create-id-conditionally))
+    #+end_src
+
+* <<<org-journal>>> ([[https://github.com/bastibe/org-journal][github]])
+  #+begin_src elisp
+    (use-package org-journal
+      :custom
+      (org-journal-dir (concat org-directory "/" "journals"))
+      (org-journal-file-format "%Y-%m-%d.org")
+      (org-journal-carryover-items "/!-DONE-CANCELLED")
+      :general
+      (local-leader org-journal-mode-map
+        "p" '(org-journal-previous-entry :which-key "prev")
+        "n" '(org-journal-next-entry :which-key "next")
+        "c" '(org-journal-new-entry :which-key "create")
+        "/" '(org-journal-search :which-key "search")
+        )
+      (leader
+        "j" '(org-journal-new-entry :which-key "journal")))
+  #+end_src
+
 * <<<org-ref>>> ([[https://github.com/jkitchin/org-ref][github]])
   #+begin_src elisp
     (use-package ivy-bibtex
@@ -900,7 +923,7 @@
                            :files ("*.el" "modules/*.el"))
       :custom
       (org-noter-default-notes-file-names nil)
-      (org-noter-notes-search-path `(,(f-join my/notes-directory "sources")))
+      (org-noter-notes-search-path (list my/book-notes-directory))
       (org-noter-prefer-root-as-file-level t)
       (org-noter-always-create-frame nil)
       (org-noter-use-indirect-buffer nil)
@@ -908,7 +931,6 @@
       (org-noter-highlight-selected-text t)
 
       :preface
-      (setq my/book-notes-directory (f-join my/notes-directory "sources"))
 
       (defun my/notes-file-for-ebook (path)
         (f-join my/book-notes-directory (f-swap-ext (f-filename path) "org")))
