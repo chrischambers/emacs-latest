@@ -222,17 +222,17 @@ which aren't absolutely necessary, but are very important.
        :preface
        ;; Source: https://github.com/emacs-evil/evil-surround
        (defmacro define-and-bind-quoted-text-object (name key start-regex end-regex)
-	 "Create new evil text objects so that we can change/delete
+         "Create new evil text objects so that we can change/delete
      the appropriate delimiters."
-	 (let ((inner-name (make-symbol (concat "evil-inner-" name)))
-	       (outer-name (make-symbol (concat "evil-a-" name))))
-	   `(progn
-	      (evil-define-text-object ,inner-name (count &optional beg end type)
-		(evil-select-paren ,start-regex ,end-regex beg end type count nil))
-	      (evil-define-text-object ,outer-name (count &optional beg end type)
-		(evil-select-paren ,start-regex ,end-regex beg end type count t))
-	      (define-key evil-inner-text-objects-map ,key #',inner-name)
-	      (define-key evil-outer-text-objects-map ,key #',outer-name))))
+         (let ((inner-name (make-symbol (concat "evil-inner-" name)))
+               (outer-name (make-symbol (concat "evil-a-" name))))
+           `(progn
+              (evil-define-text-object ,inner-name (count &optional beg end type)
+                (evil-select-paren ,start-regex ,end-regex beg end type count nil))
+              (evil-define-text-object ,outer-name (count &optional beg end type)
+                (evil-select-paren ,start-regex ,end-regex beg end type count t))
+              (define-key evil-inner-text-objects-map ,key #',inner-name)
+              (define-key evil-outer-text-objects-map ,key #',outer-name))))
        :after evil
        :config
        ;; Handle org-mode markup delimiters:
