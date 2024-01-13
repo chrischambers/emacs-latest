@@ -1,6 +1,6 @@
 #+title: Lexicon: %(my/captured-title)
-#+author: Chris Chambers
-#+email: magma.chambers@gmail.com
+#+author: %n
+#+email: %(message-user-mail-address)
 #+date: %<[%Y-%m-%d]>
 #+language: en-gb
 #+startup: align shrink inlineimages latexpreview showall
@@ -8,7 +8,7 @@
 
 * %(my/captured-title) %(org-set-tags '("lexicon" "drill"))
   :PROPERTIES:
-  :ID:           %(org-id-new)
+  :ID:           %(my/new-node-id)
   :ROAM_ALIASES: %(my/roam-alias-default)
   :END:
   %(my/captured-title)
