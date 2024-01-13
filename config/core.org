@@ -287,11 +287,15 @@ which aren't absolutely necessary, but are very important.
            "-" 'my/dec-timestamp-or-number))
    #+end_src
 
-** <<<evil-lion>>>: Left/right align on symbols like =:= with =gl= / =gL= ([[https://github.com/edkolev/evil-lion][github]])
+** <<<evil-lion>>>: Left/right align on symbols like =:= with =g(= / =g)= ([[https://github.com/edkolev/evil-lion][github]])
    #+begin_src elisp
      (use-package evil-lion
        :config
-       (evil-lion-mode))
+       (evil-lion-mode)
+       :general
+       ('(normal visual) org-mode-map
+        "g(" 'evil-lion-left
+        "g)" 'evil-lion-right))
    #+end_src
 ** <<<evil-commentary>>>: Comment out via =gc<text-object>= or =gcc= (line) ([[https://github.com/linktohack/evil-commentary][github]])
    #+begin_src elisp
