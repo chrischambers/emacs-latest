@@ -139,6 +139,7 @@
       :straight nil
       :config
       (require 'dired)
+      (when IS-MAC (customize-set-variable 'insert-directory-program "gls"))
       :custom
       ;; This prevents dired from proliferating buffers as you navigate:
       (dired-kill-when-opening-new-dired-buffer t)
