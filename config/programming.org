@@ -267,19 +267,6 @@
         )
     #+end_src
 
-* Debugging
-  #+begin_src elisp
-    (defun my/toggle-tracing ()
-      (interactive)
-      (let ((f (intern (lisp-current-defun-name))))
-      (if (trace-is-traced f)
-          (untrace-function f)
-        (trace-function f))))
-
-      (local-leader emacs-lisp-mode-map
-        "d" '(edebug-defun :which-key "debug")
-        "t" '(my/toggle-tracing :which-key "trace"))
-  #+end_src
 * Lisp Languages
 ** Keybindings common across lisps
    #+begin_src elisp
@@ -361,23 +348,81 @@
          "er" '(eval-region :which-key "region")
          "eb" '(eval-buffer :which-key "buffer")))
    #+end_src
-*** Re-bind backtrace-mode keys correctly
+*** Debugging
+**** Tracing
     #+begin_src elisp
-      (general-def '(normal motion) backtrace-mode-map
-        "#" 'backtrace-toggle-print-circle
-        "+" 'backtrace-multi-line
-        "-" 'backtrace-single-line)
+      (defun my/toggle-tracing ()
+        (interactive)
+        (let ((f (intern (lisp-current-defun-name))))
+          (if (trace-is-traced f)
+              (untrace-function f)
+            (trace-function f))))
 
-      (local-leader backtrace-mode-map
-        "+" '(backtrace-expand-ellipses :which-key "expand ellipses")
-
-        "t"  '(:ignore t :major-modes backtrace-mode :which-key "toggle")
-        "tv" '(backtrace-toggle-locals :which-key "variables")
-        "tg" '(backtrace-toggle-print-gensym :which-key "gensyms")
-
-        "n" '(backtrace-forward-frame :which-key "forward frame")
-        "p" '(backtrace-backward-frame :which-key "previous frame"))
+      (local-leader emacs-lisp-mode-map
+        "t"  '(my/toggle-tracing :which-key "trace"))
     #+end_src
+
+**** Edebug
+    #+begin_src elisp
+      (use-package edebug
+        :no-require t
+        :straight nil
+        :preface
+        (require 'which-func)
+        (require 'edebug)
+
+        (defvar my/edebugged-functions nil)
+
+        (defun my/edebug-instrument (symbol)
+          (eval-defun t)
+          (push symbol my/edebugged-functions)
+          (message "Added edebug instrumentation to %s" symbol))
+
+        (defun my/edebug-uninstrument (symbol)
+          "Implementation from `edebug-remove-instrumentation`"
+          (when-let ((unwrapped
+                      (edebug--unwrap*-symbol-function symbol)))
+            (edebug--strip-plist symbol)
+            (defalias symbol unwrapped)
+            (setq my/edebugged-functions (delete symbol my/edebugged-functions))
+            (message "Removed edebug instrumentation from %s" symbol)))
+
+        (defun my/toggle-edebug ()
+          (interactive)
+          (when-let* ((function-name (which-function))
+                      (function-symbol (intern function-name)))
+            (if (member function-symbol my/edebugged-functions)
+                (my/edebug-uninstrument function-symbol)
+              (my/edebug-instrument function-symbol))))
+
+        :general
+        (local-leader emacs-lisp-mode-map
+          "b"  '(:ignore t :major-modes emacs-lisp-mode :which-key "breakpoint")
+          "ba" '(edebug-set-breakpoint :which-key "add")
+          "bd" '(edebug-unset-breakpoint :which-key "delete")
+          "bD" '(edebug-unset-breakpoints :which-key "delete all in form")
+          "d"  '(:ignore t :major-modes emacs-lisp-mode :which-key "debug")
+          "dd" '(my/toggle-edebug :which-key "debug")
+          "dt" '(toggle-debug-on-error :which-key "toggle auto-debug")))
+    #+end_src
+
+**** Re-bind backtrace-mode keys correctly
+     #+begin_src elisp
+       (general-def '(normal motion) backtrace-mode-map
+         "#" 'backtrace-toggle-print-circle
+         "+" 'backtrace-multi-line
+         "-" 'backtrace-single-line)
+
+       (local-leader backtrace-mode-map
+         "+" '(backtrace-expand-ellipses :which-key "expand ellipses")
+
+         "t"  '(:ignore t :major-modes backtrace-mode :which-key "toggle")
+         "tv" '(backtrace-toggle-locals :which-key "variables")
+         "tg" '(backtrace-toggle-print-gensym :which-key "gensyms")
+
+         "n" '(backtrace-forward-frame :which-key "forward frame")
+         "p" '(backtrace-backward-frame :which-key "previous frame"))
+     #+end_src
 *** <<<eros>>> ([[https://github.com/xiongtx/eros][github]]): Display evaluation results inline
     #+begin_src elisp
       (use-package eros
