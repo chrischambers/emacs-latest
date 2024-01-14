@@ -749,7 +749,7 @@
                       ((f-absolute? subdirectory) subdirectory)
                       (:else (f-join org-directory subdirectory))))
                (path (f-slash path))
-               (title (if org-roam-capture--node
+               (title (if (org-roam-capture-p)
                           (org-roam-node-title org-roam-capture--node)
                         (read-string "Title: ")))
                (slug (slugify title))
@@ -770,7 +770,7 @@
         (org-roam-alias-add my/captured-title))
 
       (defun my/new-node-id ()
-        (if org-roam-capture--node
+        (if (org-roam-capture-p)
             (org-roam-node-id org-roam-capture--node)
           (org-id-new)))
 
@@ -786,7 +786,8 @@
           (file ,(concat my/org-capture-templates "book-notes.org")))
          ("p" "Project" plain
           (file (lambda () (my/get-filepath-from-title "projects" :date)))
-          (file ,(concat my/org-capture-templates "project.org")))
+          (file ,(concat my/org-capture-templates "project.org"))
+          :auto-id t)
          ("w" "Word" plain
           (file (lambda () (my/get-filepath-from-title "memex/#words")))
           (file ,(concat my/org-capture-templates "word.org")))))
@@ -851,12 +852,13 @@
           (add-hook 'org-capture-after-finalize-hook #'org-roam-db-sync))
     #+end_src
 
-** When using standard org-capture, automatically add id
+** Automatically add id when =:auto-id= capture-template parameter passed
     #+begin_src elisp
       (with-eval-after-load 'org 'org-roam
           (defun my/-capture-create-id-conditionally ()
-            (unless (org-roam-capture-p)
-              (org-id-get-create)))
+            (if (org-capture-get :auto-id)
+                (org-id-get-create)))
+
           (add-hook 'org-capture-mode-hook #'my/-capture-create-id-conditionally))
     #+end_src
 

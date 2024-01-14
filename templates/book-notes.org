@@ -1,6 +1,6 @@
 :PROPERTIES:
-:ID:           %(org-id-new)
-:ROAM_ALIASES: %(my/captured-title)
+:ID:           %(my/new-node-id)
+:ROAM_ALIASES: %(my/roam-alias-default)
 :ROAM_REFS:    %(format "[[cite:&%s]]" (org-ref-read-key))
 :END:
 #+title: Book Notes: %(my/captured-title)
