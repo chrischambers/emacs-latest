@@ -921,8 +921,7 @@
       :straight (org-noter :type git
                            :host github
                            :repo "org-noter/org-noter"
-                           :fork t
-                           :files ("*.el" "modules/*.el"))
+                           :fork t)
       :custom
       (org-noter-default-notes-file-names nil)
       (org-noter-notes-search-path (list my/book-notes-directory))

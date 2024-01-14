@@ -64,6 +64,23 @@ you can work with.
         (mapc 'kill-buffer
               (delq (current-buffer)
                     (org-remove-if-not 'buffer-file-name (buffer-list)))))
+
+      (defun my/emacs-lisp-files ()
+        (-remove (lambda (s) (or (s-ends-with? ".dir-locals.el" s)
+                            (s-ends-with? ".dirs-local.el" s))) ; general.el
+                 (apply 'append
+                        (-map (lambda (dir) (directory-files dir t "\.el$" t)) load-path))))
+
+      (defun my/find-emacs-lisp-file ()
+        "Prompt the user to choose an Emacs Lisp file from the load-path."
+        (interactive)
+        (let* ((files (my/emacs-lisp-files))
+               (file-names (mapcar (-compose #'f-no-ext #'f-filename) files))
+               (alist (cl-mapcar #'cons files file-names))
+               (vertico-sort-function #'vertico-sort-alpha)
+               (chosen-file (completing-read "Choose an Emacs Lisp file: " file-names nil t nil nil #'string<)))
+          (find-file (car (rassoc chosen-file alist)))))
+
       :after which-key
       :config
       (general-override-mode 1)
@@ -126,6 +143,7 @@ you can work with.
 
         ;; File operations
         "f"    '(:ignore t :which-key "file")
+        "fe"   '(my/find-emacs-lisp-file :which-key "elisp file")
         "ff"   '(find-file :which-key "find")
         "fr"   '(recentf-open-files :which-key "recent")
         ;; "fF"  '(find-file-noselect :which-key "find (without updating recent files)")
