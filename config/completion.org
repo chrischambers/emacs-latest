@@ -33,9 +33,8 @@
       :custom
       (vertico-cycle t)
       (completion-cycle-threshold 5)
-      ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-      ;; Vertico commands are hidden in normal buffers.
-      (read-extended-command-predicate #'command-completion-default-include-p)
+      ;; default sort is: #'vertico-sort-history-length-alpha
+      (vertico-sort-function #'vertico-sort-history-alpha)
       :general
       ('insert vertico-map
        "C-<return>"     #'vertico-exit-input ; though you should favour M-RET, that's the default
