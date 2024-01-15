@@ -1,6 +1,9 @@
 # key: head
 # name: Header
 # --
+:PROPERTIES:
+:ID:       `(org-id-get-create)`
+:END:
 #+title: $1
 #+author: ${2:`user-full-name`}
 #+email: ${3:`user-mail-address`}
