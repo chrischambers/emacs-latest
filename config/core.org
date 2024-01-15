@@ -689,7 +689,7 @@ which aren't absolutely necessary, but are very important.
     (use-package yasnippet
       :init
       (yas-global-mode 1)
-      :after company company-box
+      ;; :after company company-box
       :preface
       (defun company-mode/backend-with-yas (backend)
         (if (and (listp backend) (member 'company-yasnippet backend))

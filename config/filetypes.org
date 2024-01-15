@@ -100,6 +100,7 @@
 *** company-ansible
     #+begin_src elisp
       (use-package company-ansible
+        :after company
         :straight (company-ansible
                    :host github
                    :repo "chrischambers/company-ansible")

@@ -10,17 +10,15 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* COMMENT <<<hotfuzz>>> ([[https://github.com/axelf4/hotfuzz][github]])
-  A fuzzy-file matching like =flx=, but that has better sorting than the in-built
-  =flex= matcher or =orderless-flex=.
-
+* Basic Config
   #+begin_src elisp
-    (use-package hotfuzz
+    (use-package basic-completion
+      :straight nil
+      :no-require t
       :custom
-      (completion-styles '(hotfuzz)))  ; incompatible with orderless, as always matches
+      (completion-styles '(basic partial-completion flex)))
   #+end_src
-
-* <<<vertico>>> ([[https://github.com/minad/vertico][github]])
+* COMMENT <<<vertico>>> ([[https://github.com/minad/vertico][github]])
   #+begin_src elisp
     (use-package vertico
       :init
@@ -47,7 +45,7 @@
        "C-n"            #'next-line-or-history-element
        "C-p"            #'previous-line-or-history-element))
   #+end_src
-** IN-PROGRESS Attempt at custom sorting function
+** COMMENT IN-PROGRESS Attempt at custom sorting function
    :LOGBOOK:
    - State "IN-PROGRESS" from "TODO"          [2024-01-14 Sun 21:28]
    :END:
@@ -114,7 +112,7 @@
       (customize-set-variable 'vertico-sort-override-function #'my/vertico-sort)
     #+end_src
 
-* <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
+* COMMENT <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
   #+begin_quote
   The way completion styles work, when one style cannot match anything, Emacs
   tries the next one on the list, until one of them yields results. As such, it
@@ -163,7 +161,7 @@
          orderless-regexp)))
   #+end_src
 
-* <<<embark>>> ([[https://github.com/oantolin/embark/][github]])
+* COMMENT <<<embark>>> ([[https://github.com/oantolin/embark/][github]])
   #+begin_src elisp
     (use-package embark
       :config
@@ -180,7 +178,7 @@
     (use-package embark-consult)
   #+end_src
 
-* <<<consult>>> ([[https://github.com/minad/consult][github]])
+* COMMENT <<<consult>>> ([[https://github.com/minad/consult][github]])
   #+begin_quote
   Consult provides search and navigation commands based on the Emacs completion
   function src_elisp{(helpful-function #'completing-read)} . Completion allows
@@ -243,7 +241,7 @@
        (leader "pb" '(consult-project-buffer :which-key "switch buffer")))
  #+end_src
 
-* <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
+* COMMENT <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
   Adds annotations to completion candidates. Cannot change style of candidates
   themselves, just provides extra information. That extra information isn't able
   to be filtered via completing-read.
@@ -260,7 +258,7 @@
        :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
    #+end_src
 
-* <<<company>>> ([[https://company-mode.github.io/][github]])/([[https://www.emacswiki.org/emacs/CompanyMode][wiki]])
+* COMMENT <<<company>>> ([[https://company-mode.github.io/][github]])/([[https://www.emacswiki.org/emacs/CompanyMode][wiki]])
   #+begin_src elisp
     (use-package company
       :preface
@@ -294,7 +292,7 @@
       :hook (company-mode . company-box-mode))
   #+end_src
 
-* Vim-style line completion
+* COMMENT Vim-style line completion
   Source: [[https://www.emacswiki.org/emacs/HippieExpand][EmacsWiki: Hippie Expand]]
   Doesn't quite work.
   #+begin_src elisp
@@ -315,7 +313,17 @@
                         "C-l" #'my/expand-lines)
   #+end_src
 
-* COMMENT Testing
+* COMMENT <<<hotfuzz>>> ([[https://github.com/axelf4/hotfuzz][github]])
+  A fuzzy-file matching like =flx=, but that has better sorting than the in-built
+  =flex= matcher or =orderless-flex=.
+
+  #+begin_src elisp
+    (use-package hotfuzz
+      :custom
+      (completion-styles '(hotfuzz)))  ; incompatible with orderless, as always matches
+  #+end_src
+
+* COMMENT fussy
   #+begin_src elisp
     ;; (setq fussy-filter-fn 'fussy-filter-default)
     ;; (setq fussy-filter-fn 'fussy-filter-orderless)
