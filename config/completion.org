@@ -47,6 +47,72 @@
        "C-n"            #'next-line-or-history-element
        "C-p"            #'previous-line-or-history-element))
   #+end_src
+** IN-PROGRESS Attempt at custom sorting function
+   :LOGBOOK:
+   - State "IN-PROGRESS" from "TODO"          [2024-01-14 Sun 21:28]
+   :END:
+   #+begin_src elisp
+     (defun my/vertico--add-score-modifier (s user-input)
+       (let* ((pattern (format "^%s$" user-input))
+              (score-modifier
+               (cond
+                ((s-matches? pattern s)                       20) ; case-insensitive
+                ((s-starts-with?  user-input s :ignore-case)  10)
+                ((s-ends-with?    user-input s :ignore-case)  5)
+                ((s-contains?     user-input s :ignore-case)  2)
+                (:else 0))))
+         (cons s score-modifier)))
+
+     (defun my/vertico-sort-helper (candidates user-input)
+       (if (not user-input)
+           candidates
+           (->> candidates
+                (vertico-sort-history-length-alpha)
+                (-map (-rpartial #'my/vertico--add-score-modifier user-input))
+                ;; (-remove (-compose #'zerop #'cdr))
+                (-sort (-on #'> #'cdr))
+                (-map #'first))))
+
+     (defun my/vertico-sort (candidates)
+       (let ((user-input (minibuffer-contents)))
+         (my/vertico-sort-helper candidates user-input)))
+   #+end_src
+
+*** COMMENT Testing
+   #+begin_src elisp
+     (-map (-rpartial #'my/vertico--add-score-modifier "an")
+           '("apple" "aniseed" "nan" "an" "banana" "orange" "grape" "kiwi"))
+   #+end_src
+
+   #+begin_src elisp
+       (my/vertico-sort-helper '("apple" "aniseed" "nan" "an" "banana" "orange" "grape" "kiwi") "a")
+   #+end_src
+
+   #+begin_src elisp
+       (my/vertico-sort-helper '("apple" "aniseed" "nan" "an" "banana" "orange" "grape" "kiwi") "an")
+   #+end_src
+
+   #+begin_src elisp
+     (let ((vertico-sort-function #'my/vertico-sort))
+       (completing-read "Wibble: " '("apple" "aniseed" "nan" "an" "banana" "orange" "grape" "kiwi")))
+   #+end_src
+
+   #+begin_src elisp
+     (-sort #'string<
+       (-sort (-on #'< #'length)
+              '("apple" "aniseed" "nan" "an" "banana" "orange" "grape" "kiwi")))
+   #+end_src
+
+*** COMMENT Enable
+   #+begin_src elisp
+     (customize-set-variable 'vertico-sort-function #'my/vertico-sort)
+   #+end_src
+
+*** Like, really enable. Really.
+    Except in code-completion
+    #+begin_src elisp
+      (customize-set-variable 'vertico-sort-override-function #'my/vertico-sort)
+    #+end_src
 
 * <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
   #+begin_quote
@@ -85,6 +151,7 @@
         (my/orderless-style-dispatcher-template s "!" 'orderless-regexp))
       :custom
       (completion-styles '(partial-completion flex orderless))
+      ;; (completion-styles '(flex orderless))
       (completion-ignore-case t)
       (completion-category-defaults nil)
       (orderless-component-separator "[ _-]+")
