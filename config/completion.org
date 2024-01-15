@@ -294,6 +294,27 @@
       :hook (company-mode . company-box-mode))
   #+end_src
 
+* Vim-style line completion
+  Source: [[https://www.emacswiki.org/emacs/HippieExpand][EmacsWiki: Hippie Expand]]
+  Doesn't quite work.
+  #+begin_src elisp
+    ;; (general-define-key :prefix "C-x"
+    ;;                     :states 'insert
+    ;;                     "C-l"
+    ;;                     (make-hippie-expand-function
+    ;;                      '(try-expand-line try-expand-line-all-buffers)))
+
+    (defun my/expand-lines ()
+      (interactive)
+      (let ((hippie-expand-try-functions-list
+             '(try-expand-line try-expand-line-all-buffers)))
+        (call-interactively 'hippie-expand)))
+
+    (general-define-key :prefix "C-x"
+                        :states 'insert
+                        "C-l" #'my/expand-lines)
+  #+end_src
+
 * COMMENT Testing
   #+begin_src elisp
     ;; (setq fussy-filter-fn 'fussy-filter-default)
