@@ -21,7 +21,29 @@
       ;; Apparently, improves org-mode's native fontification:
       (doom-themes-org-config))
   #+end_src
+*** COMMENT Evaluate this when choosing a new doom theme
+    This will automatically mark all doom-themes as safe, and add them to the
+    theme selector.
+    #+begin_src elisp
+      (require 'subr-x)
 
+      (defun sha256-directory (directory)
+        (let ((hashes))
+          (dolist (file (directory-files directory t nil t))
+            (when (file-regular-p file)
+              (push (secure-hash 'sha256 (find-file-noselect file)) hashes)))
+          hashes))
+
+      (defvar doom-themes-directory
+        (f-parent (locate-library "doom-themes")))
+
+      (customize-set-variable
+       'custom-safe-themes
+       (append custom-safe-themes (sha256-directory doom-themes-directory)))
+
+      (customize-set-variable
+       'my/themes (custom-available-themes))
+    #+end_src
 ** Poet Theme
   #+begin_src elisp
     (use-package poet-theme)
