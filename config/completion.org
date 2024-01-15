@@ -181,17 +181,17 @@
   themselves, just provides extra information. That extra information isn't able
   to be filtered via completing-read.
 
-** All-the-icons completion ([[https://github.com/iyefrat/all-the-icons-completion][source]])
-   #+begin_src elisp
-     (use-package all-the-icons-completion
-       :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
-   #+end_src
-
   #+begin_src elisp
     (use-package marginalia
       :config
       (marginalia-mode))
   #+end_src
+
+** All-the-icons completion ([[https://github.com/iyefrat/all-the-icons-completion][source]])
+   #+begin_src elisp
+     (use-package all-the-icons-completion
+       :hook (marginalia-mode . all-the-icons-completion-marginalia-setup))
+   #+end_src
 
 * <<<company>>> ([[https://company-mode.github.io/][github]])/([[https://www.emacswiki.org/emacs/CompanyMode][wiki]])
   #+begin_src elisp
