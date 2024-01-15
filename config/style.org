@@ -80,6 +80,7 @@
        :general
        (leader
          "T"  '(:ignore t :which-key "theme")
+         "Tc"  '(load-theme :which-key "choose")
          "Tp" '(my/previous-theme :which-key "previous")
          "Tn" '(my/next-theme :which-key "next")))
    #+end_src
