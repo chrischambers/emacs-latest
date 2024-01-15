@@ -45,7 +45,7 @@
        "C-n"            #'next-line-or-history-element
        "C-p"            #'previous-line-or-history-element))
   #+end_src
-** COMMENT IN-PROGRESS Attempt at custom sorting function
+** IN-PROGRESS Attempt at custom sorting function
    :LOGBOOK:
    - State "IN-PROGRESS" from "TODO"          [2024-01-14 Sun 21:28]
    :END:
