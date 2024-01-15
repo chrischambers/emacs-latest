@@ -77,8 +77,9 @@ you can work with.
         (let* ((files (my/emacs-lisp-files))
                (file-names (mapcar (-compose #'f-no-ext #'f-filename) files))
                (alist (cl-mapcar #'cons files file-names))
+               (prompt "Choose an Emacs Lisp file: ")
                (vertico-sort-function #'vertico-sort-alpha)
-               (chosen-file (completing-read "Choose an Emacs Lisp file: " file-names)))
+               (chosen-file (completing-read prompt file-names)))
           (find-file (car (rassoc chosen-file alist)))))
 
       :after which-key
