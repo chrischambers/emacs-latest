@@ -588,7 +588,9 @@
                      (window-width . 0.5)
                      (window-height . fit-window-to-buffer)))
       :general
-      (leader "fn" '(org-roam-node-find :which-key "node (roam)"))
+      (leader
+        "fn" '(org-roam-node-find :which-key "node (roam)")
+        "f?" '(org-roam-node-random :which-key "random node (roam)"))
       (general-def 'insert org-mode-map "C-l" 'org-roam-node-insert)
       (local-leader org-mode-map
         "w"    '(:ignore t :major-modes org-mode :which-key "wiki (roam)")
