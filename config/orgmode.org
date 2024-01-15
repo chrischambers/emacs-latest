@@ -165,12 +165,6 @@
      (customize-set-variable 'org-confirm-babel-evaluate nil)
    #+end_src
 
-** Customise dropdown icon at right of headings
-  #+begin_src elisp
-    ;; (setq org-ellipsis " ▼ ")
-    (customize-set-variable 'org-ellipsis " ⤵ ")
-  #+end_src
-
 ** Enforce =ORDERED= property
    #+begin_src elisp
      (customize-set-variable 'org-enforce-todo-dependencies t)
@@ -275,20 +269,6 @@
       (customize-set-variable 'org-attach-id-dir (concat org-directory "/" "#attachments")))
    #+end_src
 
-** <<<org-superstar>>>: Nicer heading indicators
-  #+begin_src elisp
-    (use-package org-superstar
-      :hook (org-mode . org-superstar-mode))
-  #+end_src
-
-** <<<org-appear>>> ([[https://github.com/awth13/org-appear][github]]): hide emphasis markers like =*=, =/=, etc.
-  #+begin_src elisp
-    (use-package org-appear
-      :custom
-      (org-hide-emphasis-markers t)
-      :hook (org-mode . org-appear-mode))
-  #+end_src
-
 ** <<<org-cliplink>>> ([[https://github.com/rexim/org-cliplink][github]]): Insert link using page-title as description automatically via
    #+begin_src elisp
      (use-package org-cliplink
@@ -296,17 +276,6 @@
        ('(insert) org-mode-map "M-v" 'org-cliplink)
        (local-leader org-mode-map
          "l"  '(org-cliplink :which-key "link (from clipboard)")))
-   #+end_src
-
-** Scale image widths (with imagemagick, where available) if =#+ATTR_ORG :width= is set
-   #+begin_src elisp
-     (customize-set-variable 'org-image-actual-width nil)
-   #+end_src
-
-** COMMENT <<<valign>>> ([[https://github.com/casouri/valign][github]]): Align tables with variable-pitch fonts/images properly
-   #+begin_src elisp
-     (use-package valign
-       :hook (org-mode . valign-mode))
    #+end_src
 
 ** Show animated gifs when clicked on
@@ -419,12 +388,6 @@
      (when (boundp 'org-table-electric-header-mode)
        (org-table-electric-header-mode))
    #+end_src
-
-** Org external links styled differently
-  #+begin_src elisp
-    (org-link-set-parameters "http" :face '(:foreground "tomato" :underline t))
-    (org-link-set-parameters "https" :face '(:foreground "#61bfff" :underline t))
-  #+end_src
 
 * Custom TODOs
 ** Customise org-todo keywords
@@ -687,40 +650,6 @@
 			    " is not located under the old notes hierarchy.")))
 	   (my/conditional-kill-buffer-for-file buffer-path)
 	   (my--memex-relocate buffer-path buffer-name))))
-   #+end_src
-
-** =org-roam-node-find= Display Style
-   #+begin_src elisp
-     (with-eval-after-load 'org-roam
-       (cl-defmethod org-roam-node-icon ((node org-roam-node))
-	 (let ((path (org-roam-node-file node)))
-	   (cond
-	    ((s-matches? "#old" path) "🦴")
-	    ((s-matches? "##trails" path) "🌐")
-	    ((s-matches? "#category_theory" path) "♾️")
-	    ((s-matches? "#data_structures" path) "🔋")
-	    ((s-matches? "#languages" path) "💬")
-	    ((s-matches? "#people" path) "👤")
-	    ((s-matches? "#programming_languages" path) "💾")
-	    ((s-matches? "#quotes" path) "💬")
-	    )))
-
-       (cl-defmethod org-roam-node-relpath ((node org-roam-node))
-	 (let* ((node-path (org-roam-node-file node))
-		(node-rel-path (file-relative-name node-path org-roam-directory)))
-	   node-rel-path))
-
-       ;; (setq org-roam-node-display-template (concat "${icon:3}${title:50}"))
-       (setq org-roam-node-display-template
-           (concat "${icon:3}${title:50} " (propertize "${tags:30}|" 'face 'org-tag)))
-       ;; (setq org-roam-node-display-template
-       ;;     (concat "${icon:3}${title:50}${relpath:40}" (propertize "${tags:30}" 'face 'org-tag)))
-       ;; (setq org-roam-node-annotation-function
-       ;;     (lambda (node) (marginalia--time (org-roam-node-file-mtime node))))
-       ;; (setq org-roam-node-annotation-function
-       ;;     (lambda (node) (marginalia-annotate-file (org-roam-node-file node))))
-       (setq org-roam-node-annotation-function
-	     (lambda (node) (org-roam-node-relpath node))))
    #+end_src
 
 * Capturing via =org-capture= or =org-roam=
