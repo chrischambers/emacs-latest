@@ -719,6 +719,9 @@
           (file (lambda () (my/get-filepath-from-title "projects" :date)))
           (file ,(concat my/org-capture-templates "project.org"))
           :auto-id t)
+         ("Q" "Quote" plain (file (lambda () (my/get-filepath-from-title "memex/#quotes")))
+          (file ,(concat my/org-capture-templates "quote.org"))
+          :auto-id t)
          ("w" "Word" plain
           (file (lambda () (my/get-filepath-from-title "memex/#words")))
           (file ,(concat my/org-capture-templates "word.org")))))
