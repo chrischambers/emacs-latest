@@ -93,6 +93,7 @@
                                           "#clojure"
                                           "#emacs"
                                           "#sed"
+                                          "#systemcrafters"
                                           "#org-mode"
                                           "#nixos"
                                           "#nix-darwin"))
