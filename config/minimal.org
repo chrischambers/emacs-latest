@@ -82,6 +82,13 @@ you can work with.
                (chosen-file (completing-read prompt file-names)))
           (find-file (car (rassoc chosen-file alist)))))
 
+      (defun my/eshell ()
+        "Switch to eshell buffer if it exists; otherwise, activate it."
+        (interactive)
+        (if (boundp 'eshell-buffer-name)
+             (switch-to-buffer eshell-buffer-name)
+           (eshell)))
+
       :after which-key
       :config
       (general-override-mode 1)
@@ -117,6 +124,7 @@ you can work with.
         "ad"   '(dired :which-key "dired")
         "ac"   'calendar
         "aa"   '(org-agenda :which-key "agenda")
+        "ae"   '(my/eshell :which-key "eshell")
 
         ;; Buffer operations
         "b"    '(:ignore t :which-key "buffer")
