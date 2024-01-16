@@ -27,6 +27,7 @@
       :custom
       (corfu-auto t)
       (corfu-auto-prefix 2)
+      (corfu-auto-delay 0.3)
       (tab-always-indent 'complete))
   #+end_src
 ** corfu-popupmenu
