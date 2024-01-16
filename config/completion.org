@@ -66,11 +66,12 @@
 ** cape
    #+begin_src elisp
      (use-package cape
-       :bind (("C-x C-l" . cape-line)
-       ))
+       :bind (("C-x C-l" . cape-line))
+       :config
+       (require 'cape))
    #+end_src
 
-** COMMENT yasnippet-capf
+** yasnippet-capf ([[https://github.com/elken/yasnippet-capf][github]])
 #+begin_src elisp
   (use-package yasnippet-capf
     :straight (:host github :repo "elken/yasnippet-capf")
@@ -184,6 +185,10 @@
     Except in code-completion
     #+begin_src elisp
       (customize-set-variable 'vertico-sort-override-function #'my/vertico-sort)
+    #+end_src
+*** Enable in Corfu too??
+    #+begin_src elisp
+      (customize-set-variable 'corfu-sort-function #'my/vertico-sort)
     #+end_src
 
 * COMMENT <<<orderless>>> ([[https://github.com/oantolin/orderless][github]])
@@ -459,4 +464,21 @@
       (with-eval-after-load 'eglot
         (add-to-list 'completion-category-overrides
                      '(eglot (styles fussy basic)))))
+  #+end_src
+
+* Completion Category Overrides
+  #+begin_src elisp
+    (with-eval-after-load 'cider
+      (add-to-list 'completion-category-overrides
+                   '(cider (styles flex basic))))
+#+end_src
+* Experiment
+  #+begin_src elisp
+    (defun my/setup-clojure ()
+      (setq-local completion-at-point-functions
+                  `(,(cape-capf-super #'cider-complete-at-point #'yasnippet-capf)
+                    #'cape-dabbrev)))
+
+    (add-hook 'cider-mode-hook #'my/setup-clojure)
+    (add-hook 'cider-repl-mode-hook #'my/setup-clojure)
   #+end_src
