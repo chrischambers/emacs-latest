@@ -219,7 +219,7 @@
          orderless-regexp)))
   #+end_src
 
-* COMMENT <<<embark>>> ([[https://github.com/oantolin/embark/][github]])
+* <<<embark>>> ([[https://github.com/oantolin/embark/][github]])
   #+begin_src elisp
     (use-package embark
       :config
@@ -236,7 +236,7 @@
     (use-package embark-consult)
   #+end_src
 
-* COMMENT <<<consult>>> ([[https://github.com/minad/consult][github]])
+* <<<consult>>> ([[https://github.com/minad/consult][github]])
   #+begin_quote
   Consult provides search and navigation commands based on the Emacs completion
   function src_elisp{(helpful-function #'completing-read)} . Completion allows
@@ -299,7 +299,7 @@
        (leader "pb" '(consult-project-buffer :which-key "switch buffer")))
  #+end_src
 
-* COMMENT <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
+* <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
   Adds annotations to completion candidates. Cannot change style of candidates
   themselves, just provides extra information. That extra information isn't able
   to be filtered via completing-read.
