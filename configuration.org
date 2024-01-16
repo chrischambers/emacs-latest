@@ -192,3 +192,10 @@
      (use-package origami
        :hook (after-init . global-origami-mode))
    #+end_src
+
+** COMMENT dirvish ([[https://github.com/alexluigit/dirvish][github]])
+   #+begin_src elisp
+     (use-package dirvish
+       :config
+       (dirvish-override-dired-mode))
+   #+end_src
