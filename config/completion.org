@@ -16,7 +16,8 @@
       :straight nil
       :no-require t
       :custom
-      (completion-styles '(basic partial-completion flex)))
+      (completion-ignore-case t)
+      (completion-styles '(flex basic)))
   #+end_src
 * COMMENT <<<vertico>>> ([[https://github.com/minad/vertico][github]])
   #+begin_src elisp
