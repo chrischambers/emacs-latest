@@ -458,11 +458,11 @@
 
      (use-package geiser
        :preface
-       (defun enable-yasnippet-with-geiser ()
-         (with-eval-after-load 'yasnippet
-           (add-company-backend 'geiser-company-backend)))
-       :hook (geiser-mode . enable-yasnippet-with-geiser)
-       :after company yasnippet
+       ;; (defun enable-yasnippet-with-geiser ()
+       ;;   (with-eval-after-load 'yasnippet
+       ;;     (add-company-backend 'geiser-company-backend)))
+       ;; :hook (geiser-mode . enable-yasnippet-with-geiser)
+       ;; :after company yasnippet
        :custom
        (geiser-default-implementation 'racket)
        :general

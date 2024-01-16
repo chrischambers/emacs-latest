@@ -97,7 +97,7 @@
         ('(motion normal) yaml-mode-map "K" #'ansible-doc))
     #+end_src
 
-*** company-ansible
+*** COMMENT company-ansible
     #+begin_src elisp
       (use-package company-ansible
         :after company
