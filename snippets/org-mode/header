@@ -2,7 +2,7 @@
 # name: Header
 # --
 :PROPERTIES:
-:ID:       `(org-id-get-create)`
+:ID:       `(org-id-new)`
 :END:
 #+title: $1
 #+author: ${2:`user-full-name`}
