@@ -448,7 +448,8 @@
     (use-package fussy
       :straight (fussy :type git :host github :repo "jojojames/fussy")
       :custom
-      (fussy-use-cache t)
+      ;; (fussy-use-cache t)
+      (fussy-use-cache nil) ; avoid cache whilst testing
       (fussy-compare-same-score-fn 'fussy-histlen->strlen<)
 
       ;; For example, project-find-file uses 'project-files which uses
