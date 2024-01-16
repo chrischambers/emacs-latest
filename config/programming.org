@@ -185,17 +185,24 @@
    #+begin_src elisp
      (use-package lsp-mode
        :commands (lsp lsp-deferred)
-       :hook (lsp-mode . lsp-enable-which-key-integration)
        :init
-       (setq lsp-before-save-edits t
-             ;; lsp-inhibit-message t
-             lsp-use-plists t
-             lsp-lens-enable t
-             lsp-semantic-tokens-enable t
-             lsp-eldoc-render-all nil
-             lsp-highlight-symbol-at-point nil
-             read-process-output-max (* 4 1024 1024)
-             lsp-idle-delay 0.900))
+       (when IS-MAC
+           (setenv "LSP_USE_PLISTS" "true"))
+       (defun my/lsp-mode-setup-completion ()
+         (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+               '(flex)))
+       :hook ((lsp-mode . lsp-enable-which-key-integration)
+              ;; (lsp-completion-mode . my/lsp-mode-setup-completion)
+              )
+       :custom
+       (read-process-output-max (* 4 1024 1024))
+       (lsp-idle-delay 0.9)
+       (lsp-before-save-edits t)
+       (lsp-lens-enable t)
+       (lsp-semantic-tokens-enable t)
+       (lsp-eldoc-render-all nil)
+       ;; (lsp-completion-provider :none) ;; we use Corfu!
+       )
    #+end_src
 ** LSP-UI
    To understand which options affect what, see:
@@ -761,7 +768,6 @@
         ;; Don't tell me you're working out the indentation:
         ;; https://stackoverflow.com/questions/18778894/emacs-24-3-python-cant-guess-python-indent-offset-using-defaults-4
         (python-indent-guess-indent-offset-verbose nil)
-        (elpy-shell-darwin-use-pty t)
         (python-indent-offset 4)
         (python-shell-interpreter "ipython")
         (python-shell-interpreter-args "--simple-prompt -i"))
@@ -823,6 +829,7 @@
         :custom
         (elpy-test-runner 'elpy-test-pytest-runner)
         (elpy-test-pytest-runner-command '("py.test" "--spec"))
+        (elpy-shell-darwin-use-pty t)
         (elpy-shell-add-to-shell-history t)
         ;; (elpy-modules '(elpy-module-sane-defaults))
 
