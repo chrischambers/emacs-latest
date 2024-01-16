@@ -30,6 +30,19 @@
       (corfu-auto-delay 0.3)
       (tab-always-indent 'complete))
   #+end_src
+** corfu shouldn't mess with eshell
+   Source: [[https://github.com/SystemCrafters/crafted-emacs][GitHub - SystemCrafters/crafted-emacs]]
+   #+begin_src elisp
+     (when (require 'corfu nil :noerror)
+       ;; No auto-completion or completion-on-quit in eshell
+       (defun crafted-completion-corfu-eshell ()
+         "Special settings for when using corfu with eshell."
+         (setq-local corfu-quit-at-boundary t
+                     corfu-quit-no-match t
+                     corfu-auto nil)
+         (corfu-mode))
+       (add-hook 'eshell-mode-hook #'crafted-completion-corfu-eshell))
+   #+end_src
 ** corfu-popupmenu
    #+begin_src elisp
      (use-package corfu-popupmenu
