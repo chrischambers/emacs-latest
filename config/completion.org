@@ -478,7 +478,7 @@
     (defun my/setup-clojure ()
       (setq-local completion-at-point-functions
                   `(,(cape-capf-super #'cider-complete-at-point #'yasnippet-capf)
-                    #'cape-dabbrev)))
+                    cape-dabbrev)))
 
     (add-hook 'cider-mode-hook #'my/setup-clojure)
     (add-hook 'cider-repl-mode-hook #'my/setup-clojure)
