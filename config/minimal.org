@@ -85,7 +85,8 @@ you can work with.
       (defun my/eshell ()
         "Switch to eshell buffer if it exists; otherwise, activate it."
         (interactive)
-        (if (boundp 'eshell-buffer-name)
+        (if (and (boundp 'eshell-buffer-name)
+                 (get-buffer-window eshell-buffer-name 'visible))
              (switch-to-buffer eshell-buffer-name)
            (eshell)))
 
