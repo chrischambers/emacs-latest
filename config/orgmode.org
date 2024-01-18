@@ -962,10 +962,10 @@
        (pdf-tools-install t t t)
        ;; open pdfs scaled to fit width
        (setq-default pdf-view-display-size 'fit-width)
+       :bind (:map pdf-view-mode-map
+               ([remap pdf-view-enlarge] . my/pdf-view-enlarge)
+               ([remap pdf-view-shrink] . my/pdf-view-shrink))
        :general
-       ('normal pdf-view-mode-map
-                "=" 'my/pdf-view-enlarge
-                "-" 'my/pdf-view-shrink)
        (local-leader pdf-view-mode-map
          "v" '(:ignore t :major-modes pdf-view-mode :which-key "view")
          "vp" '(pdf-view-fit-page-to-window :which-key "fit page")
