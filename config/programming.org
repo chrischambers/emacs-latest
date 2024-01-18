@@ -716,6 +716,7 @@
         :config
         (dolist (mapping '(("s"  .       "clojure.spec.alpha")
                            ("gen" .      "clojure.spec.gen.alpha")
+                           ("x" .        "net.cgrand.xforms")
                            ("stest" .    "clojure.spec.test.alpha")
                            ("match" .    "clojure.core.match")
                            ("combo" .    "clojure.math.combinatorics")
