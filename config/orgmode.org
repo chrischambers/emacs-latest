@@ -937,78 +937,13 @@
       (leader "aN"   '(org-noter :which-key "noter")))
   #+end_src
 
-* Org and .pdf/.epub/.mobi/.djvu Integration
-** <<<pdf>>>
-   #+begin_src elisp
-     (use-package pdf-tools
-       :preface
-       (defun my/pdf-view-enlarge ()
-         (interactive)
-         (pdf-view-enlarge pdf-view-resize-factor)
-         (pdf-view-center-in-window))
-       (defun my/pdf-view-shrink ()
-         (interactive)
-         (pdf-view-shrink pdf-view-resize-factor)
-         (pdf-view-center-in-window))
-       :defer 1
-       :straight (pdf-tools :type git :host github :repo "vedang/pdf-tools")
-       :custom
-       ;; more fine-grained zooming
-       (pdf-view-resize-factor 1.05)
-
-       :config
-       ;; Install dependencies:
-       (my/keymap-fix-with-evil-mode 'pdf-view-mode)
-       (pdf-tools-install t t t)
-       ;; open pdfs scaled to fit width
-       (setq-default pdf-view-display-size 'fit-width)
-       :bind (:map pdf-view-mode-map
-               ([remap pdf-view-enlarge] . my/pdf-view-enlarge)
-               ([remap pdf-view-shrink] . my/pdf-view-shrink))
-       :general
-       (local-leader pdf-view-mode-map
-         "v" '(:ignore t :major-modes pdf-view-mode :which-key "view")
-         "vp" '(pdf-view-fit-page-to-window :which-key "fit page")
-         "vh" '(pdf-view-fit-height-to-window :which-key "fit to height")
-         "vw" '(pdf-view-fit-width-to-window :which-key "fit to width")
-         "vr" '(pdf-view-scale-reset :which-key "reset")
-         "vP" '(pdf-view-printer-minor-mode :which-key "printer view (toggle)")
-         "vR" '(pdf-view-rotate :which-key "rotate")
-         "t"  '(pdf-view-themed-minor-mode :which-key "match theme (toggle)")))
-   #+end_src
-
-** <<<djvu>>>
-   #+begin_src elisp
-    (use-package djvu
-      :general
-      (('motion normal emacs) djvu-read-mode-map
-       "C-n" 'djvu-next-page
-       "C-p" 'djvu-prev-page
-       "H"   'djvu-history-backward
-       "L"   'djvu-history-forward))
-   #+end_src
-** <<<nov.el>>> ([[https://depp.brause.cc/nov.el/][homepage]]): <<<epub>>> and <<<mobi>>> viewing within Emacs
-   #+begin_src elisp
-     (use-package esxml)
-     (use-package nov.el
-       :config
-       (my/keymap-fix-with-evil-mode 'nov-mode)
-       :mode ("\\.\\(epub\\|mobi\\)\\'" . nov-mode)
-       :general
-       ('(motion normal emacs) nov-mode-map
-         "C-n" 'nov-next-document
-         "C-p" 'nov-previous-document
-         "H"   'nov-history-back
-         "L"   'nov-history-forward))
-   #+end_src
-
+* pdf integration
 ** <<<org-pdftools>>> ([[https://github.com/fuxialexander/org-pdftools][github]])
    #+begin_src elisp
      (use-package org-pdftools
        :after org pdf-tools
        :hook (org-mode . org-pdftools-setup-link))
    #+end_src
-
 ** COMMENT <<<org-noter-pdftools>>> ([[https://github.com/fuxialexander/org-pdftools][github]])
    #+begin_src elisp
      (use-package org-noter-pdftools
