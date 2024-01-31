@@ -416,7 +416,7 @@
      (customize-set-variable 'org-image-actual-width nil)
    #+end_src
 
-** COMMENT <<<valign>>> ([[https://github.com/casouri/valign][github]]): Align tables with variable-pitch fonts/images properly
+** <<<valign>>> ([[https://github.com/casouri/valign][github]]): Align tables with variable-pitch fonts/images properly
    #+begin_src elisp
      (use-package valign
        :hook (org-mode . valign-mode))
