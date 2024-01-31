@@ -1040,6 +1040,8 @@
     (use-package org-transclusion
       :after org
       :hook (org-mode . org-transclusion-mode)
+      :custom
+      (org-transclusion-include-first-section nil)
       :general
       (leader "X" '(org-transclusion-make-from-link :which-key "transclude")))
   #+end_src
