@@ -474,6 +474,7 @@
                    '(cider (styles flex basic))))
 #+end_src
 * Experiment
+  Source: [[https://stackoverflow.com/questions/72601990/how-to-show-suggestions-for-yasnippets-when-using-eglot][emacs - How to show suggestions for YASnippets when using eglot - Stack Overflow]]
   #+begin_src elisp
     (defun my/setup-clojure ()
       (setq-local completion-at-point-functions
