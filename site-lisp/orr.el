@@ -188,8 +188,8 @@ this predicate is not nil."
 (defun orr-preview-function ()
   "Return the preview content at point.
 
-This function returns the all contents under the current
-headline, up to the next headline."
+This function returns all contents under the current headline, up
+to the next headline."
   (let ((beg (save-excursion
                (org-roam-end-of-meta-data t)
                (point)))
