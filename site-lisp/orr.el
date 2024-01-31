@@ -215,8 +215,8 @@ to the next headline."
      (magit-insert-section section (orr4-file-section)
        (let ((path (orr-file-path file))
              (title (orr-file-title file)))
-         (insert (propertize title 'font-lock-face 'org-roam-title))
          (oset section file path)
+         (magit-insert-heading (propertize title 'font-lock-face 'org-roam-title))
          (insert ?\n)
          (dolist (match matches)
            (pcase match
