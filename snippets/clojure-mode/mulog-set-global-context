@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: mulog (global context)
+# key: mulog
+# --
+(mulog/set-global-context!
+  {:${1:keyword} ${2:value}})

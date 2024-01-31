@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: mulog (log)
+# key: log
+# --
+(mulog/log ::${1:category})

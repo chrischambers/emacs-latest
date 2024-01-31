@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: mulog (start publisher)
+# key: mulog
+# --
+(mulog/start-publisher!
+  {:type :multi
+   :publishers
+   [{:type :console}
+    {:type :simple-file :filename "/var/log/mulog/events.log"}]})
