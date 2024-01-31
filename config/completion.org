@@ -144,7 +144,7 @@
                 (-map (-rpartial #'my/vertico--add-score-modifier user-input))
                 ;; (-remove (-compose #'zerop #'cdr))
                 (-sort (-on #'> #'cdr))
-                (-map #'first))))
+                (-map #'car))))
 
      (defun my/vertico-sort (candidates)
        (let ((user-input (minibuffer-contents)))
