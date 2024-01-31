@@ -712,13 +712,20 @@
        `(("t" "Task" entry
           (file+headline "todo.org" "Inbox")
           "* TODO %?")
+         ("a" "Algorithm" plain
+          (file (lambda () (my/get-filepath-from-title "memex/#algorithms")))
+          (file ,(concat my/org-capture-templates "algorithm.org"))
+          :auto-id t
+          :jump-to-captured t)
          ("b" "Book Notes" plain
           (file (lambda () (my/get-filepath-from-title my/book-notes-directory)))
-          (file ,(concat my/org-capture-templates "book-notes.org")))
+          (file ,(concat my/org-capture-templates "book-notes.org"))
+          :jump-to-captured t)
          ("p" "Project" plain
           (file (lambda () (my/get-filepath-from-title "projects" :date)))
           (file ,(concat my/org-capture-templates "project.org"))
-          :auto-id t)
+          :auto-id t
+          :jump-to-captured t)
          ("Q" "Quote" plain (file (lambda () (my/get-filepath-from-title "memex/#quotes")))
           (file ,(concat my/org-capture-templates "quote.org"))
           :auto-id t)
@@ -736,7 +743,9 @@
          ("p" "person" plain (file ,(concat my/org-capture-templates "default.org"))
           :if-new (file+head "memex/#people/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-
+         ("a" "algorithm" plain (file ,(concat my/org-capture-templates "algorithm.org"))
+          :if-new (file+head "memex/#algorithm/${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
          ("c" "category theory" plain (file ,(concat my/org-capture-templates "category_theory.org"))
           :if-new (file+head "memex/#category_theory/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
