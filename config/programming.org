@@ -353,7 +353,10 @@
          "ef" '(eval-defun :which-key "function")
          "eF" '(load-file :which-key "file")
          "er" '(eval-region :which-key "region")
-         "eb" '(eval-buffer :which-key "buffer")))
+         "eb" '(eval-buffer :which-key "buffer")
+         "f"  '(:ignore t :major-modes emacs-lisp-mode :which-key "find")
+         "fd" '(xref-find-definitions :which-key "definition")
+         "fr" '(xref-find-references :which-key "references")))
    #+end_src
 *** Debugging
 **** Tracing
