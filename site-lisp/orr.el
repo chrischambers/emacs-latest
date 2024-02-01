@@ -238,9 +238,8 @@ to the next headline."
            (setq s (funcall fn s)))
          s)))))
 
-;; Hideous. Doesn't work for ../parent/link.png urls - see "sort"
 (setq orr-relative-link-re
-      "\\[\\[\\./\\(\\(?:[^][\\]\\|\\\\\\(?:\\\\\\\\\\)*[][]\\|\\\\+[^][]\\)+\\)]\\(?:\\[\\([^z-a]+?\\)]\\)?]")
+      "\\[\\[\\(\\.?\\./\\(?:[^][\\]\\|\\\\\\(?:\\\\\\\\\\)*[][]\\|\\\\+[^][]\\)+\\)]\\(?:\\[\\([^z-a]+?\\)]\\)?]")
 
 (defun orr-fontify-like-in-org-mode (s path)
   (let ((parent-dir (f-slash (f-parent path))))
