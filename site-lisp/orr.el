@@ -252,9 +252,9 @@ to the next headline."
       "\\[\\[\\(\\.?\\./\\(?:[^][\\]\\|\\\\\\(?:\\\\\\\\\\)*[][]\\|\\\\+[^][]\\)+\\)]\\(?:\\[\\([^z-a]+?\\)]\\)?]")
 
 (defun orr-fontify-like-in-org-mode (s path)
-  (let ((parent-dir (f-slash (f-parent path))))
+  (let ((dir (f-slash (f-parent path))))
     (with-temp-buffer
-      (insert (s-replace-regexp orr-relative-link-re (format "[[%s\\1]]" parent-dir) s))
+      (insert (s-replace-regexp orr-relative-link-re (format "[[%s\\1]]" dir) s))
       (let ((org-ref-buffer-hacked t))
         (org-mode)
         (setq-local org-fold-core-style 'overlays)
