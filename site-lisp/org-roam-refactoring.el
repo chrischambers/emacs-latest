@@ -357,9 +357,12 @@ Implementation stolen from org-roam-db-map-links."
   (org-element-property :raw-link element))
 
 (defun orr/org-link-get-description (element)
-  (buffer-substring-no-properties
-   (org-element-property :contents-begin element)
-   (org-element-property :contents-end element)))
+  "If the link has a description, get it, otherwise return nil"
+  (when-let
+      ((start (org-element-property :contents-begin element))
+       (end (org-element-property :contents-end element)))
+    (buffer-substring-no-properties start end)))
+
 
 ;; ---------------------------------------------------------------------------
 ;;; functional:
