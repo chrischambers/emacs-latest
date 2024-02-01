@@ -305,12 +305,16 @@ to the next headline."
                 ))))
          )))))
 
+(defun orr-buffer-refresh ()
+  (interactive)
+  (org-roam-refactor4-main org-roam-buffer-current-nodes))
+
 (defvar orr/mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map org-roam-mode-map)
     (define-key map [C-return]  'org-roam-buffer-visit-thing)
     (define-key map (kbd "C-m") 'org-roam-buffer-visit-thing)
-    (define-key map [remap revert-buffer] 'org-roam-buffer-refresh)
+    (define-key map [remap revert-buffer] 'orr-buffer-refresh)
     (define-key map (kbd "SPC") nil)
     map))
 
