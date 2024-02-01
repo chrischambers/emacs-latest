@@ -416,3 +416,5 @@ If ASSERT, throw an error."
          (map (make-hash-table)))
     (pcase-dolist (`(,diff . ,point) mapping) (puthash diff point map))
     (gethash (apply #'min differences) map)))
+
+;; (inspect (orr/get-backlinks org-roam-buffer-current-nodes))
