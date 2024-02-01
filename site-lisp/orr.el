@@ -128,7 +128,11 @@
     (setq-local default-directory org-roam-buffer-current-directory)
     (setq-local org-roam-directory org-roam-buffer-current-directory)
     (org-roam-buffer-set-header-line-format
-     (mapconcat #'org-roam-node-title org-roam-buffer-current-nodes ", "))
+     (mapconcat
+      (lambda (i) (->> i org-roam-node-title (format "\"%s\"")))
+      org-roam-buffer-current-nodes
+      ", "))
+      (insert ?\n)
     (magit-insert-section (org-roam)
       (magit-insert-heading)
       (dolist (section orr4-mode-sections)
