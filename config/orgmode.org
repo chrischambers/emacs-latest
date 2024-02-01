@@ -560,10 +560,10 @@
 
     (use-package org-roam
       :after org
-      :straight (org-noter :type git
-                           :host github
-                           :repo "org-roam/org-roam"
-                           :fork t)
+      :straight (org-roam :type git
+                          :host github
+                          :repo "org-roam/org-roam"
+                          :fork t)
       :init
       (setq org-roam-directory org-directory)
       :custom
