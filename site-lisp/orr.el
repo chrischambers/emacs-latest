@@ -99,25 +99,40 @@
                   :heading-title heading-title
                   :properties properties))))))
 
-(defun org-roam-refactor4 ()
-  "Easily update all the backlinks for a given node/nodes."
-  (interactive)
-  (let* ((link (orr/get-link-at-point))
-         (parent-id (orr/get-id-from-parent-section))
-         (nodes (cond
-                 (link (let* ((initial-input (when link (orr/org-link-get-description link)))
-                              (nodes (my/org-roam-node-read-multiple initial-input nil nil 'require-match)))
-                         (-map #'cdr nodes)))
-                 (parent-id (list (org-roam-node-from-id parent-id)))
-                 (t (let* ((nodes (my/org-roam-node-read-multiple nil nil nil 'require-match)))
-                      (-map #'cdr nodes)))))
-         (new-buffer (get-buffer-create org-roam-refactoring2-buffer-name))
-         (ids (-map #'org-roam-node-id nodes)))
+(defun org-roam-refactor4-main (nodes)
+  (let ((new-buffer (get-buffer-create org-roam-refactoring2-buffer-name))
+        (ids (-map #'org-roam-node-id nodes)))
     (switch-to-buffer new-buffer)
     (setq org-roam-buffer-current-nodes nodes
           org-roam-buffer-current-directory org-roam-directory)
     (org-roam-refactoring4-render)
     (-map #'my/add-link-overlay-with-id ids)))
+
+(defvar orr-backlink-filter nil
+  "If set (buffer-local?), should be a predicate taking a single backlink.")
+
+(defun org-roam-refactor4 ()
+  "Easily update all the backlinks for a given node/nodes."
+  (interactive)
+  (let* ((link (orr/get-link-at-point))
+         (parent-id (orr/get-id-from-parent-section))
+         (nodes
+          (cond
+           (link
+            (let* ((initial-input (when link (orr/org-link-get-description link)))
+                   (nodes (my/org-roam-node-read-multiple initial-input
+                                                          nil
+                                                          nil
+                                                          'require-match)))
+              (-map #'cdr nodes)))
+           (parent-id (list (org-roam-node-from-id parent-id)))
+           (t
+            (let* ((nodes (my/org-roam-node-read-multiple nil
+                                                          nil
+                                                          nil
+                                                          'require-match)))
+              (-map #'cdr nodes))))))
+    (org-roam-refactor4-main nodes)))
 
 (customize-set-variable 'orr4-mode-sections (list #'orr4-backlinks-section))
 
@@ -163,11 +178,18 @@
              (cons (list file (cons (list new-heading-pos (list bl)) (cadar acc))) rest))
          (cons (list file (list (list new-heading-pos (list bl)))) acc))))))
 
-(defun orr/backlinks-grouped (nodes &optional unique)
+(defun orr/filter-backlinks (backlinks &optional show-backlink-p)
+  (if show-backlink-p
+      (-filter show-backlink-p backlinks)
+      backlinks))
+
+(defun orr/backlinks-grouped (nodes &optional unique show-backlink-p)
   (let* ((backlinks (orr/get-backlinks nodes :unique unique))
+         (backlinks (orr/filter-backlinks backlinks show-backlink-p))
          (reduced (-reduce-r-from
                    #'orr--accumulate-backlinks
-                   `((,(orr-file-create :title "foo" :path "~/foo.txt") ((1 (foo))))) backlinks))
+                   `((,(orr-file-create :title "foo" :path "~/foo.txt") ((1 (foo)))))
+                   backlinks))
          (result (-drop-last 1 reduced)))
     result))
 
@@ -181,13 +203,16 @@ When UNIQUE is t, limit to unique sources.
 
 When SHOW-BACKLINK-P is not null, only show backlinks for which
 this predicate is not nil."
-  (when-let ((grouped-backlinks (orr/backlinks-grouped nodes unique)))
-    (inspect grouped-backlinks t)
-    (magit-insert-section (org-roam-backlinks)
-      (magit-insert-heading "Backlinks:")
-      (dolist (group grouped-backlinks)
-        (orr4-build-sections group)))
-      (insert ?\n)))
+  (let ((show-backlink-p (or show-backlink-p orr-backlink-filter)))
+    (when-let ((grouped-backlinks (orr/backlinks-grouped nodes unique show-backlink-p)))
+      ;; (inspect grouped-backlinks t)
+      (magit-insert-section (org-roam-backlinks)
+        (magit-insert-heading "Backlinks:")
+        (dolist (group grouped-backlinks)
+          (orr4-build-sections group)))
+      (insert ?\n)
+      (org-latex-preview '(16))
+      (org-toggle-inline-images))))
 
 (defun orr-preview-function ()
   "Return the preview content at point.
@@ -212,6 +237,20 @@ to the next headline."
          (dolist (fn org-roam-preview-postprocess-functions)
            (setq s (funcall fn s)))
          s)))))
+
+;; Hideous. Doesn't work for ../parent/link.png urls - see "sort"
+(setq orr-relative-link-re
+      "\\[\\[\\./\\(\\(?:[^][\\]\\|\\\\\\(?:\\\\\\\\\\)*[][]\\|\\\\+[^][]\\)+\\)]\\(?:\\[\\([^z-a]+?\\)]\\)?]")
+
+(defun orr-fontify-like-in-org-mode (s path)
+  (let ((parent-dir (f-slash (f-parent path))))
+    (with-temp-buffer
+      (insert (s-replace-regexp orr-relative-link-re (format "[[%s\\1]]" parent-dir) s))
+      (let ((org-ref-buffer-hacked t))
+        (org-mode)
+        (setq-local org-fold-core-style 'overlays)
+        (font-lock-ensure)
+        (buffer-string)))))
 
 (defun orr4-build-sections (group)
   (pcase group
@@ -245,10 +284,11 @@ to the next headline."
                 (let ((source-node (orr-backlink-source-node (car backlinks)))
                       (points (-map #'orr-backlink-point backlinks)))
                   (magit-insert-section section (orr4-preview-section)
-                    (insert (org-roam-fontify-like-in-org-mode
+                    (insert (orr-fontify-like-in-org-mode
                              (orr-preview-get-contents
                               (org-roam-node-file source-node)
-                              heading-pos))
+                              heading-pos)
+                              (org-roam-node-file source-node))
                             "\n")
                     (oset section file (org-roam-node-file source-node))
                     (oset section points points)
