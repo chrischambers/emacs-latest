@@ -120,6 +120,7 @@
 
 (defvar orr-backlink-filter nil
   "If set (buffer-local?), should be a predicate taking a single backlink.")
+(put 'orr-backlink-filter 'permanent-local t)
 
 (defun org-roam-refactor4 ()
   "Easily update all the backlinks for a given node/nodes."
@@ -157,6 +158,7 @@
       (lambda (i) (->> i org-roam-node-title (format "\"%s\"")))
       org-roam-buffer-current-nodes
       ", "))
+      (insert (format "Filter: %s" orr-backlink-filter))
       (insert ?\n)
     (magit-insert-section (org-roam)
       (magit-insert-heading)
@@ -205,6 +207,16 @@
 
 ;; (inspect (orr/backlinks-grouped (list (org-roam-node-from-id "608130E1-5C55-41CF-AAC8-AB1DE5ABC788"))))
 
+(defun orr/-make-bl-p (f re)
+  (lambda (bl) (s-matches? re (funcall f bl))))
+
+(defun orr-backlink-filter-active (f)
+  (pcase f
+    (`(heading ,text) (orr/-make-bl-p #'orr-backlink-heading-title text))
+    (`(link-description ,text) (orr/-make-bl-p #'orr-backlink-link-description text))
+    (`(file-title ,text) (orr/-make-bl-p #'orr-backlink-file-title text))
+    (f f)))
+
 (cl-defun orr4-backlinks-section (nodes &key (unique nil) (show-backlink-p nil))
   "The backlinks section for NODES.
 
@@ -213,7 +225,7 @@ When UNIQUE is t, limit to unique sources.
 
 When SHOW-BACKLINK-P is not null, only show backlinks for which
 this predicate is not nil."
-  (let ((show-backlink-p (or show-backlink-p orr-backlink-filter)))
+  (let ((show-backlink-p (or show-backlink-p (orr-backlink-filter-active orr-backlink-filter))))
     (when-let ((grouped-backlinks (orr/backlinks-grouped nodes unique show-backlink-p)))
       ;; (inspect grouped-backlinks t)
       (magit-insert-section (org-roam-backlinks)
