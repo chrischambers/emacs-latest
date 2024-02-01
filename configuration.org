@@ -176,20 +176,6 @@
        (flyspell-issue-message-flag nil))
    #+end_src
 
-*** <<<whitespace-cleanup-mode>>> ([[https://github.com/purcell/whitespace-cleanup-mode][github]]): Intelligently remove extra whitespace
-
-    #+begin_quote
-    whitespace-cleanup-mode is a minor mode which calls whitespace-cleanup before
-    saving the current buffer, but only if the whitespace in the buffer was
-    initially clean. It determines this by quickly checking to see if
-    whitespace-cleanup would have any effect on the buffer.
-    #+end_quote
-
-    #+begin_src elisp
-      (use-package whitespace-cleanup-mode
-        :hook (after-init . global-whitespace-cleanup-mode))
-    #+end_src
-
 ** wordnut
    #+begin_src elisp
      (use-package wordnut
@@ -198,8 +184,3 @@
          "vd" '(wordnut-lookup-current-word :which-key "dictionary")))
    #+end_src
 
-** origmai
-   #+begin_src elisp
-     (use-package origami
-       :hook (after-init . global-origami-mode))
-   #+end_src
