@@ -50,6 +50,7 @@
   source-node target-node
   point
   heading-pos heading-title
+  link-description
   properties)
 
 ;; We can then group by container pos, sort by source node pos, and iterate
@@ -74,7 +75,7 @@
                    :and (= type "id")
                    :group :by source
                    :having (funcall min pos)]
-                [:select [l:source l:dest l:pos l:properties l:heading-pos l:heading-title f:title f:file]
+                [:select [l:source l:dest l:pos l:properties l:heading-pos l:heading-title l:link-description f:title f:file]
                  :from [(as links l) (as files f) nodes]
                  :where (in dest $v1)
                  :and (= l:source nodes:id)
@@ -83,12 +84,20 @@
                  :order :by [f:title l:heading-pos]]))
          (backlinks (org-roam-db-query sql ids)))
     (dolist (link backlinks)
-      (cl-destructuring-bind (source-id dest-id _ _ _ _ _ _) link
+      (cl-destructuring-bind (source-id dest-id _ _ _ _ _ _ _) link
         (set-add node-ids source-id)
         (set-add node-ids dest-id)))
     (let ((mapping (my/populate-nodes-from-ids (set-members node-ids))))
       (cl-loop for link in backlinks collect
-               (cl-destructuring-bind (source-id dest-id pos properties heading-pos heading-title file-title file) link
+               (cl-destructuring-bind (source-id
+                                       dest-id
+                                       pos
+                                       properties
+                                       heading-pos
+                                       heading-title
+                                       link-description
+                                       file-title
+                                       file) link
                  (orr-backlink-create
                   :file-title file-title
                   :file file
@@ -97,6 +106,7 @@
                   :point pos
                   :heading-pos heading-pos
                   :heading-title heading-title
+                  :link-description link-description
                   :properties properties))))))
 
 (defun org-roam-refactor4-main (nodes)
