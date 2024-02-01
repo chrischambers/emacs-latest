@@ -268,13 +268,13 @@ headline, up to the next headline."
            [:select [n:id, n:file, n:level, n:pos, n:todo, n:priority, n:scheduled,
                      n:deadline, n:title, n:properties, n:olp,
                      f:atime, f:mtime, f:title,
-                     (as (funcall format '"(%s)"
+                     (as (funcall printf '"(%s)"
                            (funcall replace
                              (funcall group_concat :distinct a:alias) '"," '"")) aliases)
-                     (as (funcall format '"(%s)"
+                     (as (funcall printf '"(%s)"
                            (funcall replace
                              (funcall group_concat :distinct t:tag) '"," '"")) tags)
-                     (as (funcall format '"(%s)"
+                     (as (funcall printf '"(%s)"
                            (funcall replace
                              ;; TODO: Need to incorporate functions used in org-roam-node-list
                              (funcall group_concat :distinct r:ref) '"," '"")) refs)]
