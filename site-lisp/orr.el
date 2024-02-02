@@ -158,8 +158,10 @@
       (lambda (i) (->> i org-roam-node-title (format "\"%s\"")))
       org-roam-buffer-current-nodes
       ", "))
-      (insert (format "Filter: %s" orr-backlink-filter))
-      (insert ?\n)
+    (insert (propertize
+             (format "Filter: =%s=" orr-backlink-filter)
+             'font-lock-face 'org-verbatim))
+    (insert ?\n)
     (magit-insert-section (org-roam)
       (magit-insert-heading)
       (dolist (section orr4-mode-sections)
