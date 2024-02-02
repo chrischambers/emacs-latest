@@ -321,9 +321,50 @@ to the next headline."
   (interactive)
   (org-roam-refactor4-main org-roam-buffer-current-nodes))
 
+(defun orr--filter-clear ()
+  (interactive)
+  (setq-local orr-backlink-filter nil)
+  (orr-buffer-refresh))
+
+(defun orr--filter-lambda (form)
+  (interactive "X")
+  (setq-local orr-backlink-filter form)
+  (orr-buffer-refresh))
+
+(defun orr--filter-function (f)
+  (interactive "a")
+  (setq-local orr-backlink-filter f)
+  (orr-buffer-refresh))
+
+(defun orr--filter-heading (re)
+  (interactive "sHeading: ")
+  (setq-local orr-backlink-filter `(heading ,re))
+  (orr-buffer-refresh))
+
+(defun orr--filter-file-title (re)
+  (interactive "sFile Title: ")
+  (setq-local orr-backlink-filter `(file-title ,re))
+  (orr-buffer-refresh))
+
+(defun orr--filter-link-description (re)
+  (interactive "sLink Description: ")
+  (setq-local orr-backlink-filter `(link-description ,re))
+  (orr-buffer-refresh))
+
+(transient-define-prefix orr-filter ()
+    "Prefix that waves at the user"
+    ["Filter:\n"
+     ("c" "clear" orr--filter-clear)
+     ("f" "file title" orr--filter-file-title)
+     ("F" "function" orr--filter-function)
+     ("h" "heading" orr--filter-heading)
+     ("l" "link description" orr--filter-link-description)
+     ("L" "lambda" orr--filter-lambda)])
+
 (defvar orr/mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map org-roam-mode-map)
+    (define-key map (kbd "f") 'orr-filter)
     (define-key map [C-return]  'org-roam-buffer-visit-thing)
     (define-key map (kbd "C-m") 'org-roam-buffer-visit-thing)
     (define-key map [remap revert-buffer] 'orr-buffer-refresh)
@@ -418,3 +459,6 @@ If ASSERT, throw an error."
     (gethash (apply #'min differences) map)))
 
 ;; (inspect (orr/get-backlinks org-roam-buffer-current-nodes))
+
+(local-leader org-roam-refactoring2-mode-map
+  "R" '(orr--filter-clear :which-key "reset filters"))
