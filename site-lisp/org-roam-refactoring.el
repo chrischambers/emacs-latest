@@ -462,7 +462,11 @@ accepting ELEMENT."
 (defun org-roam-refactor-replace-link-destination ()
   (interactive)
   (when-let ((el (orr/get-link-at-point))
-             (id (org-roam-node-id (org-roam-node-read))))
+             (file (f-filename (buffer-file-name)))
+             (point (point))
+             (description (orr/org-link-get-description el))
+             (prompt (format "Replace link [%s] in %s (%s) with: " description file point))
+             (id (org-roam-node-id (org-roam-node-read nil nil nil nil prompt))))
     (orr/change-link-target-destination! el id)))
 
 (defun org-roam-refactor-replace-link-description ()

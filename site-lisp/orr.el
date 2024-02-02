@@ -289,12 +289,16 @@ to the next headline."
            (pcase match
              (`(,heading-pos ,backlinks)
               (magit-insert-section section (orr4-heading-section)
-                (oset section heading-pos heading-pos)
-                (oset section file path)
-                (let* ((properties (orr-backlink-properties (car backlinks)))
+                (let* ((first-backlink (car backlinks))
+                       (properties (orr-backlink-properties first-backlink))
+                       (source-node (orr-backlink-source-node first-backlink))
+                       (points (-map #'orr-backlink-point backlinks))
                        (outline (if-let ((outline (plist-get properties :outline)))
                                     (mapconcat #'org-link-display-format outline " > ")
                                   "Top")))
+                  (oset section heading-pos heading-pos)
+                  (oset section points points)
+                  (oset section file path)
                   (insert
                    (concat
                     (propertize (org-roam-fontify-like-in-org-mode
@@ -304,25 +308,24 @@ to the next headline."
                                                      'org-roam-preview-heading))))
                     (format " (%s)" (propertize outline
                                                 'font-lock-face
-                                                'org-roam-olp)))))
-                ;; (insert (concat (propertize (format "  %s" (orr-backlink-heading-title (car backlinks)))
-                ;;                             'font-lock-face 'org-roam-header-line)
-                ;;                 (format " (%s)"
-                ;;                         (propertize outline 'font-lock-face 'org-roam-olp)))))
-                (magit-insert-heading)
-                ;; (insert ?\n)
-                (let ((source-node (orr-backlink-source-node (car backlinks)))
-                      (points (-map #'orr-backlink-point backlinks)))
+                                                'org-roam-olp))))
+                  ;; (insert (concat (propertize (format "  %s" (orr-backlink-heading-title (car backlinks)))
+                  ;;                             'font-lock-face 'org-roam-header-line)
+                  ;;                 (format " (%s)"
+                  ;;                         (propertize outline 'font-lock-face 'org-roam-olp)))))
+                  (magit-insert-heading)
+                  ;; (insert ?\n)
                   (magit-insert-section section (orr4-preview-section)
-                    (insert (orr-fontify-like-in-org-mode
-                             (orr-preview-get-contents
-                              (org-roam-node-file source-node)
-                              heading-pos)
-                              (org-roam-node-file source-node))
-                            "\n")
-                    (oset section file (org-roam-node-file source-node))
-                    (oset section points points)
-                    (insert ?\n)))
+                      (insert (orr-fontify-like-in-org-mode
+                               (orr-preview-get-contents
+                                (org-roam-node-file source-node)
+                                heading-pos)
+                               (org-roam-node-file source-node))
+                              "\n")
+                      (oset section file (org-roam-node-file source-node))
+                      (oset section heading-pos heading-pos)
+                      (oset section points points)
+                      (insert ?\n)))
                 ))))
          )))))
 
@@ -369,10 +372,34 @@ to the next headline."
      ("l" "link description" orr--filter-link-description)
      ("L" "lambda" orr--filter-lambda)])
 
+(defun orr--replace-link-destination ()
+  (interactive)
+  (when-let ((section (magit-current-section))
+             (file (oref section file))
+             (points (oref section points))
+             (buffer (or (find-buffer-visiting file)
+                         (find-file-noselect file))))
+    (save-excursion
+      (with-current-buffer buffer
+        (cl-loop for pos in points
+                 do
+                 (goto-char pos)
+                 (org-roam-refactor-replace-link-destination))))))
+
+(defun orr--replace-link-description ()
+  (interactive)
+  (message "not done yet!"))
+
+(transient-define-prefix orr-refactor ()
+    ["Refactor:\n"
+     ("l" "location" orr--replace-link-destination)
+     ("d" "description" orr--replace-link-description)])
+
 (defvar orr/mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map org-roam-mode-map)
     (define-key map (kbd "f") 'orr-filter)
+    (define-key map (kbd "r") 'orr-refactor)
     (define-key map [C-return]  'org-roam-buffer-visit-thing)
     (define-key map (kbd "C-m") 'org-roam-buffer-visit-thing)
     (define-key map [remap revert-buffer] 'orr-buffer-refresh)
@@ -398,11 +425,14 @@ to the next headline."
 (defclass orr4-heading-section (magit-section)
   ((keymap :initform 'orr/heading-mode-map)
    (file :initform nil)
-   (heading-pos :initform nil)))
+   (heading-pos :initform nil)
+   (points :initform nil)))
 
 (defvar orr/preview-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map org-roam-preview-map)
+    (define-key map (kbd "f") 'orr-filter)
+    (define-key map (kbd "r") 'orr-refactor)
     (define-key map [remap org-roam-buffer-visit-thing] 'orr/preview-visit)
     (define-key map (kbd "SPC") nil)
     map))
@@ -410,6 +440,7 @@ to the next headline."
 (defclass orr4-preview-section (magit-section)
   ((keymap :initform 'orr/preview-map)
    (file :initform nil)
+   (heading-pos :initform nil)
    (points :initform nil)))
 
 (defun orr/buffer-file-at-point (&optional assert)
@@ -459,14 +490,24 @@ If ASSERT, throw an error."
   (let ((point (orr--nearest-point-to (point) points)))
     (orr--visit file point other-window)))
 
+;; (inspect (orr/get-backlinks org-roam-buffer-current-nodes))
+
+(local-leader org-roam-refactoring2-mode-map
+  "R" '(orr--filter-clear :which-key "reset filters"))
+
+;; (defun flibbity ()
+;;   (interactive)
+;;   (let* ((current-section (magit-current-section))
+;;          (heading-pos (oref current-section heading-pos))
+;;          (points (oref current-section points))
+;;          (actual-heading-pos (save-excursion (magit-section-up) (evil-next-line) (point)))
+;;          (new-points (-map (lambda (p) (+ p (- heading-pos) actual-heading-pos)) points)))
+;;     (message "%s" new-points)
+;;     (goto-char (car new-points))))
+
 (defun orr--nearest-point-to (point points)
   (let* ((differences (-map (-compose #'abs (-partial #'- point)) points))
          (mapping (-zip-pair differences points))
          (map (make-hash-table)))
     (pcase-dolist (`(,diff . ,point) mapping) (puthash diff point map))
     (gethash (apply #'min differences) map)))
-
-;; (inspect (orr/get-backlinks org-roam-buffer-current-nodes))
-
-(local-leader org-roam-refactoring2-mode-map
-  "R" '(orr--filter-clear :which-key "reset filters"))
