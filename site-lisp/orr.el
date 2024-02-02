@@ -250,7 +250,7 @@ to the next headline."
         (end (save-excursion
                (org-next-visible-heading 1)
                (point))))
-    (string-trim (buffer-substring-no-properties beg end))))
+    (s-trim-right (buffer-substring-no-properties beg end))))
 
 (defun orr-preview-get-contents (file pt)
   "Get preview content for FILE at PT."
@@ -284,7 +284,7 @@ to the next headline."
              (title (orr-file-title file)))
          (oset section file path)
          (magit-insert-heading (propertize title 'font-lock-face 'org-roam-title))
-         (insert ?\n)
+         ;; (insert ?\n)
          (dolist (match matches)
            (pcase match
              (`(,heading-pos ,backlinks)
@@ -295,16 +295,22 @@ to the next headline."
                        (outline (if-let ((outline (plist-get properties :outline)))
                                     (mapconcat #'org-link-display-format outline " > ")
                                   "Top")))
-                  (insert (concat (propertize (org-roam-fontify-like-in-org-mode
-                                               (format "  %s" (orr-backlink-heading-title (car backlinks)))))
-                                  (format " (%s)"
-                                          (propertize outline 'font-lock-face 'org-roam-olp)))))
+                  (insert
+                   (concat
+                    (propertize (org-roam-fontify-like-in-org-mode
+                                 (format "  %s"
+                                         (propertize (orr-backlink-heading-title (car backlinks))
+                                                     'font-lock-face
+                                                     'org-roam-preview-heading))))
+                    (format " (%s)" (propertize outline
+                                                'font-lock-face
+                                                'org-roam-olp)))))
                 ;; (insert (concat (propertize (format "  %s" (orr-backlink-heading-title (car backlinks)))
                 ;;                             'font-lock-face 'org-roam-header-line)
                 ;;                 (format " (%s)"
                 ;;                         (propertize outline 'font-lock-face 'org-roam-olp)))))
                 (magit-insert-heading)
-                (insert ?\n)
+                ;; (insert ?\n)
                 (let ((source-node (orr-backlink-source-node (car backlinks)))
                       (points (-map #'orr-backlink-point backlinks)))
                   (magit-insert-section section (orr4-preview-section)
@@ -355,7 +361,6 @@ to the next headline."
   (orr-buffer-refresh))
 
 (transient-define-prefix orr-filter ()
-    "Prefix that waves at the user"
     ["Filter:\n"
      ("c" "clear" orr--filter-clear)
      ("f" "file title" orr--filter-file-title)
