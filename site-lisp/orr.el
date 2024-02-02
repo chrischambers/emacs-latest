@@ -230,6 +230,7 @@ this predicate is not nil."
   (let ((show-backlink-p (or show-backlink-p (orr-backlink-filter-active orr-backlink-filter))))
     (when-let ((grouped-backlinks (orr/backlinks-grouped nodes unique show-backlink-p)))
       ;; (inspect grouped-backlinks t)
+      ;;(magit-insert-section (orr-backlink-container)
       (magit-insert-section (org-roam-backlinks)
         (magit-insert-heading "Backlinks:")
         (dolist (group grouped-backlinks)
