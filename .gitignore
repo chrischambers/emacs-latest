@@ -8,3 +8,5 @@ straight
 elpy
 
 eln-cache
+/.lsp/
+/.clj-kondo/
