@@ -316,16 +316,17 @@ to the next headline."
                   (magit-insert-heading)
                   ;; (insert ?\n)
                   (magit-insert-section section (orr4-preview-section)
-                      (insert (orr-fontify-like-in-org-mode
-                               (orr-preview-get-contents
-                                (org-roam-node-file source-node)
-                                heading-pos)
-                               (org-roam-node-file source-node))
-                              "\n")
-                      (oset section file (org-roam-node-file source-node))
-                      (oset section heading-pos heading-pos)
-                      (oset section points points)
-                      (insert ?\n)))
+                    ;; (message "%s:%s" (f-filename (org-roam-node-file source-node)) (point))
+                    (insert (orr-fontify-like-in-org-mode
+                             (orr-preview-get-contents
+                              (org-roam-node-file source-node)
+                              heading-pos)
+                             (org-roam-node-file source-node))
+                            "\n")
+                    (oset section file (org-roam-node-file source-node))
+                    (oset section heading-pos heading-pos)
+                    (oset section points points)
+                    (insert ?\n)))
                 ))))
          )))))
 
@@ -495,15 +496,20 @@ If ASSERT, throw an error."
 (local-leader org-roam-refactoring2-mode-map
   "R" '(orr--filter-clear :which-key "reset filters"))
 
-;; (defun flibbity ()
-;;   (interactive)
-;;   (let* ((current-section (magit-current-section))
-;;          (heading-pos (oref current-section heading-pos))
-;;          (points (oref current-section points))
-;;          (actual-heading-pos (save-excursion (magit-section-up) (evil-next-line) (point)))
-;;          (new-points (-map (lambda (p) (+ p (- heading-pos) actual-heading-pos)) points)))
-;;     (message "%s" new-points)
-;;     (goto-char (car new-points))))
+(defun flibbity ()
+  (interactive)
+  (let* ((current-section (magit-current-section))
+         (heading-pos (oref current-section heading-pos))
+         (points (oref current-section points))
+         ;; WRONG: This is the start of the block, not the start of the heading
+         (actual-heading-pos (save-excursion (magit-section-backward) (point)))
+         (new-points (-map (lambda (p) (+ p (- heading-pos) actual-heading-pos)) points)))
+    (message "%s" new-points)
+    (goto-char (car new-points))))
+
+;; Maybe this approach is flawed: all we need to do is divide the preview area
+;; into n block ranges, where n is the amount of points, such that each block
+;; range maps to one point?
 
 (defun orr--nearest-point-to (point points)
   (let* ((differences (-map (-compose #'abs (-partial #'- point)) points))
