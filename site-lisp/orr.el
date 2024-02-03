@@ -303,7 +303,7 @@ to the next headline."
                    (concat
                     (propertize (org-roam-fontify-like-in-org-mode
                                  (format "  %s"
-                                         (propertize (orr-backlink-heading-title (car backlinks))
+                                         (propertize (or (orr-backlink-heading-title first-backlink) "")
                                                      'font-lock-face
                                                      'org-roam-preview-heading))))
                     (format " (%s)" (propertize outline
