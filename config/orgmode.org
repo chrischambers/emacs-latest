@@ -1103,6 +1103,7 @@
     (load "org-roam-refactoring.el")
     (load "org-roam-refactoring2.el")
     (load "sets.el")
+    (load "orr.el")
   #+end_src
 
 ** Use org-ml for some operations
