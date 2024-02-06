@@ -16,7 +16,7 @@
 (defun orr/lookup (title-or-alias)
   (gethash title-or-alias orr-alias-map))
 
-(defun my/orrg ()
+(defun my/inspect-node-for-id-at-point ()
   "Helper for quickly printing the node for an id"
   (interactive)
   (let* ((pair (bounds-of-thing-at-point 'uuid))
@@ -24,16 +24,17 @@
          (end (cdr pair))
          (id (buffer-substring-no-properties start end))
          (node (org-roam-node-from-id id)))
-    (message "%s" node)
+    (inspect node)
     node))
 
-(defun my/orrg2 ()
+(defun my/find-node-for-id-at-point ()
   "Helper for quickly navigating to the node for an id"
   (interactive)
-  (find-file (org-roam-node-file (my/orrg))))
+  (find-file (org-roam-node-file (my/inspect-node-for-id-at-point))))
 
-(leader ";" 'my/orrg)
-(leader "'" 'my/orrg2)
+(leader "x" '(:ignore t :which-key "extras"))
+(leader "xi" 'my/inspect-node-for-id-at-point)
+(leader "xf" 'my/find-node-for-id-at-point)
 
 ;; backlink
 ;; - destination node
@@ -57,8 +58,7 @@
 (defclass orr-backlink-container-section (magit-section)
   ((keymap :initform 'orr/mode-map)
    (backlinks :initform nil)
-   (target-node :initform nil))
-  )
+   (target-node :initform nil)))
 
 (cl-defun orr/get-backlinks (nodes &key unique)
   "Return the backlinks for NODES.
@@ -517,3 +517,10 @@ If ASSERT, throw an error."
          (map (make-hash-table)))
     (pcase-dolist (`(,diff . ,point) mapping) (puthash diff point map))
     (gethash (apply #'min differences) map)))
+
+(defun org-roam-refactor-current-node ()
+  (interactive)
+  (org-roam-refactor4-main (list (org-roam-node-at-point))))
+
+(local-leader org-mode-map
+  "wB"   '(org-roam-refactor-current-node :which-key "refactor"))
