@@ -890,21 +890,28 @@
           (when (f-ancestor-of? my/ebooks-directory document-path)
             (let ((target (my/notes-file-for-ebook document-path)))
               (message target)
-              ;; (with-current-buffer (find-file-noselect target)
-              ;;   (goto-char (point-max))
-              ;;   (insert "This worked!")
-              ;;   )
-              ))))
+              (with-current-buffer (find-file-noselect target)
+                (org-with-point-at (point-min)
+                  (catch 'break
+                    (while (re-search-forward (org-re-property org-noter-property-doc-file) nil)
+                      (when (file-equal-p (expand-file-name (match-string 3)
+                                                            (file-name-directory target))
+                                          document-path)
+                        (if-let ((saved-location (org-entry-get nil org-noter-property-note-location)))
+                            (setq document-location (cons (string-to-number saved-location) 0)))
+                        (let ((org-noter--start-location-override document-location))
+                          (org-noter arg))
+                        (throw 'break t))))))))))
       :config
       (require 'org-noter)
 
-      (remove-hook
-       'org-noter-create-session-from-document-hook
-       #'org-noter--create-session-from-document-file-default)
+      ;; (remove-hook
+      ;;  'org-noter-create-session-from-document-hook
+      ;;  #'org-noter--create-session-from-document-file-default)
 
-      (add-hook
-       'org-noter-create-session-from-document-hook
-       #'my/org-noter-session-from-document-file)
+      ;; (add-hook
+      ;;  'org-noter-create-session-from-document-hook
+      ;;  #'my/org-noter-session-from-document-file)
 
       ;; :preface
       ;; (defun my/org-noter-precise-note ()
