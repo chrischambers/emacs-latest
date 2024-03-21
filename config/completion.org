@@ -128,8 +128,8 @@
               (pattern2 (format "\b%s\b" user-input))
               (score-modifier
                (cond
-                ((s-matches? pattern s)                       30) ; case-insensitive
-                ((s-matches? pattern s)                       20) ; case-insensitive
+                ((s-matches? pattern  s)                       30) ; case-insensitive
+                ((s-matches? pattern2 s)                       20) ; case-insensitive
                 ((s-starts-with?  user-input s :ignore-case)  10)
                 ((s-ends-with?    user-input s :ignore-case)  5)
                 ((s-contains?     user-input s :ignore-case)  2)
