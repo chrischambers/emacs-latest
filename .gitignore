@@ -10,3 +10,5 @@ elpy
 eln-cache
 /.lsp/
 /.clj-kondo/
+
+tree-sitter

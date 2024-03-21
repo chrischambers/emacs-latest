@@ -17,6 +17,15 @@
   Ideally using fontification to indicate whether the functionality is
   available, as LSP does under its own prefix.
 * TODO Configure SQL(i) repl-toggle correctly
+* Automatically use Tree-sitter where possible ([[https://github.com/renzmann/treesit-auto][github]])
+  #+begin_src elisp
+    (use-package treesit-auto
+      :custom
+      (treesit-auto-install 'prompt)
+      :config
+      (treesit-auto-add-to-auto-mode-alist 'all)
+      (global-treesit-auto-mode))
+  #+end_src
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
    #+begin_src elisp
