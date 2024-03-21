@@ -225,6 +225,8 @@
                   '("->" . (?\s (Br . Bl) ?\s (Bc . Bc) ?⮕)))
      (add-to-list 'my/clojure-prettify-alist
                   '("->>" . (?\s (Br . Bl) ?\s (Bc . Bc) ?⮆)))
+     (add-to-list 'my/clojure-prettify-alist
+                  '("comp" . (?\s (Br . Bl) ?\s (Bc . Bc) ?∘)))
 
      (eval-after-load 'clojure-mode
        '(setq clojure--prettify-symbols-alist
