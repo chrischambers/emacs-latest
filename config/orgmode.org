@@ -1152,7 +1152,9 @@
 * Misc
 ** Function to archive project correctly
    #+begin_src elisp
-      (setq my/projects-directory (f-join my/notes-directory "projects"))
+     (setq my/projects-directory (f-join my/notes-directory "projects"))
+     (setq my/completed-projects-directory
+           (f-join my/notes-directory "#archives" "projects" "completed" ))
 
      (defun my/fob->file (file-or-buffer)
        "Returns a `file' when a `file-or-buffer' object is provided."
@@ -1166,40 +1168,40 @@
            file-or-buffer
          (find-file-noselect file-or-buffer)))
 
-      (defun my/list-project-files ()
-        (f-files my/projects-directory (lambda (f) (string= (f-ext f) "org")) t))
+     (defun my/list-project-files ()
+       (f-files my/projects-directory (lambda (f) (string= (f-ext f) "org")) t))
 
-      (defun my/org-file-title (file-or-buffer)
-        "Get the value of the #+TITLE: attribute from an Org file or buffer."
-        (with-current-buffer (my/fob->buffer file-or-buffer)
-          (save-excursion
-            (goto-char (point-min))
-            (when (re-search-forward "^#\\+TITLE:\\s-+\\(.*?\\)\\s-*$" nil t)
-              (match-string-no-properties 1)))))
+     (defun my/org-file-title (file-or-buffer)
+       "Get the value of the #+TITLE: attribute from an Org file or buffer."
+       (with-current-buffer (my/fob->buffer file-or-buffer)
+         (save-excursion
+           (goto-char (point-min))
+           (when (re-search-forward "^#\\+TITLE:\\s-+\\(.*?\\)\\s-*$" nil t)
+             (match-string-no-properties 1)))))
 
-      (defun my/project-file? (file-or-buffer)
-        (let ((file (my/fob->file file-or-buffer)))
-          (f-descendant-of? file my/projects-directory)))
+     (defun my/project-file? (file-or-buffer)
+       (let ((file (my/fob->file file-or-buffer)))
+         (f-descendant-of? file my/projects-directory)))
 
      (defun my/--archive-completed-project (file-or-buffer)
        (let* ((buffer (my/fob->buffer file-or-buffer))
               (path (buffer-file-name buffer))
               (title (my/org-file-title path))
-              (new-location (f-join my/notes-directory "#archives/projects/completed" (f-filename path))))
-              (with-current-buffer buffer
-                (point-min)
-                (org-roam-tag-add (list "complete"))
-                (save-buffer)
-                (vc-rename-file path new-location)
-                (org-roam-db-sync))
-              (message "Archiving completed project `%s'" title)))
+              (new-location (f-join my/completed-projects-directory (f-filename path))))
+         (with-current-buffer buffer
+           (point-min)
+           (org-roam-tag-add (list "complete"))
+           (save-buffer)
+           (vc-rename-file path new-location)
+           (org-roam-db-sync))
+         (message "Archiving completed project `%s'" title)))
 
-      (defun my/archive-completed-project ()
-        "Marks a project complete and adds it to the archives."
-        (interactive)
-        (let ((buffer (current-buffer)))
-          (if (my/project-file? buffer)
-              (my/--archive-completed-project buffer)
-              (let ((path (completing-read "Select project file: " (my/list-project-files))))
-                (my/--archive-completed-project path)))))
+     (defun my/archive-completed-project ()
+       "Marks a project complete and adds it to the archives."
+       (interactive)
+       (let ((buffer (current-buffer)))
+         (if (my/project-file? buffer)
+             (my/--archive-completed-project buffer)
+           (let ((path (completing-read "Select project file: " (my/list-project-files))))
+             (my/--archive-completed-project path)))))
    #+end_src
