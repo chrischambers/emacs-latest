@@ -203,6 +203,7 @@
          (push '("DONE" . ?✓) prettify-symbols-alist)
          (push '("CANCELLED" . ?✘) prettify-symbols-alist)
          (push '("SOMEDAY-MAYBE" . ??) prettify-symbols-alist)
+         (push '("IN-PROGRESS" . ?🪓) prettify-symbols-alist)
          (push '("THOUGHT" . ?💭) prettify-symbols-alist)
          (push '("IDEA" . ?💡) prettify-symbols-alist))
        :hook
