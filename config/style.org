@@ -386,8 +386,9 @@
    #+begin_src elisp
      (use-package org-modern
        :custom
-       (org-modern-star nil)
+       ;;(org-modern-star t)
        (org-modern-hide-stars nil)
+       (org-modern-todo nil)
        :config
        (global-org-modern-mode))
    #+end_src
@@ -398,7 +399,7 @@
     (customize-set-variable 'org-ellipsis " ⤵ ")
   #+end_src
 
-** <<<org-superstar>>>: Nicer heading indicators
+** COMMENT <<<org-superstar>>>: Nicer heading indicators
   #+begin_src elisp
     (use-package org-superstar
       :hook (org-mode . org-superstar-mode))
