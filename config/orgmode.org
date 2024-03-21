@@ -1154,12 +1154,14 @@
    #+begin_src elisp
       (setq my/projects-directory (f-join my/notes-directory "projects"))
 
-     (defun my/file-or-buffer->file (file-or-buffer)
+     (defun my/fob->file (file-or-buffer)
+       "Returns a `file' when a `file-or-buffer' object is provided."
        (if (bufferp file-or-buffer)
            (buffer-file-name file-or-buffer)
          file-or-buffer))
 
-     (defun my/file-or-buffer->buffer (file-or-buffer)
+     (defun my/fob->buffer (file-or-buffer)
+       "Returns a `buffer' when a `file-or-buffer' object is provided."
        (if (bufferp file-or-buffer)
            file-or-buffer
          (find-file-noselect file-or-buffer)))
@@ -1169,18 +1171,18 @@
 
       (defun my/org-file-title (file-or-buffer)
         "Get the value of the #+TITLE: attribute from an Org file or buffer."
-        (with-current-buffer (my/file-or-buffer->buffer file-or-buffer)
+        (with-current-buffer (my/fob->buffer file-or-buffer)
           (save-excursion
             (goto-char (point-min))
             (when (re-search-forward "^#\\+TITLE:\\s-+\\(.*?\\)\\s-*$" nil t)
               (match-string-no-properties 1)))))
 
       (defun my/project-file? (file-or-buffer)
-        (let ((file (my/file-or-buffer->file file-or-buffer)))
+        (let ((file (my/fob->file file-or-buffer)))
           (f-descendant-of? file my/projects-directory)))
 
      (defun my/--archive-completed-project (file-or-buffer)
-       (let* ((buffer (my/file-or-buffer->buffer file-or-buffer))
+       (let* ((buffer (my/fob->buffer file-or-buffer))
               (path (buffer-file-name buffer))
               (title (my/org-file-title path))
               (new-location (f-join my/notes-directory "#archives/projects/completed" (f-filename path))))
