@@ -421,6 +421,8 @@ which aren't absolutely necessary, but are very important.
     (use-package projectile
       :defer 1
       :general (leader "p" '(projectile-command-map :which-key "projects"))
+      :custom
+      (projectile-create-missing-test-files t)
       :config
       (projectile-mode +1))
    #+end_src
