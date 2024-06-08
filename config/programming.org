@@ -563,6 +563,7 @@
         (org-babel-clojure-backend 'cider)
         (cider-repl-display-help-banner nil)
         (cider-eldoc-display-for-symbol-at-point nil)
+        (nrepl-sync-request-timeout 60)
 
         (cider-repl-pop-to-buffer-on-connect t)
 
