@@ -2,6 +2,9 @@
 # name: Definition
 # --
 * $1
+	:PROPERTIES:
+        :ID:       `(org-id-new)`
+        :END:
 	$1
 
 ** Definition
