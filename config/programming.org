@@ -10,6 +10,11 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
+* Direnv integration via =envrc.el= ([[https://github.com/purcell/envrc][github]])
+  #+begin_src elisp
+    (use-package envrc
+      :hook (after-init . envrc-global-mode))
+  #+end_src
 * TODO Configure SQL(i) repl-toggle correctly
 * Automatically use Tree-sitter where possible ([[https://github.com/renzmann/treesit-auto][github]])
   #+begin_src elisp
