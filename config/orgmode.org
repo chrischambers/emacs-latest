@@ -349,31 +349,36 @@
      (customize-set-variable 'org-log-into-drawer "LOGBOOK")
    #+end_src
 
-** Org =src= languages (see complete list [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][here]])
+** Org babel / =src= block configuration
+*** Add nix as an available language
    #+begin_src elisp
-     (org-babel-do-load-languages
-      'org-babel-load-languages
-      '(
-        (C . t)
-        (clojure . t)
-        (ditaa . t)
-        (dot . t)
-        (haskell . t)
-        (js . t)
-        (latex . t)
-        (org . t)
-        (oz . t)
-        (plantuml . t)
-        (python . t)
-        (scheme . t)
-        (shell . t)
-        (sqlite . t)
-        ))
+     (use-package ob-nix
+       :straight (ob-nix :type git :host github :repo "emacsmirror/ob-nix"))
    #+end_src
+*** Set desired =src= block / babel languages (see complete list [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][here]])
+    #+begin_src elisp
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((C . t)
+         (clojure . t)
+         (ditaa . t)
+         (dot . t)
+         (haskell . t)
+         (js . t)
+         (latex . t)
+         (nix . t)
+         (org . t)
+         (oz . t)
+         (plantuml . t)
+         (python . t)
+         (scheme . t)
+         (shell . t)
+         (sqlite . t)))
+    #+end_src
 
 *** Ditaa config
    #+begin_src elisp
-     (customize-set-variable 'org-ditaa-jar-path (concat user-emacs-directory "ditaa.jar"))
+     (customize-set-variable 'org-ditaa-jar-path (concat no-littering-var-directory "ditaa.jar"))
    #+end_src
 
 ** When editing a code snippet, use current window rather opening a new one
