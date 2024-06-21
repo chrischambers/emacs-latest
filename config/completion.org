@@ -294,6 +294,8 @@
      (consult-preview-key (list :debounce 0.5 'any))
      :config
      (setq consult-narrow-key "<")
+     :bind
+     ([remap project-switch-to-buffer] . consult-project-buffer)
      :general
      ;; ('(insert motion) "C-c C-o" 'consult-multi-occur)
      (leader
@@ -312,12 +314,6 @@
        "has"  '(consult-apropos :which-key "symbol")
        "."    '(consult-complex-command :which-key "repeat command")
        ))
- #+end_src
-
- #+begin_src elisp
-   (with-eval-after-load
-       'projectile 'consult
-       (leader "pb" '(consult-project-buffer :which-key "switch buffer")))
  #+end_src
 
 * <<<marginalia>>> ([[https://github.com/minad/marginalia][github]])
