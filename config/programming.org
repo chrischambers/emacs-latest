@@ -10,12 +10,6 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* IN-PROGRESS Extract common LSP interface into local leader
-  :LOGBOOK:
-  - State "IN-PROGRESS" from "TODO"          [2022-05-14 Sat 10:12]
-  :END:
-  Ideally using fontification to indicate whether the functionality is
-  available, as LSP does under its own prefix.
 * TODO Configure SQL(i) repl-toggle correctly
 * Automatically use Tree-sitter where possible ([[https://github.com/renzmann/treesit-auto][github]])
   #+begin_src elisp
