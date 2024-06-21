@@ -155,7 +155,8 @@
       :general
       (leader
         "d"    '(:ignore t :which-key "dict/spell")
-        "ds"   '(ispell-word :which-key "spellcheck")
+        "ds"   '(ispell-buffer :which-key "spellcheck buffer")
+        "dS"   '(ispell-word :which-key "spellcheck at point")
         "df"   '(dictionary-search :which-key "dictionary (find)")
         "dd"   '(dictionary-lookup-definition :which-key "dictionary (point)")))
   #+end_src
