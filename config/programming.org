@@ -29,6 +29,12 @@
       (treesit-auto-add-to-auto-mode-alist 'all)
       (global-treesit-auto-mode))
   #+end_src
+* Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
+#+begin_src elisp
+    (use-package format-all
+    :commands format-all-mode
+    :hook (prog-mode . format-all-mode))
+#+end_src
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
    #+begin_src elisp
