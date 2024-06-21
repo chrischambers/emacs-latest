@@ -139,7 +139,7 @@ you can work with.
         "bo"   'kill-other-buffers
         "bq"   'kill-buffer-and-window
         ;; "bR"  'rename-file-and-buffer
-        "br"   'revert-buffer
+        "br"   '(revert-buffer :which-key "refresh buffer")
 
         ;; Diff-related operations
         "d"    '(:ignore t :which-key "diff")
