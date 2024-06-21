@@ -326,12 +326,13 @@
 *** <<<smartparens>>> ([[https://github.com/Fuco1/smartparens][github]])
     #+begin_src elisp
       (use-package smartparens
-        :hook ((lisp-mode . smartparens-mode)
-               (emacs-lisp-mode . smartparens-mode)
-               (clojure-mode . smartparens-mode)
-               (clojurec-mode . smartparens-mode)
+        :hook ((lisp-mode          . smartparens-mode)
+               (emacs-lisp-mode    . smartparens-mode)
+               (clojure-mode       . smartparens-mode)
+               (clojurec-mode      . smartparens-mode)
                (clojurescript-mode . smartparens-mode)
-               (cider-repl-mode . smartparens-mode))
+               (cider-repl-mode    . smartparens-mode)
+               (nix-mode           . smartparens-mode))
         :config
         (require 'smartparens-config))
     #+end_src
@@ -342,12 +343,13 @@
         :custom
         (evil-move-beyond-eol t)
         (evil-cleverparens-use-s-and-S nil)
-        :hook ((lisp-mode . evil-cleverparens-mode)
-               (emacs-lisp-mode . evil-cleverparens-mode)
-               (clojure-mode . evil-cleverparens-mode)
-               (clojurec-mode . evil-cleverparens-mode)
+        :hook ((lisp-mode          . evil-cleverparens-mode)
+               (emacs-lisp-mode    . evil-cleverparens-mode)
+               (clojure-mode       . evil-cleverparens-mode)
+               (clojurec-mode      . evil-cleverparens-mode)
                (clojurescript-mode . evil-cleverparens-mode)
-               (cider-repl-mode . evil-cleverparens-mode)))
+               (cider-repl-mode    . evil-cleverparens-mode)
+               (nix-mode           . evil-cleverparens-mode)))
     #+end_src
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
    #+begin_src elisp
