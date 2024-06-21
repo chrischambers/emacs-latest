@@ -764,34 +764,13 @@
         (setq ein:query-timeout 1000))
     #+end_src
 
-**** <<<numpydoc>>>: generate numpy-like docstrings ([[https://github.com/douglasdavis/numpydoc.el][github]])
+*** virtualenvwrapper integration
     #+begin_src elisp
-      (use-package numpydoc
-        :after python
-        :general
-        (local-leader python-mode-map "d" '(numpydoc-generate :which-key "generate-docstring")))
+      (use-package virtualenvwrapper
+        :config
+        (venv-initialize-interactive-shells)
+        (venv-initialize-eshell))
     #+end_src
-
-**** virtualenvwrapper integration
-     #+begin_src elisp
-       (use-package virtualenvwrapper
-         :config
-         (venv-initialize-interactive-shells)
-         (venv-initialize-eshell))
-     #+end_src
-**** pyvenv integration
-     #+begin_src elisp
-       (use-package pyvenv
-         :hook (python-mode . pyvenv-tracking-mode)
-         :general
-         (local-leader python-mode-map
-           "v" '(:ignore t :major-modes python-mode :which-key "virtualenv")
-           "vw" '(pyvenv-workon :which-key "workon")
-           "vd" '(pyvenv-deactivate :which-key "deactivate")
-           )
-         )
-     #+end_src
-
 *** REPL
 
     #+begin_src elisp
@@ -824,146 +803,6 @@
            "tC" '(pytest-one :which-key "cursor (pdb)")))
      #+end_src
 
-**** COMMENT python-pytest
-     #+begin_src elisp
-       (use-package python-pytest
-         :custom
-         (python-pytest-arguments '("--spec"))
-         :general
-         (local-leader python-mode-map
-           "t" '(python-pytest-popup :which-key "test")))
-     #+end_src
-
-***** live-py-mode
-
-      #+begin_src elisp
-        (use-package live-py-mode
-          :general
-          (local-leader python-mode-map
-            "l" '(live-py-mode :which-key "live coding")
-            )
-          )
-      #+end_src
-
-*** Formatting
-**** COMMENT blacken
-    #+begin_src elisp
-      (use-package blacken
-        :after python
-        :config
-        (setq blacken-only-if-project-is-blackened t
-              blacken-line-length 79)
-        :general
-        (local-leader python-mode-map
-          ;; "=" '(blacken-buffer :which-key "format buffer")
-          ))
-    #+end_src
-
-**** COMMENT yaplify
-    #+begin_src elisp
-      (use-package yapfify
-        ;; :hook (python-mode . yapf-mode)
-        :after python)
-    #+end_src
-
-**** COMMENT python-docstring
-    Note: this doesn't play well with lsp-mode
-    #+begin_src elisp
-      (use-package python-docstring
-        :hook (python-mode . python-docstring-mode))
-    #+end_src
-
-*** Documentation
-**** COMMENT pydoc
-     #+begin_src elisp
-       (use-package pydoc)
-     #+end_src
-
-**** COMMENT pylookup
-     #+begin_src elisp
-       (use-package pylookup
-         :commands (pylookup-lookup pylookup-update pylookup-update-all))
-     #+end_src
-
-*** Imports
-**** COMMENT import magic
-    #+begin_src elisp
-      (use-package importmagic
-        :hook (python-mode . importmagic-mode)
-        :config
-        (add-hook 'pyvenv-post-activate-hooks 'importmagic-mode)
-        :general
-        (local-leader python-mode-map
-          "ic" '(importmagic-fix-symbol-at-point :which-key "fix missing (cursor)")
-          "ia" '(importmagic-fix-imports :which-key "fix missing (all)")))
-    #+end_src
-
-**** COMMENT Pyimport
-     #+begin_src elisp
-       (use-package pyimport
-         :preface
-         (defun update-pyimport-pyflakes-path ()
-           (setq pyimport-pyflakes-path (executable-find "pyflakes")))
-         :config
-         (add-hook 'pyvenv-post-activate-hooks 'update-pyimport-pyflakes-path)
-         (add-hook 'pyvenv-post-deactivate-hooks 'update-pyimport-pyflakes-path)
-         :general
-         (local-leader python-mode-map
-           "ir" '(pyimport-remove-unused :which-key "remove unused")))
-     #+end_src
-
-**** COMMENT isortify
-    #+begin_src elisp
-      (use-package isortify
-        :general
-        (local-leader python-mode-map
-          "is" '(isortify-buffer :which-key "sort")))
-    #+end_src
-
-*** Misc
-**** COMMENT pip-requirements
-    #+begin_src elisp
-      (use-package pip-requirements
-        :commands pip-requirements-mode
-        :mode
-        ("\\.pip$'" . pip-requirements-mode)
-        ("requirements.*\\.txt$" . pip-requirements-mode))
-    #+end_src
-
-**** COMMENT pippel
-    #+begin_src elisp
-      (use-package pippel
-        :after python
-        :general
-        (local-leader python-mode-map
-          "p" '(pippel-list-packages :which-key "package list"))
-        ('(normal insert motion) pippel-package-menu-mode-map
-         "m" '(pippel-menu-mark-unmark :which-key "remove mark")
-         "d" '(pippel-menu-mark-delete :which-key "mark for deletion")
-         "U" '(pippel-menu-mark-all-upgrades :which-key "mark all upgradable")
-         "u" '(pippel-menu-mark-upgrade :which-key "mark for upgrade")
-         "r" '(pippel-list-packages :which-key "refresh package list")
-         "i" '(pippel-install-package :which-key "prompt user for packages")
-         "x" '(pippel-menu-execute :which-key "perform marked package menu actions")
-         "RET" '(pippel-menu-visit-homepage :which-key "follow link")))
-    #+end_src
-
-**** COMMENT [[https://github.com/wbolster/evil-text-object-python][=evil-text-object-python=]]
-
-     #+begin_src elisp
-       (use-package evil-text-object-python
-         :hook (python-mode . evil-text-object-python-add-bindings))
-     #+end_src
-
-**** COMMENT python-mls ([[https://github.com/jdtsmith/python-mls][github]])
-    #+begin_src elisp
-      (use-package python-mls
-        :config
-        (python-mls-setup))
-    #+end_src
-
-*** TODO Fix =update-python-interpreter= - you need to preserve the default values and restore them on deactivate. Likewise, there should be an order of precedence: jupyter console -> ipython -> python. Finally, this should not run multiple times (it seems to at the moment however)
-*** TODO Evil-unimpaired, python block navigation. Compare to vim?
 ** Haskell
 *** Haskell Mode
     Installation: see [[https://www.haskell.org/platform/][Haskell Platform]]
