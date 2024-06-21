@@ -539,6 +539,10 @@
           (interactive)
           (cider-eval-defun-at-point t))
 
+        (defun my/clojuredocs-cheatsheet ()
+          (interactive)
+          (browse-url "https://clojure.org/api/cheatsheet"))
+
         :config
         (require 'ob-clojure)
         :custom
@@ -574,16 +578,18 @@
 
         :general
         (local-leader '(clojure-mode-map cider-repl-mode-map)
-          "d"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "?"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "docs")
-          "dc"   '(cider-clojuredocs :which-key "clojuredocs")
-          "dC"   '(cider-clojuredocs-web :which-key "clojuredocs (web)")
-          "dj"   '(cider-javadoc  :which-key "javadocs")
+          "?d"   '(cider-clojuredocs :which-key "clojuredocs")
+          "?D"   '(cider-clojuredocs-web :which-key "clojuredocs (web)")
+          "?c"   '(cider-cheatsheet :which-key "cheatsheet (cider)")
+          "?C"   '(my/clojuredocs-cheatsheet :which-key "clojuredocs cheatsheet")
+          "?j"   '(cider-javadoc :which-key "javadocs")
 
-          "D"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "d"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "debug")
-          "De"   '(my/debug-clojure-expression :which-key "debug")
-          "DE"   '(cider-enlighten-mode :which-key "enlighten on/off")
+          "dd"   '(my/debug-clojure-expression :which-key "debug expression")
+          "de"   '(cider-enlighten-mode :which-key "enlighten on/off")
 
           "e"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "eval")
@@ -629,9 +635,7 @@
           "vn"   '(cider-browse-ns :which-key "namespaces")
           "vN"   '(cider-browse-ns-all :which-key "namespaces (all)")
           "vs"   '(cider-browse-spec :which-key "specs")
-          "vS"   '(cider-browse-spec-all :which-key "specs (all)")
-
-          "?"    '(cider-view-refcard :which-key "quickref"))
+          "vS"   '(cider-browse-spec-all :which-key "specs (all)"))
 
         (local-leader clojure-mode-map
           "eb"   '(cider-load-buffer :which-key "buffer")
