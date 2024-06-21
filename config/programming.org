@@ -35,6 +35,44 @@
     :commands format-all-mode
     :hook (prog-mode . format-all-mode))
 #+end_src
+* Flymake Configuration ([[https://www.gnu.org/software/emacs/manual/html_node/flymake/index.html#Top][docs]])
+  #+begin_src elisp
+    (use-package flymake
+      :no-require t
+      :straight nil
+      :preface
+      (defun my/kill-flymake-diagnostic-buffers ()
+        (when (string-match-p "*Flymake diagnostics for" (format "%s" (window-list)))
+          (dolist (w (window-list))
+            (when (string-match-p "*Flymake diagnostics for" (buffer-name (window-buffer w)))
+              (kill-buffer (window-buffer w))))
+          t))
+
+      (defun my/flymake-toggle-buffer-diagnostics ()
+        "Toggle a flymake error buffer."
+        (interactive)
+        (when (not (my/kill-flymake-diagnostic-buffers))
+        (flymake-show-buffer-diagnostics)))
+
+      (defun my/flymake-toggle-project-diagnostics ()
+        "Toggle a flymake error buffer."
+        (interactive)
+        (when (not (my/kill-flymake-diagnostic-buffers))
+        (flymake-show-project-diagnostics)))
+
+      :config
+      (evil-ex-define-cmd "cope[n]" 'my/flymake-toggle-buffer-diagnostics)
+      (evil-ex-define-cmd "ccl[ose]" 'my/flymake-toggle-buffer-diagnostics)
+
+      :general
+      (local-leader prog-mode-map
+        "l" '(:ignore t :which-key "lint")
+        "lb" '(my/flymake-toggle-buffer-diagnostics :which-key "buffer")
+        "la" '(my/flymake-toggle-project-diagnostics :which-key "all")
+        "ln" '(flymake-goto-next-error :which-key "next error")
+        "lp" '(flymake-goto-prev-error :which-key "previous error")))
+  #+end_src
+
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
    #+begin_src elisp
