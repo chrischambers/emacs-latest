@@ -198,99 +198,32 @@
        :init (abridge-diff-mode 1))
    #+end_src
 
-* LSP / Language Server Protocol
-** LSP
-   #+begin_src elisp
-     (use-package lsp-mode
-       :commands (lsp lsp-deferred)
-       :init
-       (when IS-MAC
-           (setenv "LSP_USE_PLISTS" "true"))
-       (defun my/lsp-mode-setup-completion ()
-         (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-               '(flex)))
-       :hook ((lsp-mode . lsp-enable-which-key-integration)
-              ;; (lsp-completion-mode . my/lsp-mode-setup-completion)
-              )
-       :custom
-       (read-process-output-max (* 4 1024 1024))
-       (lsp-idle-delay 0.9)
-       (lsp-before-save-edits t)
-       (lsp-lens-enable t)
-       (lsp-semantic-tokens-enable t)
-       (lsp-eldoc-render-all nil)
-       ;; (lsp-completion-provider :none) ;; we use Corfu!
-       )
-   #+end_src
-** LSP-UI
-   To understand which options affect what, see:
-   [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A guide on disabling/enabling lsp-mode features]]
+* Eglot LSP ([[https://www.gnu.org/software/emacs/manual/html_node/eglot/index.html][manual]])
+  #+begin_src elisp
+    (use-package eglot
+      :no-require t
+      :straight nil
+      :custom
+      ;; Don't prompt when code-actions/refactorings change buffers
+      (eglot-confirm-server-initiated-edits nil)
+      (eglot-extend-to-xref t)
+      :general
+      (local-leader prog-mode-map
+        "a"    '(eglot-code-actions :which-key "action")
+        "f"    '(:ignore t :which-key "find")
+        "fd"   '(xref-find-definitions :which-key "definition")
+        "fD"   '(eglot-find-declaration :which-key "declaration")
+        "fr"   '(xref-find-references :which-key "references")
+        "fm"   '(imenu :which-key "menu")
 
-   #+begin_src elisp
-     (use-package lsp-ui
-       :after lsp-mode
-       :commands lsp-ui-mode
-       :config
-       (setq lsp-ui-doc-enable t
-             lsp-ui-doc-use-webkit nil
-             ;; lsp-ui-doc-delay 10000.0
-             ;; lsp-ui-sideline-delay 10000.0
-             lsp-ui-doc-include-signature t
-             lsp-ui-doc-position 'at-point
-             lsp-eldoc-enable-hover t
-             lsp-headerline-breadcrumb-enable t
-             lsp-modeline-code-actions-enable t
-             lsp-modeline-diagnostics-enable t
-             lsp-ui-sideline-enable t
-             lsp-ui-sideline-show-hover t
-             lsp-ui-sideline-show-diagnostics t
-             lsp-ui-sideline-ignore-duplicate t))
-   #+end_src
+        "r"    '(:ignore t :which-key "refactor")
+        "rr"   '(eglot-rename :which-key "rename")
 
-** Integration with Consult
-   #+begin_src elisp
-     (use-package consult-lsp
-       :after lsp consult
-       :config
-       (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
-   #+end_src
-
-** Integration with Treemacs
-   #+begin_src elisp
-     (use-package lsp-treemacs
-       :after lsp treemacs
-       :commands lsp-treemacs-errors-list)
-   #+end_src
-
-*** DAP Mode
-    #+begin_src elisp
-      (use-package dap-mode
-        :after lsp
-        :hook ((python-mode . dap-ui-mode)
-               (python-mode . dap-mode))
-        :config
-        (add-hook 'dap-stopped-hook
-                  (lambda (arg) (call-interactively #'dap-hydra)))
-        (require 'dap-python)
-        ;; NOTE: This monkey-patch enables =pyvenv-workon= and =dap=debug= to play
-        ;; togerther nicely.
-        (advice-add 'dap-python--pyenv-executable-find :override #'my/dap-python--pyenv-executable-find)
-        (defun my/dap-python--pyenv-executable-find (command)
-          (executable-find command))
-
-        ;; ;; Reduce the features to the repl and the local variable information
-        ;; (setq dap-auto-configure-features '(locals repl))
-
-        ;; ;; Redefine the height of the repl buffer
-        ;; (setq dap-ui-buffer-configurations
-        ;;       `((,dap-ui--locals-buffer . ((side . right) (slot . 1) (window-width . 0.20)))
-        ;;         (,dap-ui--expressions-buffer . ((side . right) (slot . 2) (window-width . 0.20)))
-        ;;         (,dap-ui--sessions-buffer . ((side . right) (slot . 3) (window-width . 0.20)))
-        ;;         (,dap-ui--breakpoints-buffer . ((side . left) (slot . 2) (window-width . ,treemacs-width)))
-        ;;         (,dap-ui--debug-window-buffer . ((side . bottom) (slot . 3) (window-width . 0.20)))
-        ;;         (,dap-ui--repl-buffer . ((side . bottom) (slot . 1) (window-height . 0.20)))))
-        )
-    #+end_src
+        "t"    '(:ignore t :which-key "test")
+        "tj"   '(projectile-toggle-between-implementation-and-test :which-key "jump"))
+      ('(insert motion) prog-mode-map
+       "C-a"  'eglot-code-actions))
+  #+end_src
 
 * Lisp Languages
 ** Keybindings common across lisps
@@ -725,7 +658,6 @@
           (add-to-list 'cljr-magic-require-namespaces mapping t))
         :general
         (local-leader cider-mode-map
-          "rr"   '(lsp-rename :which-key "rename")
           "ra"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
                            :which-key "add")
           "rap"  '(cljr-add-project-dependency :which-key "project deps")
@@ -733,25 +665,15 @@
           "R"    '(hydra-cljr-help-menu/body :which-key "refactor (hydra)")))
     #+end_src
 
-*** Clojure LSP
-   #+begin_src elisp
-     (use-package clojure-lsp
-       :no-require t
-       :straight nil
-       :hook ((clojure-mode . lsp)
-              (clojurescript-mode . lsp)
-              (clojurec-mode . lsp))
-       :general
-       (local-leader clojure-mode-map
-         "a"    '(lsp-execute-code-action :which-key "action")
-         "f"    '(:ignore t :major-modes clojure-mode :which-key "find")
-         "fd"   '(lsp-find-definition :which-key "definition")
-         "fD"   '(lsp-find-declaration :which-key "declaration")
-         "fi"   '(lsp-find-implementation :which-key "implementation (protocol/multimethod)")
-         "fr"   '(lsp-find-references :which-key "references"))
-       ('(insert motion) clojure-mode-map
-        "C-a"  'lsp-execute-code-action))
-   #+end_src
+*** Clojure Eglot LSP
+    #+begin_src elisp
+      (use-package clojure-eglot
+        :no-require t
+        :straight nil
+        :hook ((clojure-mode . eglot-ensure)
+               (clojurescript-mode . eglot-ensure)
+               (clojurec-mode . eglot-ensure)))
+    #+end_src
 *** Miscellaneous Tweaks
 **** Improved Compojure indentation ([[https://github.com/weavejester/compojure/wiki/Emacs-indentation][source]])
      #+begin_src elisp
@@ -779,6 +701,7 @@
         :mode
         ("\\.py\\'" . python-mode)
         ("\\.wsgi$" . python-mode)
+        :hook (python-mode . eglot-ensure)
 
         :init
         (setq-default indent-tabs-mode nil)
@@ -790,117 +713,6 @@
         (python-indent-offset 4)
         (python-shell-interpreter "ipython")
         (python-shell-interpreter-args "--simple-prompt -i"))
-    #+end_src
-
-*** COMMENT Main Config
-   #+begin_src elisp
-     (use-package python
-       :mode
-       ("\\.py\\'" . python-mode)
-       ("\\.wsgi$" . python-mode)
-       ;; :interpreter ("python" . python-mode)
-       :custom
-       (python-indent-guess-indent-offset nil)
-       (elpy-shell-darwin-use-pty t)
-       :preface
-       (defun update-python-interpreter ()
-         "Prefer ipython (where available)"
-         (when (and
-                (not (equal python-shell-interpreter "ipython"))
-                (executable-find "ipython"))
-           (setq
-            python-shell-interpreter "ipython"
-            python-shell-interpreter-args "--simple-prompt -i"
-            python-shell-prompt-regexp "In \\[[0-9]+\\]: "
-            python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
-            python-shell-completion-setup-code
-            "from IPython.core.completerlib import module_completion"
-            python-shell-completion-string-code
-            "';'.join(module_completion('''%s'''))\n"
-            python-shell-completion-string-code
-            "';'.join(get_ipython().Completer.all_completions('''%s'''))\n"
-            ))
-         (message "Python interpreter updated")
-         ;; https://stackoverflow.com/questions/25669809/how-do-you-run-python-code-using-emacs
-
-         ;; (setq python-shell-interpreter "jupyter"
-         ;;       python-shell-interpreter-args "console --simple-prompt"
-         ;;       python-shell-prompt-detect-failure-warning nil)
-         ;; (add-to-list 'python-shell-completion-native-disabled-interpreters
-         ;;              "jupyter")
-         )
-       :init (setq-default indent-tabs-mode nil)
-       :config
-       (add-hook 'pyvenv-post-activate-hooks 'update-python-interpreter)
-       (setq python-indent-offset 4)
-       :general
-       (local-leader python-mode-map
-         "i" '(:ignore t :major-modes python-mode :which-key "imports")))
-   #+end_src
-
-*** elpy
-    #+begin_src elisp
-      (use-package elpy
-        ;; :after python
-        :defer t
-        :init
-        (advice-add 'python-mode :before 'elpy-enable)
-        :custom
-        (elpy-test-runner 'elpy-test-pytest-runner)
-        (elpy-test-pytest-runner-command '("py.test" "--spec"))
-        (elpy-shell-darwin-use-pty t)
-        (elpy-shell-add-to-shell-history t)
-        ;; (elpy-modules '(elpy-module-sane-defaults))
-
-        ;; You almost certainly want this setting on: evaluation can
-        ;; fail with a stack overflow or strange characters can appear otherwise:
-        (elpy-shell-echo-output nil)
-        :general
-        (local-leader '(inferior-python-mode-map)
-          "," '(elpy-shell-switch-to-buffer :which-key "buffer <=> shell jump"))
-        ('normal '(python-mode-map inferior-python-mode-map) "K" 'elpy-doc)
-        ('insert python-mode-map "C-<tab>" 'elpy-shell-switch-to-shell)
-        ('insert inferior-python-mode-map "C-<tab>" 'elpy-shell-switch-to-buffer)
-        (local-leader python-mode-map
-          "," '(elpy-shell-switch-to-shell :which-key "buffer <=> shell jump")
-
-          "e" '(:ignore t :major-modes python-mode :which-key "evaluate")
-          ;; "eb" '(elpy-shell-send-region-or-buffer :which-key "buffer (or region)")
-          "eb" '(elpy-shell-send-region-or-buffer-and-step-and-go
-                 :which-key "buffer (or region)")
-          "el" '(elpy-shell-send-statement-and-step-and-go :which-key "line")
-          "ef" '(elpy-shell-send-defun-and-step-and-go :which-key "function")
-          "ec" '(elpy-shell-send-defclass-and-step-and-go :which-key "class")
-          "eg" '(elpy-shell-send-group-and-go :which-key "group")
-          "e#" '(elpy-shell-send-codecell-and-step-and-go
-                 :which-key "codecell (block between ##)")
-
-          "d" '(elpy-doc :which-key "documentation")
-
-          "g" '(:ignore t :major-modes python-mode :which-key "goto")
-          "gq" 'elpy-goto-definition
-          "gw" 'xref-find-apropos
-          "ge" 'xref-find-definitions
-          ;; (elpy-flymake-next-error)
-          ;; (elpy-flymake-previous-error)
-          "c" '(elpy-check :which-key "code-check")))
-    #+end_src
-
-*** LSP
-    #+begin_src elisp
-      (use-package python-config
-        :straight nil
-        :no-require t
-        :general
-        (local-leader python-mode-map
-          "f"    '(:ignore t :major-modes python-mode :which-key "find")
-          "fd"   '(lsp-find-definition :which-key "definition")
-          "fD"   '(lsp-find-declaration :which-key "declaration")
-          "fi"   '(lsp-find-implementation :which-key "implementation")
-          "fr"   '(lsp-find-references :which-key "references")
-          "="    '(:ignore t :major-modes python-mode :which-key "format")
-          "=b"   '(lsp-format-buffer :which-key "buffer")
-          "=r"   '(lsp-format-region :which-key "region")))
     #+end_src
 
 **** pyls
@@ -1160,18 +972,6 @@
         :mode (("\\.hs\\(c\\|-boot\\)?\\'" . haskell-mode)
                ("\\.lhs\\'" . literate-haskell-mode)
                ("\\.cabal\\'" . haskell-cabal-mode)))
-    #+end_src
-
-*** LSP
-    #+begin_src elisp
-      (use-package lsp-haskell
-        :hook (haskell-mode . lsp)
-        :config
-        (setq lsp-haskell-server-path "haskell-language-server-wrapper")
-        (setq lsp-haskell-server-args ())
-        ;; Comment/uncomment this line to see interactions between lsp client/server.
-        ;; (setq lsp-log-io t)
-        )
     #+end_src
 
 *** =haskell-doc-mode=: displays type signature of function & uses smart indentation
