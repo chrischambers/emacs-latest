@@ -416,15 +416,53 @@ which aren't absolutely necessary, but are very important.
       (savehist-mode))
   #+end_src
 
-* <<<projectile>>>: Project-related helpers ([[https://projectile.mx/][docs]]/[[https://github.com/bbatsov/projectile][github]])
+* <<<project.el>>> and <<<projectile>>>: ([[https://www.gnu.org/software/emacs/manual/html_node/emacs/Projects.html][project docs]]/[[https://projectile.mx/][projectile docs]]/[[https://github.com/bbatsov/projectile][github]])
   #+begin_src elisp
     (use-package projectile
+      :preface
+      (defun my/add-project (dir)
+        "Add `dir' to `project--list', regardless of vc status.
+
+    `project.el' will automatically add version-controlled projects
+    you operate on (most of the time), but sometimes you want to be
+    able to specify a project root that isn't version-controlled, or
+    might be nested under a larger version-controlled project. This
+    command allows you to do that."
+        (interactive "D")
+        (let ((dir (f-full dir)))
+          (when (f-exists? dir)
+            (project--remember-dir dir)
+            (project-switch-project dir))))
       :defer 1
-      :general (leader "p" '(projectile-command-map :which-key "projects"))
       :custom
       (projectile-create-missing-test-files t)
       :config
-      (projectile-mode +1))
+      ;; The following is required for `project-list-buffers':
+      (setq Buffer-menu-show-internal t)
+      (projectile-mode +1)
+      :general
+      ;; (leader "P" '(projectile-command-map :which-key "projectile"))
+      (leader
+        "p"   '(:ignore t :which-key "project")
+        "p!"  '(project-shell-command :which-key "shell command")
+        "p&"  '(project-async-shell-command :which-key "async shell command")
+        "pa"  '(my/add-project :which-key "add")
+        "pb"  '(:ignore t :which-key "buffer")
+        "pbf" '(project-switch-to-buffer :which-key "find")
+        "pbl" '(project-list-buffers :which-key "list")
+        "pbk" '(project-kill-buffers :which-key "kill")
+        "pc"  '(project-compile :which-key "compile")
+        "pC"  '(projectile-commander :which-key "commander")
+        "pd"  '(project-dired :which-key "dired")
+        "pD"  '(projectile-edit-dir-locals :which-key "dir-locals.el")
+        "pe"  '(project-eshell :which-key "eshell")
+        "pf"  '(:ignore t :which-key "find")
+        "pff" '(projectile-find-file :which-key "file")
+        "pfd" '(projectile-find-dir :which-key "directory")
+        "pfr" '(project-find-regexp :which-key "regexp")
+        "pp"  '(project-switch-project :which-key "switch")
+        "pr"  '(project-forget-project :which-key "remove")
+        "p/"  '(project-search :which-key "search")))
    #+end_src
 
 * <<<all-the-icons>>> ([[https://github.com/domtronn/all-the-icons.el][source]])
