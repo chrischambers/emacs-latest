@@ -1255,3 +1255,33 @@
    #+begin_src elisp
      (use-package svelte-mode)
    #+end_src
+* Nix
+** Nix Mode ([[https://github.com/NixOS/nix-mode][github]]/[[https://github.com/NixOS/nix-mode/blob/master/nix-mode.org][docs]])
+  #+begin_src elisp
+    (use-package nix-mode
+      :mode ("\\.nix\\'" "\\.nix.in\\'"))
+  #+end_src
+
+** Nix DRV Mode
+  #+begin_src elisp
+    (use-package nix-drv-mode
+      :no-require t
+      :straight nil
+      :mode "\\.drv\\'")
+  #+end_src
+
+** Nix Shell
+  #+begin_src elisp
+    (use-package nix-shell
+      :no-require t
+      :straight nil
+      :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
+  #+end_src
+
+** Nix REPL
+  #+begin_src elisp
+    (use-package nix-repl
+      :no-require t
+      :straight nil
+      :commands (nix-repl))
+  #+end_src
