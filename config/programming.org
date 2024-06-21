@@ -295,7 +295,7 @@
 * Lisp Languages
 ** Keybindings common across lisps
    #+begin_src elisp
-     (defun mine/eval-region-or-buffer ()
+     (defun my/eval-region-or-buffer ()
        (interactive)
        (if (region-active-p)
            (eval-region (region-beginning) (region-end))
@@ -305,7 +305,7 @@
        (general-def
          local-leader lisp-mode-map
          "e" '(:ignore t :major-modes lisp-mode :which-key "evaluate")
-         "eb" '(mine/eval-region-or-buffer :which-key "buffer/region")))
+         "eb" '(my/eval-region-or-buffer :which-key "buffer/region")))
    #+end_src
 
 ** Structural Editing
