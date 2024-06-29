@@ -151,15 +151,17 @@ which aren't absolutely necessary, but are very important.
 * Set [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Frame-Parameters.html][frame parameters]]
   Full list available [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Frame-Parameters.html#Frame-Parameters][here]].
 
-** Initial display (laptop)
+** Initial display
   #+begin_src elisp
     (if (display-graphic-p)
         (progn
           (setq frame-resize-pixelwise 1)
-          (setq initial-frame-alist
+          (setq default-frame-alist
                 '((internal-border-width . 24)  ; padding, ala nano-emacs
-                  (tool-bar-lines . 0)
-                  (width . 172)  ; chars
+                  (vertical-scroll-bars . nil)
+                  (tool-bar-lines . 0)))
+          (setq initial-frame-alist
+                '((width . 172)  ; chars
                   (height . 44)  ; lines
                   ))))
   #+end_src
@@ -183,8 +185,7 @@ which aren't absolutely necessary, but are very important.
 
 * Set Frame Title
   #+begin_src elisp
-    ;; (org-set-frame-title "Chris Chambers - Emacs")
-    (setq frame-title-format "%b -- Emacs")
+    (setq frame-title-format "Ɛ: %b")
   #+end_src
 
 * Extend Evil
