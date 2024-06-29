@@ -44,7 +44,7 @@ which aren't absolutely necessary, but are very important.
 :        (setq truncate-lines nil))
 :    #+end_src
 
-* COMMENT =exec-path-from-shell=: Ensure PATH is set correctly when not launched via shell session ([[https://github.com/purcell/exec-path-from-shell][github]])
+* =exec-path-from-shell=: Ensure PATH is set correctly when not launched via shell session ([[https://github.com/purcell/exec-path-from-shell][github]])
   #+begin_src elisp
     (use-package exec-path-from-shell
       :config
