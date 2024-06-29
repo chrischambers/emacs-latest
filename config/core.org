@@ -852,3 +852,17 @@ which aren't absolutely necessary, but are very important.
       :config
       (require 'dwim-shell-commands))
   #+end_src
+
+* Automatically use Tree-sitter where possible ([[https://github.com/renzmann/treesit-auto][github]])
+
+  If tree-sitter in Emacs crashes it's probably because the tree-sitter binary
+  has been updated, re-build emacs from source ([[https://www.reddit.com/r/emacs/comments/1cdq488/do_not_upgrade_treesitter_or_else_emacs_crashes/][source]]).
+
+  #+begin_src elisp
+    (use-package treesit-auto
+      :custom
+      (treesit-auto-install 'prompt)
+      :config
+      (treesit-auto-add-to-auto-mode-alist 'all)
+      (global-treesit-auto-mode))
+  #+end_src
