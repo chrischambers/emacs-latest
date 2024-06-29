@@ -384,13 +384,14 @@
    #+end_src
 
 * Org styling
-** Org-modern
+** COMMENT Org-modern
    #+begin_src elisp
      (use-package org-modern
        :custom
        ;;(org-modern-star t)
        (org-modern-hide-stars nil)
        (org-modern-todo nil)
+       ;; (org-modern-radio-target nil)
        :config
        (global-org-modern-mode))
    #+end_src
