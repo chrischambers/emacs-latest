@@ -273,18 +273,24 @@
   If =persp-mode= is active, we use a different command for consult-buffer:
   (for dynamic-loading technique, see: [[https://stackoverflow.com/questions/7790382/how-to-determine-whether-a-package-is-installed-in-elisp][source]])
 
-  #+begin_src elisp
-    (if (require 'persp-mode nil 'noerror)
-      (defun my/consult-buffer ()
-        "`consult-buffer' with buffers provided by persp."
-        (interactive)
-        (with-persp-buffer-list ()
-                                (consult-buffer)))
-        (defun my/consult-buffer ()
-          "`consult-buffer' wrapper."
-          (interactive)
-          (consult-buffer)))
-  #+end_src
+:  #+begin_src elisp
+:    (if (require 'persp-mode nil 'noerror)
+:      (defun my/consult-buffer ()
+:        "`consult-buffer' with buffers provided by persp."
+:        (interactive)
+:        (with-persp-buffer-list ()
+:                                (consult-buffer)))
+:        (defun my/consult-buffer ()
+:          "`consult-buffer' wrapper."
+:          (interactive)
+:          (consult-buffer)))
+:  #+end_src
+
+: #+begin_src elisp
+:   (defun my/consult-buffer (buffer)
+:     (interactive (list (beframe--buffer-prompt)))
+:     (beframe-switch-buffer buffer))
+: #+end_src
 
  #+begin_src elisp
    (use-package consult

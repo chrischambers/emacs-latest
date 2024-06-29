@@ -123,7 +123,7 @@
                 #'+workspaces--evil-alternate-buffer-a)
   #+end_src
 
-* workgroups2 ([[https://github.com/pashinin/workgroups2][github]])
+* COMMENT workgroups2 ([[https://github.com/pashinin/workgroups2][github]])
   #+begin_src elisp
     (use-package workgroups2
       :config
@@ -137,3 +137,136 @@
         "TAB o" '(wg-open-workgroup :which-key "open")
         "TAB d" '(wg-kill-workgroup :which-key "delete")))
   #+end_src
+
+* COMMENT Tabspaces
+#+begin_src elisp
+  (use-package tabspaces
+    :straight (:type git :host github :repo "mclear-tools/tabspaces")
+    :hook (after-init . tabspaces-mode)
+    :commands (tabspaces-switch-or-create-workspace
+               tabspaces-open-or-create-project-and-workspace)
+    :custom
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*"))
+    (tabspaces-initialize-project-with-todo t)
+    (tabspaces-todo-file-name "project-todo.org")
+    ;; sessions
+    (tabspaces-session t)
+    (tabspaces-session-auto-restore t))
+
+#+end_src
+** Filter by workspace when using `consult-Buffer`
+   #+begin_src elisp
+     (with-eval-after-load 'consult
+       ;; hide full buffer list (still available with "b" prefix)
+       (consult-customize consult--source-buffer :hidden t :default nil)
+       ;; set consult-workspace buffer list
+       (defvar consult--source-workspace
+         (list :name     "Workspace Buffers"
+               :narrow   ?w
+               :history  'buffer-name-history
+               :category 'buffer
+               :state    #'consult--buffer-state
+               :default  t
+               :items    (lambda () (consult--buffer-query
+                                :predicate #'tabspaces--local-buffer-p
+                                :sort 'visibility
+                                :as #'buffer-name)))
+
+         "Set workspace buffer list for consult-buffer.")
+       (add-to-list 'consult-buffer-sources 'consult--source-workspace))
+
+   #+end_src
+* <<<Beframe>>> ([[https://github.com/protesilaos/beframe][github]]/[[https://protesilaos.com/emacs/beframe][manual]])
+  #+begin_src elisp
+    (use-package beframe
+      :preface
+      (defun my/infer-frame-name (frame name)
+        (when-let (((frame-list))
+                 (buffer (car (frame-parameter frame 'buffer-list)))
+                 (file-name (when (bufferp buffer) (buffer-file-name buffer)))
+                 (buf-name (buffer-name buffer))
+                 (dir (with-current-buffer buffer (or (vc-root-dir) default-directory))))
+          (format "Ɛ: <%s>" (or projectile-project-name
+                                (projectile-project-name dir)))))
+
+      (defun my/switch-project-new-frame (dir)
+        "\"Switch\" to another project by running an Emacs command.
+    The available commands are presented as a dispatch menu
+    made from `project-switch-commands'.
+
+    When called in a program, it will use the project corresponding
+    to directory DIR."
+      (interactive (list (funcall project-prompter)))
+      (project-switch-project dir))
+
+      (defun my/rename-frame (frame &optional name)
+        (interactive
+         (let ((select-frame (beframe--frame-prompt :force-even-if-one)))
+           (list
+            (beframe--frame-object select-frame)
+            (when current-prefix-arg
+              (read-string
+               (format "Rename the frame now called `%s' to: "
+                       select-frame)
+               nil 'beframe--rename-frame-history select-frame)))))
+
+        (modify-frame-parameters
+         frame
+         (list (cons 'name (my/infer-frame-name frame name)))))
+
+      :hook
+      (after-init . (lambda () (require 'beframe)))
+      :custom
+      (beframe-rename-function #'my/rename-frame)
+      (beframe-functions-in-frames '(my/switch-project-new-frame))
+      ;; (beframe-global-buffers
+      ;;  (-concat beframe-global-buffers
+      ;;           '("Async-native-compile-log"
+      ;;             "\\*Warnings\\*"
+      ;;             "\\*Help\\*"
+      ;;             "\\*info\\*")))
+      :config
+      (beframe-mode 1)
+      :general
+      (leader "pP" '(my/switch-project-new-frame :which-key "switch (new frame)")))
+  #+end_src
+** =consult-buffer= with =beframe=
+   Stolen from: [[https://protesilaos.com/emacs/beframe][Beframe (beframe.el) | Protesilaos Stavrou]]
+   #+begin_src elisp
+     (with-eval-after-load 'beframe
+       (defvar consult-buffer-sources)
+       (declare-function consult--buffer-state "consult")
+
+       (with-eval-after-load 'consult
+         ;; (consult-customize consult--source-buffer :hidden t :default nil)
+
+         (defface beframe-buffer
+           '((t :inherit font-lock-string-face))
+           "Face for `consult' framed buffers.")
+
+         (defun my/beframe-buffer-names-sorted (&optional frame)
+           "Return the list of buffers from `beframe-buffer-names' sorted by visibility.
+     With optional argument FRAME, return the list of buffers of FRAME."
+           (beframe-buffer-names frame :sort #'beframe-buffer-sort-visibility))
+
+         (defvar beframe-consult-source
+           `( :name     "Frame-specific buffers (current frame)"
+              :narrow   ?F
+              :category buffer
+              :face     beframe-buffer
+              :history  beframe-history
+              :items    ,#'my/beframe-buffer-names-sorted
+              :action   ,#'switch-to-buffer
+              :state    ,#'consult--buffer-state))
+         ;; (add-to-list 'consult-buffer-sources 'beframe-consult-source)
+         (defun my/consult-buffer ()
+           (interactive)
+           (let* ((consult--source-buffer (plist-put consult--source-buffer :hidden t))
+                  (consult--source-buffer (plist-put consult--source-buffer :default nil))
+                  (consult-buffer-sources (add-to-list 'consult-buffer-sources
+                                                       'beframe-consult-source)))
+             (consult-buffer)))))
+   #+end_src
