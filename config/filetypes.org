@@ -46,19 +46,22 @@
        :mode ("\\.ya?ml\\'"))
    #+end_src
 
-*** COMMENT emacs-ansible ([[https://github.com/k1LoW/emacs-ansible][github]])
+*** emacs-ansible ([[https://gitlab.com/emacs-ansible/emacs-ansible][gitlab]])
     #+begin_src elisp
       (use-package ansible
         :straight (emacs-ansible
-                   :host github
-                   :repo "k1LoW/emacs-ansible"
+                   :host gitlab
+                   :repo "emacs-ansible/emacs-ansible"
                    ;; The following prevents pulling in the entire ansible codebase:
                    :nonrecursive t))
     #+end_src
 
-*** poly-ansible
+*** poly-ansible ([[https://gitlab.com/mavit/poly-ansible][gitlab]])
     #+begin_src elisp
       (use-package poly-ansible
+        :straight (poly-ansible
+                   :host gitlab
+                   :repo "mavit/poly-ansible")
         :mode ("\\.ya?ml\\'" . poly-ansible-mode))
     #+end_src
 
