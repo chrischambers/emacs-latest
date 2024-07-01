@@ -245,7 +245,7 @@
     #+begin_src elisp
       (customize-set-variable
        'org-clock-sound
-       (concat user-emacs-directory "org-clock-sound.wav"))
+       (concat my/resources-directory "/" "org-clock-sound.wav"))
     #+end_src
 
 **** Fix for OSX

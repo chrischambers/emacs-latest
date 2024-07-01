@@ -493,6 +493,8 @@
       :no-require t
       :straight nil
       :preface
+      (defconst ansible-keywords-file-path
+        (concat my/resources-directory "/" "ansible-keywords.txt"))
       (defvar ansible-keywords nil)
 
       (defun my/get-ansible-keywords ()
@@ -501,8 +503,7 @@
             (progn
               (customize-set-variable
                'ansible-keywords
-               (split-string
-                (f-read-text (concat user-emacs-directory "ansible-keywords.txt"))))
+               (split-string (f-read-text ansible-keywords-file-path)))
               ansible-keywords)
           ansible-keywords))
 

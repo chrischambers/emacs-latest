@@ -23,7 +23,8 @@
 
 * Set file paths
   #+begin_src elisp
-    (setq my/notes-directory (file-truename "~/Dropbox/notes")
+    (setq my/resources-directory (concat user-emacs-directory "resources")
+          my/notes-directory (file-truename "~/Dropbox/notes")
           my/ebooks-directory (file-truename "~/Ebooks")
           my/book-notes-directory (concat my/notes-directory "/" "sources"))
   #+end_src
