@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: home
+# key: home
+# --
+{{ ansible_env.HOME }}
