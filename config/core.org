@@ -467,10 +467,10 @@ which aren't absolutely necessary, but are very important.
         "pf"  '(:ignore t :which-key "find")
         "pff" '(projectile-find-file :which-key "file")
         "pfd" '(projectile-find-dir :which-key "directory")
-        "pfr" '(project-find-regexp :which-key "regexp")
+        ;;"pfr" '(project-find-regexp :which-key "regexp")
         "pp"  '(project-switch-project :which-key "switch")
         "pr"  '(project-forget-project :which-key "remove")
-        "p/"  '(project-search :which-key "search")))
+        "p/"  '(project-find-regexp :which-key "search")))
    #+end_src
 
 * <<<all-the-icons>>> ([[https://github.com/domtronn/all-the-icons.el][source]])
