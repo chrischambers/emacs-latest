@@ -237,7 +237,7 @@
     (use-package treemacs
       :custom
       (treemacs-width 30)
-      (treemacs-tag-follow-delay 0.5)
+      ;; (treemacs-tag-follow-delay 0.5)
       (treemacs-hide-gitignored-files-mode t)
       :config
       (treemacs-project-follow-mode)
@@ -245,7 +245,7 @@
       ;; slightly lower the size of treemacs icons
       (treemacs-resize-icons 18)
 
-      (treemacs-tag-follow-mode t)
+      ;; (treemacs-tag-follow-mode t)
       (treemacs-filewatch-mode t)
       (treemacs-fringe-indicator-mode 'always)
 
