@@ -1035,7 +1035,10 @@
 ** Nix Mode ([[https://github.com/NixOS/nix-mode][github]]/[[https://github.com/NixOS/nix-mode/blob/master/nix-mode.org][docs]])
   #+begin_src elisp
     (use-package nix-mode
-      :mode ("\\.nix\\'" "\\.nix.in\\'"))
+      :mode ("\\.nix\\'" "\\.nix.in\\'")
+      :config
+      (require 'eglot)
+      (add-to-list 'eglot-server-programs '(nix-mode . ("nil"))))
   #+end_src
 
 ** Nix DRV Mode
