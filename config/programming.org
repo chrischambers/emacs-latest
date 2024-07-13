@@ -60,6 +60,12 @@
         "lp" '(flymake-goto-prev-error :which-key "previous error")))
   #+end_src
 
+* Eldoc Configuration
+** Eldoc-box ([[https://github.com/casouri/eldoc-box][github]])
+   #+begin_src elisp
+     (use-package eldoc-box
+       :hook (prog-mode . eldoc-box-hover-at-point-mode))
+   #+end_src
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
    #+begin_src elisp
