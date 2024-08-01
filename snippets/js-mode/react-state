@@ -1,0 +1,4 @@
+# key: state
+# name: state
+# --
+const [$1, set${1}] = useState($2)$0
