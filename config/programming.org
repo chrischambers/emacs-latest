@@ -1013,6 +1013,24 @@
                         :which-key "documentation")
          "dj" '(my/mozilla-js-documentation-search :which-key "javascript")))
    #+end_src
+** Import-js
+   #+begin_src elisp
+     (setq js-modes '(js2-mode rjsx-mode javascript-mode))
+   #+end_src
+
+   #+begin_src elisp
+     (use-package import-js
+       :preface
+       (defun my/import-js-fix ()
+         (interactive)
+         (when (-contains? js-modes major-mode)
+           (import-js-fix)))
+       :init
+       (dolist (mode js-modes)
+         (add-hook mode #'run-import-js))
+       :config
+       (add-hook 'after-save-hook 'my/import-js-fix))
+   #+end_src
 
 * Nix
 ** Nix Mode ([[https://github.com/NixOS/nix-mode][github]]/[[https://github.com/NixOS/nix-mode/blob/master/nix-mode.org][docs]])
