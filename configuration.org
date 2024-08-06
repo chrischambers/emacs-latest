@@ -148,21 +148,21 @@
    #+end_src
 * Prose
   - [X] [[https://www.masteringemacs.org/article/wordsmithing-in-emacs][Wordsmithing in Emacs - Mastering Emacs]]
+** COMMENT Dictionary Config
+   #+begin_src elisp
+     (use-package dictionary-config
+       :no-require t
+       :straight nil
+       :general
+       (leader
+         "d"    '(:ignore t :which-key "dict/spell")
+         "ds"   '(ispell-buffer :which-key "spellcheck buffer")
+         "dS"   '(ispell-word :which-key "spellcheck at point")
+         "df"   '(dictionary-search :which-key "dictionary (find)")
+         "dd"   '(dictionary-lookup-definition :which-key "dictionary (point)")))
+   #+end_src
 
-  #+begin_src elisp
-    (use-package dictionary-config
-      :no-require t
-      :straight nil
-      :general
-      (leader
-        "d"    '(:ignore t :which-key "dict/spell")
-        "ds"   '(ispell-buffer :which-key "spellcheck buffer")
-        "dS"   '(ispell-word :which-key "spellcheck at point")
-        "df"   '(dictionary-search :which-key "dictionary (find)")
-        "dd"   '(dictionary-lookup-definition :which-key "dictionary (point)")))
-  #+end_src
-
-** <<<flyspell>>>: Spell-checker
+** COMMENT <<<flyspell>>>: Spell-checker
    #+begin_src elisp
      (use-package flyspell
        :hook
@@ -178,6 +178,18 @@
        (flyspell-issue-message-flag nil))
    #+end_src
 
+** Jinx ([[https://github.com/minad/jinx][github]])
+   #+begin_src elisp
+     (use-package jinx
+       :hook (emacs-startup . global-jinx-mode)
+       :straight nil
+       :no-require t
+       :preface
+       (add-to-list 'load-path
+                    "/nix/store/brc7l26k7vnhpypz0q3mivcrk4r1ln1z-emacs-jinx-20240515.1016/share/emacs/site-lisp/elpa/jinx-20240515.1016")
+       :bind (("M-$" . jinx-correct)
+              ("C-M-$" . jinx-languages)))
+   #+end_src
 ** wordnut
    #+begin_src elisp
      (use-package wordnut
@@ -195,3 +207,7 @@
       (kaocha-runner-output-win-max-height 20)
       :after (cider-mode))
   #+end_src
+
+# Local Variables:
+# jinx-local-words: "Ement dirvish wordnut"
+# End:
