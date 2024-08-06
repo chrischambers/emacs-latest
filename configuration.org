@@ -208,6 +208,29 @@
       :after (cider-mode))
   #+end_src
 
+* Auto-Format Code: Apheleia ([[https://github.com/radian-software/apheleia][github]])
+  #+begin_src elisp
+    (use-package apheleia
+      :config
+      (apheleia-global-mode +1))
+  #+end_src
+
+** Clojure
+   [[https://andersmurphy.com/2020/08/20/emacs-setting-up-apheleia-to-use-zprint.html][Emacs: setting up Apheleia to use Prettier and Zprint]]
+
+   #+begin_src elisp
+     (use-package apheleia-clojure
+       :straight nil
+       :no-require t
+       :after apheleia
+       :config
+       (setf (alist-get 'clj-zprint apheleia-formatters)
+             '("clj-zprint"
+               "{:style [:community :justified] :map {:comma? false}} <"
+               file))
+       (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint)))
+   #+end_src
+
 # Local Variables:
 # jinx-local-words: "Ement dirvish wordnut"
 # End:
