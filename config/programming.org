@@ -16,6 +16,12 @@
       :hook (after-init . envrc-global-mode))
   #+end_src
 * TODO Configure SQL(i) repl-toggle correctly
+* Editorconfig integration
+  #+begin_src elisp
+    (use-package editorconfig
+      :config
+      (editorconfig-mode 1))
+  #+end_src
 * Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
 #+begin_src elisp
     (use-package format-all
