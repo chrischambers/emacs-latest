@@ -17,7 +17,13 @@
              "conf\\.symlink$"
              "^\\.?[^.]*$"))        ; i.e. non-dotfiles without extensions
   #+end_src
-
+* <<<makefiles>>>
+  #+begin_src elisp
+    (use-package makefile-mode
+      :straight nil
+      :no-require t
+      :mode "Makefile")
+  #+end_src
 * <<<logview>>>: Log files
   #+begin_src elisp
     (use-package logview
