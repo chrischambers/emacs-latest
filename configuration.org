@@ -123,7 +123,7 @@
        :hook (after-init . global-whitespace-cleanup-mode))
    #+end_src
 
-** origmai
+** origami
    #+begin_src elisp
      (use-package origami
        :hook (after-init . global-origami-mode))
