@@ -198,7 +198,7 @@
          "vd" '(wordnut-lookup-current-word :which-key "dictionary")))
    #+end_src
 
-* COMMENT Testing
+* Testing
   #+begin_src elisp
     (use-package kaocha-runner
       :custom
