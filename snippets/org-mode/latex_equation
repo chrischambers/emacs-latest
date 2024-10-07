@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: latex equation
+# key: leq
+# --
+
+\begin{equation*}
+        $1
+\end{equation*}
+$0
