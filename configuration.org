@@ -230,6 +230,12 @@
        (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint)))
    #+end_src
 
-# Local Variables:
-# jinx-local-words: "Ement dirvish wordnut"
-# End:
+   #+begin_src elisp
+     (defun my/projectile-toggle-test-advice (f &rest args)
+       (cider-load-buffer)
+       (apply f args))
+
+     (advice-add #'projectile-toggle-between-implementation-and-test
+                 :around
+                 #'my/projectile-toggle-test-advice)
+   #+end_src
