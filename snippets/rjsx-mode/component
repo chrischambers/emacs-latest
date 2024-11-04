@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: component
+# key: comp
+# --
+
+function ${1:Component}() {
+        $2
+        return (
+                <>
+                        $3
+                </>
+        )
+}
+
+export default $1
