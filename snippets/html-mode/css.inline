@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: css (inline)
+# key: css
+# --
+<style type="text/css">
+        $1
+</style>
+$0

@@ -1,0 +1,4 @@
+# key: js
+# name: js (link)
+# --
+<script src="${1:path/to/javascript}.js"></script>$0

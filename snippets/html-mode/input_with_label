@@ -2,4 +2,4 @@
 # name: Input (with label)
 # --
 <label for="${1:$(slugify yas-text)}">$1</label>
-<input id="${1:$(slugify yas-text)}" type="${2:$$(yas-choose-value html-input-values}" />
+<input id="${1:$(slugify yas-text)}" type="${2:$$(yas-choose-value html-input-values)}" />

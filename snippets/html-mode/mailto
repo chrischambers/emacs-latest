@@ -1,0 +1,4 @@
+# key: mailto
+# name: mailto
+# --
+<a href="mailto:${1:`user-mail-address`}?subject=${2:feedback}">${3:email me}</a>$0

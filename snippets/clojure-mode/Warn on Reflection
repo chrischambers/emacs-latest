@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Warn on Reflection
+# key: wor
+# --
+
+(set! *warn-on-reflection* true)$0
