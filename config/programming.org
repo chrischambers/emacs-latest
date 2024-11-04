@@ -672,7 +672,7 @@
         :custom
         (cljr-warn-on-eval nil)
         ;; conflicts with clojure-lsp providing same facility:
-        ;; (cljr-add-ns-to-blank-clj-files nil)
+        (cljr-add-ns-to-blank-clj-files nil)
         :config
         (dolist (mapping '(("s"  .       "clojure.spec.alpha")
                            ("b" .        "better-cond.core")
