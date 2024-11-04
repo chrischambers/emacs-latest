@@ -1,0 +1,4 @@
+# key: inp
+# name: Input (with aria label)
+# --
+<input aria-label="$1" id="${1:$(slugify yas-text)}" type="${2:$$(yas-choose-value html-input-values)}" />

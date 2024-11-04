@@ -1,0 +1,6 @@
+# key: form
+# name: form
+# --
+<form ${1:enctype="multipart/form-data" }method="${2:post}" action="${3:.}">
+        $4
+</form>$0

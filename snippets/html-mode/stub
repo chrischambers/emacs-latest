@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: HTML stub
+# key: stub
+# --
+<!DOCTYPE html>
+<html lang="${1:en}">
+        <head>
+                <title>${2:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`}</title>
+                <meta charset="utf-8" />
+        </head>
+
+        <body>
+                <header>
+                        ${3}
+                </header>
+                        $0
+                <footer>
+                        ${4}
+                </footer>
+        </body>
+</html>

@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: table
+# key: table
+# --
+<table>
+        <colgroup>
+                <col>
+                <col class="alt">
+        </colgroup>
+        <thead>
+                $1
+        </thead>
+        <tbody>
+                $2
+        </tbody>
+</table>$0
