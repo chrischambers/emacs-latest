@@ -238,3 +238,14 @@
                  :around
                  #'my/projectile-toggle-test-advice)
    #+end_src
+* Emmet
+   #+begin_src elisp
+     (use-package emmet-mode
+       :hook ((sgml-mode . emmet-mode)       ;; Enabled for all markup modes
+              (css-mode . emmet-mode)
+              (clojure-mode . emmet-mode)    ;; hiccup
+              (cider-repl-mode . emmet-mode) ;; hiccup
+              (rjsx-mode . emmet-mode))
+       :config
+       (add-to-list 'emmet-jsx-major-modes 'rjsx-mode))
+   #+end_src
