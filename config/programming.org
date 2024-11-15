@@ -734,7 +734,7 @@
         (python-shell-interpreter-args "--simple-prompt -i"))
     #+end_src
 
-**** pyls
+**** COMMENT pyls
     #+begin_src elisp
       (use-package pyls
         :straight nil
