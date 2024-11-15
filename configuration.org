@@ -225,8 +225,7 @@
        :after apheleia
        :config
        (setf (alist-get 'clj-zprint apheleia-formatters)
-             '("clj-zprint"
-               "{:style [:community :justified :respect-nl] :map {:comma? false}}"))
+             '("clj-zprint"))
        (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint)))
    #+end_src
 
