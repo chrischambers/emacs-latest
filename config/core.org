@@ -450,6 +450,7 @@ which aren't absolutely necessary, but are very important.
       (projectile-mode +1)
       :general
       ;; (leader "P" '(projectile-command-map :which-key "projectile"))
+      (leader "fp" '(project-find-file :which-key "in project"))
       (leader
         "p"   '(:ignore t :which-key "project")
         "p!"  '(project-shell-command :which-key "shell command")
