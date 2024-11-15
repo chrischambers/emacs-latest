@@ -561,7 +561,8 @@
 
 * <<<org roam>>> ([[https://github.com/chrischambers/org-roam][github]]): Superior backlinking and hyperlinking
   #+begin_src elisp
-    (use-package emacsql-sqlite)
+    ;; (use-package emacsql)
+    ;; (use-package emacsql-sqlite)
 
     (use-package org-roam
       :after org
