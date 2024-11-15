@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: zprint: skip formatting
+# key: zp
+# --
+;;!zprint {:format :skip}$0

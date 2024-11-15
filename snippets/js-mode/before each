@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: before each
+# key: be
+# --
+beforeEach(() => {
+        $1
+})$0

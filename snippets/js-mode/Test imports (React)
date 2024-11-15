@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Test imports (React)
+# key: ti
+# --
+import { act } from "react"
+import userEvent from "@testing-library/user-event"
+import { render, renderHook, screen } from "@testing-library/react"
+import { describe, it, expect, test, vi } from "vitest"

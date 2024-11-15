@@ -1,0 +1,4 @@
+# key: zp
+# name: zprint: -> single-line
+# --
+;;!zprint {:format :next :fn-map {"->" :none-body}}$0

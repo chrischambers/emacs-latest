@@ -1,5 +1,7 @@
 # -*- mode: snippet -*-
-# name: import
-# key: i
+# name: it
+# key: it
 # --
-import $1 from './$1'$0
+it("${1:should do something}", () => {
+        $2
+})$0

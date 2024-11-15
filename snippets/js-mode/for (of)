@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: for (of)
+# key: for
+# --
+for(const ${1:varname} of ${2:obj}) {
+        $3
+}$0
