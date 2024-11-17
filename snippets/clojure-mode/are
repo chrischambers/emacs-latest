@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: are
+# key: are
+# --
+(are [${1:params} expected] (= expected (${2:f} $1))
+        $3)$0
