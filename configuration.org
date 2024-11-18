@@ -88,6 +88,7 @@
     #+begin_src elisp
     (my/config-load "config/shell.org")
     #+end_src
+
 * [[./config/programming.org][Programming configuration]]
     #+begin_src elisp
     (my/config-load "config/programming.org")
