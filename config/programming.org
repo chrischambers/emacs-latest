@@ -22,7 +22,38 @@
       :config
       (editorconfig-mode 1))
   #+end_src
-* Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
+
+* Auto-Format Code: Apheleia ([[https://github.com/radian-software/apheleia][github]])
+  #+begin_src elisp
+    (use-package apheleia
+      :config
+      (apheleia-global-mode +1))
+  #+end_src
+
+** Clojure Formatting Config
+   [[https://andersmurphy.com/2020/08/20/emacs-setting-up-apheleia-to-use-zprint.html][Emacs: setting up Apheleia to use Prettier and Zprint]]
+
+   #+begin_src elisp
+     (use-package apheleia-clojure
+       :straight nil
+       :no-require t
+       :after apheleia
+       :config
+       (setf (alist-get 'clj-zprint apheleia-formatters)
+             '("clj-zprint"))
+       (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint)))
+   #+end_src
+
+   #+begin_src elisp
+     (defun my/projectile-toggle-test-advice (f &rest args)
+       (cider-load-buffer)
+       (apply f args))
+
+     (advice-add #'projectile-toggle-between-implementation-and-test
+                 :around
+                 #'my/projectile-toggle-test-advice)
+   #+end_src
+* COMMENT Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
 #+begin_src elisp
     (use-package format-all
     :commands format-all-mode
@@ -713,6 +744,16 @@
          (let-routes 1)
          (context 2))
      #+end_src
+*** Kaocha Test Runner
+    #+begin_src elisp
+      (use-package kaocha-runner
+        :custom
+        (kaocha-runner-failure-win-min-height 20)
+        (kaocha-runner-ongoing-tests-win-min-height 20)
+        (kaocha-runner-output-win-max-height 20)
+        :after (cider-mode))
+    #+end_src
+
 * Other Languages
 ** Python
 *** Main Config
@@ -899,317 +940,331 @@
      (use-package svelte-mode)
    #+end_src
 
-* Web Mode ([[https://github.com/fxbois/web-mode][github]]/[[https://web-mode.org/][docs]])
-  #+begin_src elisp
-    (use-package web-mode)
-  #+end_src
-** Web Snippet Extras
-  #+begin_src elisp
-    (setq html-input-values
-          '("text"
-            "password"
-            "checkbox"
-            "radio"
-            "submit"
-            "reset"
-            "hidden"
-            "image"
-            "file"
-            "button"
-            "search"
-            "tel"
-            "url"
-            "email"
-            "date"
-            "time"
-            "number"
-            "range"
-            "color"))
+** Javascript
+*** COMMENT Tide ([[https://github.com/ananthakumaran/tide][github]])
+    #+begin_src elisp
+      (use-package tide
+        :after javascript-mode
+        :hook ((javascript-mode . tide-setup)
+               (javascript-mode . tide-hl-identifier-mode)))
+    #+end_src
 
-    (setq html-tags
-          '("a"
-            "abbr"
-            "address"
-            "area"
-            "article"
-            "aside"
-            "audio"
-            "base"
-            "bdi"
-            "bdo"
-            "blockquote"
-            "body"
-            "br"
-            "button"
-            "canvas"
-            "caption"
-            "cite"
-            "code"
-            "col"
-            "colgroup"
-            "data"
-            "datalist"
-            "dd"
-            "del"
-            "dfn"
-            "div"
-            "dl"
-            "dt"
-            "em"
-            "embed"
-            "fieldset"
-            "figcaption"
-            "figure"
-            "footer"
-            "form"
-            "h1"
-            "h2"
-            "h3"
-            "h4"
-            "h5"
-            "h6"
-            "head"
-            "header"
-            "hr"
-            "html"
-            "img"
-            "input"
-            "ins"
-            "kbd"
-            "label"
-            "legend"
-            "li"
-            "link"
-            "main"
-            "map"
-            "mark"
-            "meta"
-            "meter"
-            "nav"
-            "noscript"
-            "object"
-            "ol"
-            "optgroup"
-            "option"
-            "output"
-            "p"
-            "param"
-            "pre"
-            "progress"
-            "q"
-            "samp"
-            "script"
-            "section"
-            "select"
-            "source"
-            "span"
-            "strong"
-            "style"
-            "table"
-            "tbody"
-            "td"
-            "template"
-            "textarea"
-            "tfoot"
-            "th"
-            "thead"
-            "time"
-            "title"
-            "tr"
-            "track"
-            "ul"
-            "var"
-            "video"
-            "wbr"))
+*** COMMENT JSX
+    #+begin_src elisp
+      (use-package jsx
+        :preface
+        (define-derived-mode jsx-mode web-mode "JSX")
+        :no-require t
+        :straight nil
+        :mode
+        ("\\.jsx\\'" . jsx-mode)
+        :hook ((jsx-mode . tide-setup)
+               (jsx-mode . tide-hl-identifier-mode)))
+    #+end_src
+*** Eglot Config for JS
+    #+begin_src elisp
+      (with-eval-after-load 'eglot
+        (add-to-list 'eglot-server-programs
+                     '(((jsx-mode :language-id "javascriptreact"))
+                       "typescript-language-server"
+                       "--stdio")))
+    #+end_src
 
-    (setq html-semantic-tags
-          '("article"
-            "aside"
-            "audio"
-            "blockquote"
-            "button"
-            "canvas"
-            "caption"
-            "cite"
-            "code"
-            "data"
-            "datalist"
+*** RJSX-Mode
+    #+begin_src elisp
+      (use-package rjsx-mode
+        :hook (rjsx-mode . eglot-ensure))
+    #+end_src
 
-            "ins"
-            "del"
+*** JS2-reactor ([[https://github.com/js-emacs/js2-refactor.el?tab=readme-ov-file][github]])
+    Source of hydra: [[https://gist.github.com/anachronic/7af88c62db136727cd1fed17ee0a662f][A hydra for js2-refactor in emacs · GitHub]]
+    #+begin_src elisp
+      (use-package js2-refactor
+        :preface
+        (defhydra js2-refactor-hydra (:color blue :hint nil)
+          "
+      ^Functions^                    ^Variables^               ^Buffer^                      ^sexp^               ^Debugging^
+      ------------------------------------------------------------------------------------------------------------------------------
+      [_lp_] Localize Parameter      [_ev_] Extract variable   [_wi_] Wrap buffer in IIFE    [_k_]  js2 kill      [_lt_] log this
+      [_ef_] Extract function        [_iv_] Inline variable    [_ig_] Inject global in IIFE  [_ss_] split string  [_dt_] debug this
+      [_ip_] Introduce parameter     [_rv_] Rename variable    [_ee_] Expand node at point   [_sl_] forward slurp
+      [_em_] Extract method          [_vt_] Var to this        [_cc_] Contract node at point [_ba_] forward barf
+      [_ao_] Arguments to object     [_sv_] Split var decl.    [_uw_] unwrap
+      [_tf_] Toggle fun exp and decl [_ag_] Add var to globals
+      [_ta_] Toggle fun expr and =>  [_ti_] Ternary to if
+      [_q_]  quit"
+          ("ee" js2r-expand-node-at-point)
+          ("cc" js2r-contract-node-at-point)
+          ("ef" js2r-extract-function)
+          ("em" js2r-extract-method)
+          ("tf" js2r-toggle-function-expression-and-declaration)
+          ("ta" js2r-toggle-arrow-function-and-expression)
+          ("ip" js2r-introduce-parameter)
+          ("lp" js2r-localize-parameter)
+          ("wi" js2r-wrap-buffer-in-iife)
+          ("ig" js2r-inject-global-in-iife)
+          ("ag" js2r-add-to-globals-annotation)
+          ("ev" js2r-extract-var)
+          ("iv" js2r-inline-var)
+          ("rv" js2r-rename-var)
+          ("vt" js2r-var-to-this)
+          ("ao" js2r-arguments-to-object)
+          ("ti" js2r-ternary-to-if)
+          ("sv" js2r-split-var-declaration)
+          ("ss" js2r-split-string)
+          ("uw" js2r-unwrap)
+          ("lt" js2r-log-this)
+          ("dt" js2r-debug-this)
+          ("sl" js2r-forward-slurp)
+          ("ba" js2r-forward-barf)
+          ("k" js2r-kill)
+          ("q" nil))
+        :general
+        (local-leader '(js2-mode-map rjsx-mode-map)
+          "r" '(js2-refactor-hydra/body :which-key "refactor")))
+    #+end_src
 
-            "dfn"
-            "footer"
-            "h1"
-            "h2"
-            "h3"
-            "h4"
-            "h5"
-            "h6"
-            "header"
-            "main"
-            "nav"
-            "section"))
-  #+end_src
-* Javascript
-** COMMENT Tide ([[https://github.com/ananthakumaran/tide][github]])
+*** Skewer ([[https://github.com/skeeto/skewer-mode][github]])
+    #+begin_src elisp
+      (use-package skewer-mode
+        :config
+        (skewer-setup)
+        :general
+        (local-leader '(javascript-mode-map js2-mode-map rjsx-mode-map)
+          "e"  '(:ignore t :major-modes (javascript-mode js2-mode rjsx-mode) :which-key "eval")
+          "ee" '(skewer-eval-defun :which-key "expression")))
+    #+end_src
+
+*** JS Docs
+    #+begin_src elisp
+      (use-package js-docs
+        :preface
+        (defun my/mozilla-js-documentation-search (query)
+          (interactive "MSearch for: ")
+          (browse-url (format "https://developer.mozilla.org/en-GB/search?q=%s" query)))
+        :no-require t
+        :straight nil
+        :general
+        (local-leader (javascript-mode-map rjsx-mode-map js2-mode-map)
+          "d"  '(:ignore t :major-modes (javascript-mode rjsx-mode js2-mode)
+                         :which-key "documentation")
+          "dj" '(my/mozilla-js-documentation-search :which-key "javascript")))
+    #+end_src
+*** Import-js
+    #+begin_src elisp
+      (setq js-modes '(js2-mode rjsx-mode javascript-mode))
+    #+end_src
+
+    #+begin_src elisp
+      (use-package import-js
+        :preface
+        (defun my/import-js-fix ()
+          (interactive)
+          (when (-contains? js-modes major-mode)
+            (import-js-fix)))
+        :init
+        (dolist (mode js-modes)
+          (add-hook mode #'run-import-js))
+        :config
+        (add-hook 'after-save-hook 'my/import-js-fix))
+    #+end_src
+
+** Nix
+*** Nix Mode ([[https://github.com/NixOS/nix-mode][github]]/[[https://github.com/NixOS/nix-mode/blob/master/nix-mode.org][docs]])
    #+begin_src elisp
-     (use-package tide
-       :after javascript-mode
-       :hook ((javascript-mode . tide-setup)
-              (javascript-mode . tide-hl-identifier-mode)))
+     (use-package nix-mode
+       :mode ("\\.nix\\'" "\\.nix.in\\'")
+       :config
+       (require 'eglot)
+       (add-to-list 'eglot-server-programs '(nix-mode . ("nil"))))
    #+end_src
 
-** COMMENT JSX
+*** Nix DRV Mode
    #+begin_src elisp
-     (use-package jsx
-       :preface
-       (define-derived-mode jsx-mode web-mode "JSX")
+     (use-package nix-drv-mode
        :no-require t
        :straight nil
-       :mode
-       ("\\.jsx\\'" . jsx-mode)
-       :hook ((jsx-mode . tide-setup)
-              (jsx-mode . tide-hl-identifier-mode)))
-   #+end_src
-** Eglot Config for JS
-   #+begin_src elisp
-     (with-eval-after-load 'eglot
-       (add-to-list 'eglot-server-programs
-                    '(((jsx-mode :language-id "javascriptreact"))
-                      "typescript-language-server"
-                      "--stdio")))
+       :mode "\\.drv\\'")
    #+end_src
 
-** RJSX-Mode
+*** Nix Shell
    #+begin_src elisp
-     (use-package rjsx-mode
-       :hook (rjsx-mode . eglot-ensure))
-   #+end_src
-
-** JS2-reactor ([[https://github.com/js-emacs/js2-refactor.el?tab=readme-ov-file][github]])
-   Source of hydra: [[https://gist.github.com/anachronic/7af88c62db136727cd1fed17ee0a662f][A hydra for js2-refactor in emacs · GitHub]]
-   #+begin_src elisp
-     (use-package js2-refactor
-       :preface
-       (defhydra js2-refactor-hydra (:color blue :hint nil)
-         "
-     ^Functions^                    ^Variables^               ^Buffer^                      ^sexp^               ^Debugging^
-     ------------------------------------------------------------------------------------------------------------------------------
-     [_lp_] Localize Parameter      [_ev_] Extract variable   [_wi_] Wrap buffer in IIFE    [_k_]  js2 kill      [_lt_] log this
-     [_ef_] Extract function        [_iv_] Inline variable    [_ig_] Inject global in IIFE  [_ss_] split string  [_dt_] debug this
-     [_ip_] Introduce parameter     [_rv_] Rename variable    [_ee_] Expand node at point   [_sl_] forward slurp
-     [_em_] Extract method          [_vt_] Var to this        [_cc_] Contract node at point [_ba_] forward barf
-     [_ao_] Arguments to object     [_sv_] Split var decl.    [_uw_] unwrap
-     [_tf_] Toggle fun exp and decl [_ag_] Add var to globals
-     [_ta_] Toggle fun expr and =>  [_ti_] Ternary to if
-     [_q_]  quit"
-         ("ee" js2r-expand-node-at-point)
-         ("cc" js2r-contract-node-at-point)
-         ("ef" js2r-extract-function)
-         ("em" js2r-extract-method)
-         ("tf" js2r-toggle-function-expression-and-declaration)
-         ("ta" js2r-toggle-arrow-function-and-expression)
-         ("ip" js2r-introduce-parameter)
-         ("lp" js2r-localize-parameter)
-         ("wi" js2r-wrap-buffer-in-iife)
-         ("ig" js2r-inject-global-in-iife)
-         ("ag" js2r-add-to-globals-annotation)
-         ("ev" js2r-extract-var)
-         ("iv" js2r-inline-var)
-         ("rv" js2r-rename-var)
-         ("vt" js2r-var-to-this)
-         ("ao" js2r-arguments-to-object)
-         ("ti" js2r-ternary-to-if)
-         ("sv" js2r-split-var-declaration)
-         ("ss" js2r-split-string)
-         ("uw" js2r-unwrap)
-         ("lt" js2r-log-this)
-         ("dt" js2r-debug-this)
-         ("sl" js2r-forward-slurp)
-         ("ba" js2r-forward-barf)
-         ("k" js2r-kill)
-         ("q" nil))
-       :general
-       (local-leader '(js2-mode-map rjsx-mode-map)
-         "r" '(js2-refactor-hydra/body :which-key "refactor")))
-   #+end_src
-
-** Skewer ([[https://github.com/skeeto/skewer-mode][github]])
-   #+begin_src elisp
-     (use-package skewer-mode
-       :config
-       (skewer-setup)
-       :general
-       (local-leader '(javascript-mode-map js2-mode-map rjsx-mode-map)
-         "e"  '(:ignore t :major-modes (javascript-mode js2-mode rjsx-mode) :which-key "eval")
-         "ee" '(skewer-eval-defun :which-key "expression")))
-   #+end_src
-
-** JS Docs
-   #+begin_src elisp
-     (use-package js-docs
-       :preface
-       (defun my/mozilla-js-documentation-search (query)
-         (interactive "MSearch for: ")
-         (browse-url (format "https://developer.mozilla.org/en-GB/search?q=%s" query)))
+     (use-package nix-shell
        :no-require t
        :straight nil
-       :general
-       (local-leader (javascript-mode-map rjsx-mode-map js2-mode-map)
-         "d"  '(:ignore t :major-modes (javascript-mode rjsx-mode js2-mode)
-                        :which-key "documentation")
-         "dj" '(my/mozilla-js-documentation-search :which-key "javascript")))
+       :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
    #+end_src
-** Import-js
+
+*** Nix REPL
    #+begin_src elisp
-     (setq js-modes '(js2-mode rjsx-mode javascript-mode))
+     (use-package nix-repl
+       :no-require t
+       :straight nil
+       :commands (nix-repl))
    #+end_src
 
+
+* Web Development Related
+** Web Mode ([[https://github.com/fxbois/web-mode][github]]/[[https://web-mode.org/][docs]])
    #+begin_src elisp
-     (use-package import-js
-       :preface
-       (defun my/import-js-fix ()
-         (interactive)
-         (when (-contains? js-modes major-mode)
-           (import-js-fix)))
-       :init
-       (dolist (mode js-modes)
-         (add-hook mode #'run-import-js))
-       :config
-       (add-hook 'after-save-hook 'my/import-js-fix))
+     (use-package web-mode)
    #+end_src
+*** Web Snippet Extras
+   #+begin_src elisp
+     (setq html-input-values
+           '("text"
+             "password"
+             "checkbox"
+             "radio"
+             "submit"
+             "reset"
+             "hidden"
+             "image"
+             "file"
+             "button"
+             "search"
+             "tel"
+             "url"
+             "email"
+             "date"
+             "time"
+             "number"
+             "range"
+             "color"))
 
-* Nix
-** Nix Mode ([[https://github.com/NixOS/nix-mode][github]]/[[https://github.com/NixOS/nix-mode/blob/master/nix-mode.org][docs]])
-  #+begin_src elisp
-    (use-package nix-mode
-      :mode ("\\.nix\\'" "\\.nix.in\\'")
-      :config
-      (require 'eglot)
-      (add-to-list 'eglot-server-programs '(nix-mode . ("nil"))))
-  #+end_src
+     (setq html-tags
+           '("a"
+             "abbr"
+             "address"
+             "area"
+             "article"
+             "aside"
+             "audio"
+             "base"
+             "bdi"
+             "bdo"
+             "blockquote"
+             "body"
+             "br"
+             "button"
+             "canvas"
+             "caption"
+             "cite"
+             "code"
+             "col"
+             "colgroup"
+             "data"
+             "datalist"
+             "dd"
+             "del"
+             "dfn"
+             "div"
+             "dl"
+             "dt"
+             "em"
+             "embed"
+             "fieldset"
+             "figcaption"
+             "figure"
+             "footer"
+             "form"
+             "h1"
+             "h2"
+             "h3"
+             "h4"
+             "h5"
+             "h6"
+             "head"
+             "header"
+             "hr"
+             "html"
+             "img"
+             "input"
+             "ins"
+             "kbd"
+             "label"
+             "legend"
+             "li"
+             "link"
+             "main"
+             "map"
+             "mark"
+             "meta"
+             "meter"
+             "nav"
+             "noscript"
+             "object"
+             "ol"
+             "optgroup"
+             "option"
+             "output"
+             "p"
+             "param"
+             "pre"
+             "progress"
+             "q"
+             "samp"
+             "script"
+             "section"
+             "select"
+             "source"
+             "span"
+             "strong"
+             "style"
+             "table"
+             "tbody"
+             "td"
+             "template"
+             "textarea"
+             "tfoot"
+             "th"
+             "thead"
+             "time"
+             "title"
+             "tr"
+             "track"
+             "ul"
+             "var"
+             "video"
+             "wbr"))
 
-** Nix DRV Mode
-  #+begin_src elisp
-    (use-package nix-drv-mode
-      :no-require t
-      :straight nil
-      :mode "\\.drv\\'")
-  #+end_src
+     (setq html-semantic-tags
+           '("article"
+             "aside"
+             "audio"
+             "blockquote"
+             "button"
+             "canvas"
+             "caption"
+             "cite"
+             "code"
+             "data"
+             "datalist"
 
-** Nix Shell
-  #+begin_src elisp
-    (use-package nix-shell
-      :no-require t
-      :straight nil
-      :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
-  #+end_src
+             "ins"
+             "del"
 
-** Nix REPL
-  #+begin_src elisp
-    (use-package nix-repl
-      :no-require t
-      :straight nil
-      :commands (nix-repl))
-  #+end_src
+             "dfn"
+             "footer"
+             "h1"
+             "h2"
+             "h3"
+             "h4"
+             "h5"
+             "h6"
+             "header"
+             "main"
+             "nav"
+             "section"))
+   #+end_src
+** Emmet
+    #+begin_src elisp
+      (use-package emmet-mode
+        :hook ((sgml-mode . emmet-mode)       ;; Enabled for all markup modes
+               (css-mode . emmet-mode)
+               (clojure-mode . emmet-mode)    ;; hiccup
+               (cider-repl-mode . emmet-mode) ;; hiccup
+               (rjsx-mode . emmet-mode))
+        :config
+        (add-to-list 'emmet-jsx-major-modes 'rjsx-mode))
+    #+end_src

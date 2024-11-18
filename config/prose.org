@@ -1,0 +1,68 @@
+#+TITLE: Prose Configuration
+#+AUTHOR: Chris Chambers
+#+EMAIL: magma.chambers@gmail.com
+#+LANGUAGE: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:elisp :results value silent
+
+* Enable lexical binding
+#+begin_src elisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+* Dictionaries
+** COMMENT Dictionary Config
+   #+begin_src elisp
+     (use-package dictionary-config
+       :no-require t
+       :straight nil
+       :general
+       (leader
+         "d"    '(:ignore t :which-key "dict/spell")
+         "ds"   '(ispell-buffer :which-key "spellcheck buffer")
+         "dS"   '(ispell-word :which-key "spellcheck at point")
+         "df"   '(dictionary-search :which-key "dictionary (find)")
+         "dd"   '(dictionary-lookup-definition :which-key "dictionary (point)")))
+   #+end_src
+
+** wordnut
+   #+begin_src elisp
+     (use-package wordnut
+       :general
+       (leader
+         "vd" '(wordnut-lookup-current-word :which-key "dictionary")))
+   #+end_src
+
+
+* Spell CHecking
+** COMMENT <<<flyspell>>>: Spell-checker
+   #+begin_src elisp
+     (use-package flyspell
+       :hook
+       ((prog-mode . flyspell-prog-mode)
+        (text-mode . flyspell-mode)
+        (gfm-mode . flyspell-mode)
+        (git-commit-mode . flyspell-mode)
+        (mu4e-compose-mode . flyspell-mode))
+       :custom
+       (ispell-dictionary "british")
+       (ispell-personal-dictionary (concat user-emacs-directory "dictionary.txt"))
+       ;; Apparently a major performance gain:
+       (flyspell-issue-message-flag nil))
+   #+end_src
+
+** Jinx ([[https://github.com/minad/jinx][github]])
+   #+begin_src elisp
+     (use-package jinx
+       :hook (emacs-startup . global-jinx-mode)
+       :straight nil
+       :no-require t
+       :preface
+       (add-to-list 'load-path
+                    "/nix/store/brc7l26k7vnhpypz0q3mivcrk4r1ln1z-emacs-jinx-20240515.1016/share/emacs/site-lisp/elpa/jinx-20240515.1016")
+       :bind (("M-$" . jinx-correct)
+              ("C-M-$" . jinx-languages)))
+   #+end_src
+
+* Sources
+  - [] [[https://www.masteringemacs.org/article/wordsmithing-in-emacs][Wordsmithing in Emacs - Mastering Emacs]]
