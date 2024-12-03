@@ -888,3 +888,9 @@ which aren't absolutely necessary, but are very important.
     (use-package origami
       :hook (after-init . global-origami-mode))
   #+end_src
+
+* Start emacs server only if it's not currently running
+  #+begin_src elisp
+    (load "server")
+    (unless (server-running-p) (server-start))
+  #+end_src
