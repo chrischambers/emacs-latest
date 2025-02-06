@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Latex package
+# key: ltxp
+# --
+#+latex_header: \usepackage{$1}$0
