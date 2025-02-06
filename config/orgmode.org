@@ -1015,7 +1015,7 @@
       ;; Avoid using SM5 Algorithm: see https://faqs.ankiweb.net/what-spaced-repetition-algorithm.html#what-about-sm-5
       (org-drill-spaced-repetition-algorithm 'sm2)
 
-      (org-drill-use-visible-cloze-face-p t)
+      (org-drill-use-visible-cloze-face-p nil)
       (org-drill-add-random-noise-to-intervals-p t)
       (org-default-properties (append org-default-properties '("DRIlL_CARD_TYPE")))
       :config
