@@ -893,3 +893,23 @@ which aren't absolutely necessary, but are very important.
     (load "server")
     (unless (server-running-p) (server-start))
   #+end_src
+
+* <<<bookmark.el>>>: Named bookmarks
+  #+begin_src elisp
+    (use-package bookmark
+      :no-require t
+      :straight nil
+      :preface
+      (defun my/scroll-to-top (&rest r)
+        (interactive)
+        (evil-scroll-line-to-top (line-number-at-pos)))
+      :config
+      (advice-add #'bookmark--jump-via :after #'my/scroll-to-top)
+      :general
+      (leader
+        ;; Mark (i.e. bookmark) operations
+        "m"   '(:ignore t :which-key "mark")
+        "mj"  '(bookmark-jump :which-key "jump")
+        "ml"  '(bookmark-jump :which-key "jump")
+        "mm"  '(bookmark-set :which-key "make")))
+  #+end_src
