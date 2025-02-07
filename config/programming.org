@@ -30,6 +30,14 @@
       (apheleia-global-mode +1))
   #+end_src
 
+  To suppress automatic code formatting for a given project, insert
+  =dir-locals.el= with something like the following:
+
+  #+begin_example
+    ((clojure-mode
+      (apheleia-inhibit . t)))
+  #+end_example
+
 ** Clojure Formatting Config
    [[https://andersmurphy.com/2020/08/20/emacs-setting-up-apheleia-to-use-zprint.html][Emacs: setting up Apheleia to use Prettier and Zprint]]
 
