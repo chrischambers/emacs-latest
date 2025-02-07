@@ -656,9 +656,12 @@ which aren't absolutely necessary, but are very important.
         (advice-add 'evil-scroll-page-up :around #'my/jump-advice)
 
         (advice-add 'xref-find-definitions :around #'my/jump-advice)
+        (advice-add 'xref-find-references :around #'my/jump-advice)
+        (advice-add 'xref-find-apropos :around #'my/jump-advice)
         (advice-add 'consult-buffer :around #'my/jump-advice)
         (advice-add 'find-file :around #'my/jump-advice)
         (advice-add 'switch-to-buffer :around #'my/jump-advice)
+        (advice-add 'bookmark--jump-via :around #'my/jump-advice)
 
         ;; ... whenever you want a new jump scenario just use the above pattern.
 
