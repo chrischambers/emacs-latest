@@ -634,8 +634,11 @@ which aren't absolutely necessary, but are very important.
         (require 'better-jumper)
         :custom
         (better-jumper-use-evil-jump-advice nil)
-
         :config
+        ;; Include currently edited source files as potential jump target:
+        (customize-set-variable
+         'better-jumper--buffer-targets
+         "\\*\\(new\\|Org Src[^*]*\\|scratch\\)\\*")
         (better-jumper-mode 1)
         ;; this lets me toggle between two points (adapted from
         ;; evil-jump-backward-swap)
