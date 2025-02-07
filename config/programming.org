@@ -1114,6 +1114,7 @@
      (use-package nix-drv-mode
        :no-require t
        :straight nil
+       :ensure nix-mode
        :mode "\\.drv\\'")
    #+end_src
 
@@ -1122,6 +1123,7 @@
      (use-package nix-shell
        :no-require t
        :straight nil
+       :ensure nix-mode
        :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
    #+end_src
 
@@ -1130,9 +1132,14 @@
      (use-package nix-repl
        :no-require t
        :straight nil
+       :ensure nix-mode
        :commands (nix-repl))
    #+end_src
 
+*** COMMENT Nix-sandbox ([[https://github.com/nix-community/nix-emacs?tab=readme-ov-file][github]])
+    #+begin_src elisp
+      (use-package nix-sandbox)
+    #+end_src
 
 * Web Development Related
 ** Web Mode ([[https://github.com/fxbois/web-mode][github]]/[[https://web-mode.org/][docs]])
