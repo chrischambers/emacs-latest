@@ -394,6 +394,10 @@
        (org-table-electric-header-mode))
    #+end_src
 
+** Avoid prompt when re-editing overlay for =org-edit-special=
+   #+begin_src elisp
+     (customize-set-variable 'org-src-ask-before-returning-to-edit-buffer nil)
+   #+end_src
 * Custom TODOs
 ** Customise org-todo keywords
    - =@= :: log timestamp/note when task is transitioned into
