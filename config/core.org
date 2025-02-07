@@ -770,7 +770,7 @@ which aren't absolutely necessary, but are very important.
 ** <<<switch-window>>> ([[https://github.com/dimitri/switch-window][github]])
    Improves =C-w w=:
    - When there are 2 windows in the frame, it behaves as usual,
-   - Howecver, If thee are greater than two windows, it displays letter hints
+   - However, If thee are greater than two windows, it displays letter hints
      for jumping around, like =vimperator=, =ace-windows=, etc.
 
    #+begin_src elisp
