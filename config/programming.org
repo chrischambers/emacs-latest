@@ -566,6 +566,7 @@
           (interactive)
           (browse-url "https://clojure.org/api/cheatsheet"))
 
+        :hook (cider-mode . (lambda () (set (make-local-variable 'global-eldoc-mode) nil)))
         :config
         (require 'ob-clojure)
         :custom
