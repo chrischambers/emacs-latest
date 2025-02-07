@@ -222,12 +222,13 @@
       :custom
       (beframe-rename-function #'my/rename-frame)
       (beframe-functions-in-frames '(my/switch-project-new-frame))
-      ;; (beframe-global-buffers
-      ;;  (-concat beframe-global-buffers
-      ;;           '("Async-native-compile-log"
-      ;;             "\\*Warnings\\*"
-      ;;             "\\*Help\\*"
-      ;;             "\\*info\\*")))
+      (beframe-global-buffers
+       (-concat beframe-global-buffers
+                '("Async-native-compile-log"
+                  "\\*Messages\\*"
+                  "\\*Warnings\\*"
+                  "\\*Help\\*"
+                  "\\*info\\*")))
       :config
       (beframe-mode 1)
       :general
