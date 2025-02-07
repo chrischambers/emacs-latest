@@ -282,16 +282,24 @@
       :no-require t
       :straight nil
       :preface
+      ;; https://emacs.stackexchange.com/questions/73983/how-to-make-eldoc-only-popup-on-demand
       (defun my/eldoc-show ()
         (interactive)
         (eldoc nil) ;; nil to not bring the eldoc buffer to view
         (eldoc-box-help-at-point))
 
       (defun my/setup-less-annoying-eldoc ()
+        (interactive)
         (eldoc-mode -1)
-        (eldoc-box-hover-mode))
+        (eldoc-box-hover-mode 1))
 
-      :hook ((prog-mode . eglot-ensure)
+      (defun my/eglot-ensure ()
+        "Activates eglot... unless the major mode is blacklisted."
+        (interactive)
+        (unless (member major-mode '(emacs-lisp-mode))
+          (eglot-ensure)))
+
+      :hook ((prog-mode . my/eglot-ensure)
              (eglot-managed-mode . my/setup-less-annoying-eldoc))
        :bind (:map prog-mode-map
                ([remap eldoc-doc-buffer] . my/eldoc-show))
