@@ -296,7 +296,7 @@
       (defun my/eglot-ensure ()
         "Activates eglot... unless the major mode is blacklisted."
         (interactive)
-        (unless (member major-mode '(emacs-lisp-mode))
+        (unless (member major-mode '(emacs-lisp-mode lisp-mode))
           (eglot-ensure)))
 
       :hook ((prog-mode . my/eglot-ensure)
@@ -372,6 +372,7 @@
         (evil-move-beyond-eol t)
         (evil-cleverparens-use-s-and-S nil)
         :hook ((prog-mode          . evil-cleverparens-mode)
+               (slime-repl-mode    . evil-cleverparens-mode)
                (cider-repl-mode    . evil-cleverparens-mode)))
     #+end_src
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
@@ -1306,3 +1307,27 @@
         :config
         (add-to-list 'emmet-jsx-major-modes 'rjsx-mode))
     #+end_src
+
+* Common Lisp
+  [[https://www.youtube.com/watch?v=VnWVu8VVDbI][Installing Common Lisp, Emacs, Slime & Quicklisp - YouTube]]
+
+  #+begin_src elisp
+    (use-package quicklisp-slime-helper
+      :no-require t
+      :straight nil
+      :preface
+      (load (expand-file-name "~/quicklisp/slime-helper.el"))
+      :custom
+      (inferior-lisp-program "sbcl")
+      :general
+      ('(insert motion) slime-repl-mode-map
+       "C-l"  'slime-repl-clear-buffer)
+      (local-leader 'lisp-mode-map
+        "e" '(:ignore t :major-modes (lisp-mode) :which-key "evaluate")
+        "ee" '(slime-eval-last-expression :which-key "expression")
+        "eb" '(slime-eval-buffer :which-key "buffer")
+        "er" '(slime-eval-region :which-key "region")
+        "c" '(:ignotre t :major-modes (lisp-mode) :which-key "compile")
+        "cc" '(slime-compile-defun :which-key "current function")
+        "cf" '(slime-compile-and-load-file :which-key "file")))
+  #+end_src
