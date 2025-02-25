@@ -469,7 +469,7 @@
 
      (defcustom org-agenda-blacklist
        '(
-         ;; "#old"
+         "#old"
          "#archives/completed_tasks.org$")
        "patterns to exclude from org-agenda path names")
 
