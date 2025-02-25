@@ -638,7 +638,7 @@ which aren't absolutely necessary, but are very important.
         ;; Include currently edited source files as potential jump target:
         (customize-set-variable
          'better-jumper--buffer-targets
-         "\\*\\(new\\|Org Src[^*]*\\|scratch\\)\\*")
+         "\\*\\(new\\|Org Agenda\\|Org Src[^*]*\\|scratch\\)\\*")
         (better-jumper-mode 1)
         ;; this lets me toggle between two points (adapted from
         ;; evil-jump-backward-swap)
