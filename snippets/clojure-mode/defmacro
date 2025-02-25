@@ -1,0 +1,7 @@
+# key: defm
+# name: defmacro
+# --
+(defmacro ${1:name}
+          ${2:"${3:This is a docstring}"}
+        [$4]
+        $5)$0
