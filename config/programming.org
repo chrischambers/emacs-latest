@@ -16,13 +16,6 @@
       :hook (after-init . envrc-global-mode))
   #+end_src
 * TODO Configure SQL(i) repl-toggle correctly
-* Editorconfig integration
-  #+begin_src elisp
-    (use-package editorconfig
-      :config
-      (editorconfig-mode 1))
-  #+end_src
-
 * Auto-Format Code: Apheleia ([[https://github.com/radian-software/apheleia][github]])
   #+begin_src elisp
     (use-package apheleia

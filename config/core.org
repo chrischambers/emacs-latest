@@ -402,6 +402,14 @@ which aren't absolutely necessary, but are very important.
 	 ("q[uit]"  org-capture-kill)))
     #+end_src
 
+* Editorconfig integration
+  #+begin_src elisp
+    (use-package editorconfig
+      :straight nil
+      :no-require t
+      :config
+      (editorconfig-mode 1))
+  #+end_src
 * <<<recentf>>>: Operate on recent files easily
   #+begin_src elisp
     (use-package recentf
