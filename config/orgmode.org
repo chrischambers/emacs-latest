@@ -220,7 +220,7 @@
      #+begin_src elisp
        (use-package alert
          :config
-         (if IS-MAC (setq alert-default-style 'osx-notifier)))
+         (if IS-MAC (customize-set-variable 'alert-default-style 'osx-notifier)))
      #+end_src
 
 *** Advise clock-in/out
