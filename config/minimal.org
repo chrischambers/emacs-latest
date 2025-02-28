@@ -44,6 +44,8 @@ you can work with.
 * <<<which-key>>> ([[https://github.com/justbur/emacs-which-key][github]]): Display leader/prefix hints
   #+begin_src elisp
     (use-package which-key
+      :straight nil
+      :no-require t
       :config
       ;; (which-key-setup-side-window-right-bottom)
       (which-key-mode 1)
