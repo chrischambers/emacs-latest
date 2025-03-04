@@ -133,7 +133,7 @@ you can work with.
         "b"    '(:ignore t :which-key "buffer")
         ;; "bb"  '(ibuffer :which-key "switch buffer")
         "bb"   '(switch-to-buffer :which-key "switch buffer")
-        "bd"   'kill-this-buffer
+        "bd"   'kill-current-buffer
         "bp"   'previous-buffer
         "b["   'previous-buffer
         "bn"   'next-buffer
