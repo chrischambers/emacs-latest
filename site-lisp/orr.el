@@ -1,4 +1,5 @@
 ;;; orr.el --- Foo -*- lexical-binding: t; -*-
+(require 'transient)
 
 (defvar orr-alias-map nil "Cache for alias mapping")
 
