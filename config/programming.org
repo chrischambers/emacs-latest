@@ -730,11 +730,13 @@
         ;; conflicts with clojure-lsp providing same facility:
         (cljr-add-ns-to-blank-clj-files nil)
         :config
-        (dolist (mapping '(("s"  .       "clojure.spec.alpha")
+        (dolist (mapping '(("async"  .   "clojure.core.async")
+                           ("s"  .       "clojure.spec.alpha")
                            ("b" .        "better-cond.core")
                            ("gen" .      "clojure.spec.gen.alpha")
                            ("x" .        "net.cgrand.xforms")
                            ("stest" .    "clojure.spec.test.alpha")
+                           ("math" .     "clojure.math")
                            ("match" .    "clojure.core.match")
                            ("combo" .    "clojure.math.combinatorics")
                            ("browse" .   "clojure.java.browse")
