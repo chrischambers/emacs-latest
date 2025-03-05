@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: re-find
+# key: rf
+# --
+(re-find #"${1:pattern}" "${2:string}")$0
