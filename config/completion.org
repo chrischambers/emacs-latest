@@ -123,17 +123,31 @@
    - State "IN-PROGRESS" from "TODO"          [2024-01-14 Sun 21:28]
    :END:
    #+begin_src elisp
+     (defun split-into-words (s)
+      (replace-regexp-in-string "[-_/\\.]" " " s))
+
      (defun my/vertico--add-score-modifier (s user-input)
        (let* ((input (regexp-quote user-input))
-              (pattern  (format "^%s$" input))
-              (pattern2 (format "\b%s\b" input))
+              (words (split-into-words s))
+              (case-fold-search nil) ; disable case-insensitivity by default here
+              (exactly?  (format "^%s$" input))
+              (at-word-boundaries? (format "\\b%s\\b" input))
               (score-modifier
                (cond
-                ((s-matches? pattern  s)                       30) ; case-insensitive
-                ((s-matches? pattern2 s)                       20) ; case-insensitive
-                ((s-starts-with?        input s :ignore-case)  10)
-                ((s-ends-with?          input s :ignore-case)  5)
-                ((s-contains?           input s :ignore-case)  2)
+                ((s-matches? exactly?  s)                       700)
+                ((let ((case-fold-search t))
+                   (s-matches? exactly?  s))                    600)
+                ;; ((s-matches? at-word-boundaries? words)         500) ; case-insensitive
+                ((s-starts-with? input s)                       450)
+                ((s-starts-with? input s :ignore-case)          400)
+                ((s-ends-with?   input s)                       350)
+                ((s-ends-with?   input s :ignore-case)          300)
+                ((s-matches? at-word-boundaries? s)             250) ; case-insensitive
+                ((let ((case-fold-search t))
+                   (s-matches? at-word-boundaries?  s))         225)
+                ((s-contains?    input s)                       200)
+                ((s-contains?    input s :ignore-case)          100)
+                ;; ((s-contains?    input words :ignore-case) 100)
                 (:else 0))))
          (cons s score-modifier)))
 
@@ -153,6 +167,65 @@
    #+end_src
 
 *** COMMENT Testing
+    #+begin_src elisp
+
+      (let ((res (sort
+                  (-map (-rpartial #'my/vertico--add-score-modifier "crd")
+                        '("crd/bar/baz"
+                          "~/foo/bar/baz.crd"
+                          "~/foo/crd/bar"
+                          "~/foo/crda/bar"
+                          "Crd/bar/baz"
+                          "~/foo/bar/cRd"
+                          "~/foo/crD/bar"
+                          "~/cr/d"
+                          "~/foo/bar/crd"
+                          "~/c/r/d"
+                          "crd"
+                          "CRD"
+                          "~/c/rd"))
+                  :key #'cdr
+                  :reverse t)))
+        (inspect res))
+
+      (let ((stripped-s (strip-separator-chars "~/foo/crd/bar")))
+        (s-matches? (format "\\b%s\\b" "crd") stripped-s))
+
+      (prin1-to-string res)
+        (eql
+         (mapcar #'car res)
+         '("~/foo/bar/crd"
+           "~/foo/bar/baz.crd"
+           "~/foo/crd/bar"
+           "~/cr/d"
+           "~/c/rd"
+           "~/c/r/d"))
+
+      (mapcar #'strip-separator-chars
+       '("~/foo/bar/crd"
+        "~/foo/bar/baz.crd"
+        "~/foo/crd/bar"
+        "~/cr/d"
+        "~/c/rd"
+        "~/c/r/d"))
+
+      (defun to-spaced-regex (s)
+        (string-join
+         (mapcar (lambda (c) (format "%c[[:space:]]*" c)) s)))
+
+      (s-matches?
+       (to-spaced-regex "sad") "sad")
+
+      (progn
+        (string-match "c\\([[:space:]]*\\)" "~/foo/bar/baz.crd")
+        (match-string 1 "~/foo/bar/baz.crd"))
+
+      (string-match "\\([a-z]+\\)-\\([0-9]+\\)" "test-123")
+      (match-beginning 1)
+      (match-end 1)
+      (match-string 1 "test-123")
+    #+end_src
+
    #+begin_src elisp
      (-map (-rpartial #'my/vertico--add-score-modifier "an")
            '("apple" "aniseed" "nan" "an" "banana" "orange" "grape" "kiwi"))
