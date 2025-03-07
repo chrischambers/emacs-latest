@@ -3,7 +3,5 @@
 # key: js
 # --
 <script type="text/javascript">
-        ${1:$(function() {
-                $2
-        });}
+        $1
 </script>
