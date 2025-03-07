@@ -319,6 +319,30 @@
   #+end_src
 
 * Lisp Languages
+** Lisp Modes / Mode Maps
+   #+begin_src elisp
+     (defvar lisp-mode-config
+       '((clojure-mode . clojure-mode-map)          ; clojure
+         (lisp-mode . lisp-mode-map)                ; common lisp
+         (scheme-mode . scheme-mode-map)            ; scheme/racket
+         (emacs-lisp-mode . emacs-lisp-mode-map)    ; emacs lisp
+     ))
+
+     (defvar lisp-modes (mapcar #'car lisp-mode-config))
+     (defvar lisp-mode-maps (mapcar #'cdr lisp-mode-config))
+
+     (defvar lisp-repl-mode-config
+       '((cider-repl-mode . cider-repl-mode-map)    ; clojure
+         (slime-repl-mode . slime-repl-mode-map)    ; common lisp
+         (geiser-repl-mode . geiser-repl-mode-map)  ; scheme/racket
+         (inferior-emacs-lisp-mode
+          . inferior-emacs-lisp-mode-map)           ; emacs lisp
+     ))
+
+     (defvar lisp-repl-modes (mapcar #'car lisp-repl-mode-config))
+     (defvar lisp-repl-mode-maps (mapcar #'cdr lisp-repl-mode-config))
+   #+end_src
+
 ** Keybindings common across lisps
    #+begin_src elisp
      (defun my/eval-region-or-buffer ()
@@ -327,11 +351,10 @@
            (eval-region (region-beginning) (region-end))
          (eval-buffer)))
 
-     (with-eval-after-load 'lisp-mode
-       (general-def
-         local-leader lisp-mode-map
-         "e" '(:ignore t :major-modes lisp-mode :which-key "evaluate")
-         "eb" '(my/eval-region-or-buffer :which-key "buffer/region")))
+     (local-leader
+      :keymaps lisp-mode-maps
+         "e" `(:ignore t :major-modes ,lisp-modes :which-key "evaluate")
+         "eb" '(my/eval-region-or-buffer :which-key "buffer/region"))
    #+end_src
 
 ** Structural Editing
@@ -514,7 +537,7 @@
        (geiser-default-implementation 'racket)
        :general
        (local-leader scheme-mode-map
-         "e" '(:ignore t :major-modes scheme-mode :which-key "evaluate")
+         "ee" '(geiser-eval-last-sexp :which-key "expression")
          "eb" '(geiser-eval-buffer-and-go :which-key "buffer")
          "er" '(geiser-eval-region-and-go :which-key "region")
          "ed" '(geiser-eval-definition-and-go :which-key "definition")))
@@ -609,8 +632,6 @@
           "dd"   '(my/debug-clojure-expression :which-key "debug expression")
           "de"   '(cider-enlighten-mode :which-key "enlighten on/off")
 
-          "e"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
-                           :which-key "eval")
           "ec"   '(cider-pprint-eval-last-sexp-to-comment :which-key "expr -> comment")
           "ed"   '(cider-eval-all-files :which-key "directory")
           "ee"   '(cider-eval-sexp-at-point :which-key "expression")
@@ -1318,7 +1339,6 @@
       ('(insert motion) slime-repl-mode-map
        "C-l"  'slime-repl-clear-buffer)
       (local-leader 'lisp-mode-map
-        "e" '(:ignore t :major-modes (lisp-mode) :which-key "evaluate")
         "ee" '(slime-eval-last-expression :which-key "expression")
         "eb" '(slime-eval-buffer :which-key "buffer")
         "er" '(slime-eval-region :which-key "region")

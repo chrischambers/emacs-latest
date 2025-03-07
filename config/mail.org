@@ -399,8 +399,11 @@
            :foreground "#c4d030"))
         "Face for the 'trash' tag in Notmuch.")
       :general
-      ([remap evil-collection-notmuch-tree-toggle-delete] #'my/notmuch-tree-toggle-delete)
-      ([remap evil-collection-notmuch-search-toggle-delete] #'my/notmuch-search-toggle-delete)
+      ([remap evil-collection-notmuch-tree-toggle-delete]
+       #'my/notmuch-tree-toggle-delete)
+      ([remap evil-collection-notmuch-search-toggle-delete]
+       #'my/notmuch-search-toggle-delete)
+
       (leader "an" '(notmuch-hello :which-key "notmuch"))
       (notmuch-common-keymap
        "j"       'evil-next-line
@@ -413,13 +416,18 @@
        "f"       'my/notmuch-filter-by-from
        "F"       'my/notmuch-search-by-from)
       (local-leader '(notmuch-search-mode-map notmuch-tree-mode-map)
-        "g"      '(my/notmuch-create-gmail-filter-from-current-sender :which-key "gmail-filter")
-        "e"      '(:ignore t :which-key "edit...")
+        "g"      '(my/notmuch-create-gmail-filter-from-current-sender
+                   :which-key "gmail-filter")
+        "e"      '(:ignore t
+                   :major-modes (notmuch-search-mode-map notmuch-tree-mode-map)
+                   :which-key "edit...")
         "ef"     '(my/notmuch-edit-feeds :which-key "feeds")
         "ep"     '(my/notmuch-edit-papertrail :which-key "papertrail")
         "es"     '(my/notmuch-edit-screened :which-key "screened")
         "eS"     '(my/notmuch-edit-spam :which-key "spam")
-        "m"      '(:ignore t :which-key "move to...")
+        "m"      '(:ignore t
+                   (notmuch-search-mode-map notmuch-tree-mode-map)
+                   :which-key "move to...")
         "mf"     '(my/notmuch-move-sender-to-feeds :which-key "feeds")
         "mp"     '(my/notmuch-move-sender-to-papertrail :which-key "papertrail")
         "ms"     '(my/notmuch-move-sender-to-screened :which-key "screened")
