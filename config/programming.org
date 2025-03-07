@@ -287,10 +287,13 @@
         (eldoc-mode -1)
         (eldoc-box-hover-mode 1))
 
+      (defvar eglot-disabled-major-modes
+        '(emacs-lisp-mode lisp-mode web-mode))
+
       (defun my/eglot-ensure ()
         "Activates eglot... unless the major mode is blacklisted."
         (interactive)
-        (unless (member major-mode '(emacs-lisp-mode lisp-mode))
+        (unless (member major-mode eglot-disabled-major-modes)
           (eglot-ensure)))
 
       :hook ((prog-mode . my/eglot-ensure)
@@ -1163,7 +1166,20 @@
 * Web Development Related
 ** Web Mode ([[https://github.com/fxbois/web-mode][github]]/[[https://web-mode.org/][docs]])
    #+begin_src elisp
-     (use-package web-mode)
+     (use-package web-mode
+       :mode
+       (("\\.phtml\\'" . web-mode)
+        ("\\.php\\'" . web-mode)
+        ("\\.tpl\\'" . web-mode)
+        ("\\.[agj]sp\\'" . web-mode)
+        ("\\.as[cp]x\\'" . web-mode)
+        ("\\.erb\\'" . web-mode)
+        ("\\.mustache\\'" . web-mode)
+        ("\\.djhtml\\'" . web-mode)
+        ("\\.html?\\'" . web-mode))
+       ;; :config
+       ;; (add-to-list 'eglot-server-programs '(html-mode . ("nil")))
+       )
    #+end_src
 *** Web Snippet Extras
    #+begin_src elisp
@@ -1318,6 +1334,7 @@
       (use-package emmet-mode
         :hook ((sgml-mode . emmet-mode)       ;; Enabled for all markup modes
                (css-mode . emmet-mode)
+               (web-mode . emmet-mode)
                (clojure-mode . emmet-mode)    ;; hiccup
                (cider-repl-mode . emmet-mode) ;; hiccup
                (rjsx-mode . emmet-mode))
