@@ -1094,9 +1094,9 @@
         :straight nil
         :general
         (local-leader (javascript-mode-map rjsx-mode-map js2-mode-map)
-          "d"  '(:ignore t :major-modes (javascript-mode rjsx-mode js2-mode)
+          "?"  '(:ignore t :major-modes (javascript-mode rjsx-mode js2-mode)
                          :which-key "documentation")
-          "dj" '(my/mozilla-js-documentation-search :which-key "javascript")))
+          "?j" '(my/mozilla-js-documentation-search :which-key "javascript")))
     #+end_src
 *** Import-js
     #+begin_src elisp
