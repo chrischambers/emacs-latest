@@ -173,6 +173,7 @@
        :hook (prog-mode . repl-toggle-mode)
        :custom
        (rtog/goto-buffer-fun 'pop-to-buffer)
+       (slime-auto-start 'ask)
        ;; (rtog/fullscreen t) ; not sure about this
        (rtog/mode-repl-alist
         '((emacs-lisp-mode . ielm)
