@@ -393,7 +393,24 @@
         (evil-cleverparens-use-s-and-S nil)
         :hook ((prog-mode          . evil-cleverparens-mode)
                (slime-repl-mode    . evil-cleverparens-mode)
-               (cider-repl-mode    . evil-cleverparens-mode)))
+               (cider-repl-mode    . evil-cleverparens-mode))
+        :general
+
+        (general-define-key
+         :states '(normal)
+         :keymaps lisp-mode-maps
+         "M-x" 'sp-split-sexp)
+
+        (general-define-key
+         :states '(normal)
+         :keymaps lisp-mode-maps
+         "M-u" 'sp-join-sexp)
+
+        (general-define-key
+         :states '(normal)
+         :keymaps lisp-mode-maps
+         "gh" '(sp-splice-sexp-killing-backward
+                :which-key "splice (killing backwards)")))
     #+end_src
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
    #+begin_src elisp
