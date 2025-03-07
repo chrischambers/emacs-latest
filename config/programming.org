@@ -325,6 +325,8 @@
 * Lisp Languages
 ** Lisp Modes / Mode Maps
    #+begin_src elisp
+     (require 'ielm)
+
      (defvar lisp-mode-config
        '((clojure-mode . clojure-mode-map)          ; clojure
          (lisp-mode . lisp-mode-map)                ; common lisp
@@ -345,6 +347,12 @@
 
      (defvar lisp-repl-modes (mapcar #'car lisp-repl-mode-config))
      (defvar lisp-repl-mode-maps (mapcar #'cdr lisp-repl-mode-config))
+
+     (defun my/mode->hook-symbol (mode-symbol)
+       (let* ((name (symbol-name mode-symbol))
+              (hook-name (s-join "" (list name "-hook")))
+              (hook-symbol (intern hook-name)))
+         hook-symbol))
    #+end_src
 
 ** Keybindings common across lisps
@@ -379,10 +387,11 @@
 *** <<<smartparens>>> ([[https://github.com/Fuco1/smartparens][github]])
     #+begin_src elisp
       (use-package smartparens
-        :hook ((prog-mode          . smartparens-mode)
-               (cider-repl-mode    . smartparens-mode))
+        :hook (prog-mode  . smartparens-mode)
         :config
-        (require 'smartparens-config))
+        (require 'smartparens-config)
+        (dolist (mode lisp-repl-modes)
+          (add-hook (my/mode->hook-symbol mode) 'smartparens-mode)))
     #+end_src
 
 *** <<<evil cleverparens>>> ([[https://github.com/emacs-evil/evil-cleverparens][github]])
@@ -391,9 +400,10 @@
         :custom
         (evil-move-beyond-eol t)
         (evil-cleverparens-use-s-and-S nil)
-        :hook ((prog-mode          . evil-cleverparens-mode)
-               (slime-repl-mode    . evil-cleverparens-mode)
-               (cider-repl-mode    . evil-cleverparens-mode))
+        :hook (prog-mode . evil-cleverparens-mode)
+        :config
+        (dolist (mode lisp-repl-modes)
+          (add-hook (my/mode->hook-symbol mode) 'evil-cleverparens-mode))
         :general
 
         (general-define-key
