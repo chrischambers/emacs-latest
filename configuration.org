@@ -136,8 +136,7 @@
 
 * Function for Opening in Browser
   #+begin_src elisp
-    (defun my/org-src-get-tangle-path ()
-      "Get the :tangle property of the source block being edited in `org-edit-special` mode."
+    (defun my/org-src-path ()
       (if (not (org-src-edit-buffer-p))
           (message "Not in an Org src edit buffer")
         (let* ((src-buffer (org-src-source-buffer)) ;; Get main Org buffer
@@ -152,14 +151,13 @@
                      (dir (f-parent file-name))
                      (params (org-element-property :parameters element))
                      (tangle (alist-get :tangle (org-babel-parse-header-arguments params))))
-                (when tangle
-                  (f-join dir tangle))))))))
+                (if tangle (f-join dir tangle) file-name)))))))
 
     (defun my/open-in-browser (buffer)
       (interactive "b")
       (with-current-buffer buffer
         (let* ((file-name (if (org-src-edit-buffer-p)
-                              (my/org-src-get-tangle-path)
+                              (my/org-src-path)
                             (buffer-file-name (current-buffer))))
                (base-cmd  "open -a /Applications/Firefox\\ Developer\\ Edition.app")
                (cmd (s-join " " (list base-cmd file-name))))
