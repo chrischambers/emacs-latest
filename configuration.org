@@ -133,3 +133,37 @@
    #+begin_src elisp
      (use-package ement)
    #+end_src
+
+* Function for Opening in Browser
+  #+begin_src elisp
+    (defun my/org-src-get-tangle-path ()
+      "Get the :tangle property of the source block being edited in `org-edit-special` mode."
+      (if (not (org-src-edit-buffer-p))
+          (message "Not in an Org src edit buffer")
+        (let* ((src-buffer (org-src-source-buffer)) ;; Get main Org buffer
+               (pos (with-current-buffer src-buffer
+                      (org-babel-where-is-src-block-head)))) ;; Get block start position
+          (if (not pos)
+              (message "Could not locate source block")
+            (with-current-buffer src-buffer
+              (goto-char pos) ;; Move to source block
+              (let* ((element (org-element-at-point))
+                     (file-name (buffer-file-name (current-buffer)))
+                     (dir (f-parent file-name))
+                     (params (org-element-property :parameters element))
+                     (tangle (alist-get :tangle (org-babel-parse-header-arguments params))))
+                (when tangle
+                  (f-join dir tangle))))))))
+
+    (defun my/open-in-browser (buffer)
+      (interactive "b")
+      (with-current-buffer buffer
+        (let* ((file-name (if (org-src-edit-buffer-p)
+                              (my/org-src-get-tangle-path)
+                            (buffer-file-name (current-buffer))))
+               (base-cmd  "open -a /Applications/Firefox\\ Developer\\ Edition.app")
+               (cmd (s-join " " (list base-cmd file-name))))
+          (when file-name
+            (message cmd)
+            (shell-command cmd)))))
+  #+end_src
