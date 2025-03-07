@@ -930,7 +930,7 @@
     #+end_src
 
 *** Bindings
-**** Format buffer via ormolu
+**** COMMENT Format buffer via ormolu
     #+begin_src elisp
       (use-package ormolu
         :hook (haskell-mode . ormolu-format-on-save-mode)
