@@ -404,23 +404,22 @@
         :config
         (dolist (mode lisp-repl-modes)
           (add-hook (my/mode->hook-symbol mode) 'evil-cleverparens-mode))
-        :general
+        (let ((lispy-maps (append lisp-mode-maps lisp-repl-mode-maps)))
+          (general-define-key
+           :states '(normal motion)
+           :keymaps lispy-maps
+           "M-x" 'sp-split-sexp)
 
-        (general-define-key
-         :states '(normal)
-         :keymaps lisp-mode-maps
-         "M-x" 'sp-split-sexp)
+          (general-define-key
+           :states '(normal)
+           :keymaps lispy-maps
+           "M-u" 'sp-join-sexp)
 
-        (general-define-key
-         :states '(normal)
-         :keymaps lisp-mode-maps
-         "M-u" 'sp-join-sexp)
-
-        (general-define-key
-         :states '(normal)
-         :keymaps lisp-mode-maps
-         "gh" '(sp-splice-sexp-killing-backward
-                :which-key "splice (killing backwards)")))
+          (general-define-key
+           :states '(normal)
+           :keymaps lispy-maps
+           "gh" '(sp-splice-sexp-killing-backward
+                  :which-key "splice (killing backwards)"))))
     #+end_src
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
    #+begin_src elisp
