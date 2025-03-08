@@ -153,15 +153,29 @@
                      (tangle (alist-get :tangle (org-babel-parse-header-arguments params))))
                 (if tangle (f-join dir tangle) file-name)))))))
 
+    (defun my/open-path-in-browser (path)
+      (let* ((base-cmd  "open -a /Applications/Firefox\\ Developer\\ Edition.app")
+             (cmd (s-join " " (list base-cmd path))))
+        (message cmd)
+        (shell-command cmd)))
+
     (defun my/open-in-browser (buffer)
       (interactive "b")
       (with-current-buffer buffer
-        (let* ((file-name (if (org-src-edit-buffer-p)
-                              (my/org-src-path)
-                            (buffer-file-name (current-buffer))))
-               (base-cmd  "open -a /Applications/Firefox\\ Developer\\ Edition.app")
-               (cmd (s-join " " (list base-cmd file-name))))
-          (when file-name
-            (message cmd)
-            (shell-command cmd)))))
+        (let ((path (if (org-src-edit-buffer-p)
+                        (my/org-src-path)
+                      (buffer-file-name (current-buffer)))))
+          (when path
+            (my/open-path-in-browser path)))))
+
+    (defun my/tangle-then-browse ()
+      (interactive)
+      (when-let ((file-name
+                  (cdr (assq :tangle (org-babel-parse-header-arguments
+                                      (org-element-property :parameters
+                                                            (org-element-at-point))))))
+             (path (f-parent (buffer-file-name (current-buffer)))))
+        (when file-name
+          (org-babel-tangle)
+          (my/open-path-in-browser (f-join path file-name)))))
   #+end_src
