@@ -122,13 +122,6 @@
        (hyperbole-mode 1))
    #+end_src
 
-** COMMENT dirvish ([[https://github.com/alexluigit/dirvish][github]])
-   #+begin_src elisp
-     (use-package dirvish
-       :config
-       (dirvish-override-dired-mode))
-   #+end_src
-
 ** COMMENT Ement.el
    #+begin_src elisp
      (use-package ement)
@@ -186,3 +179,11 @@
         (org-babel-tangle)
         (my/open-path-in-browser (f-join path file-name))))
   #+end_src
+
+* TODO Play with this and dired and make a choice
+** COMMENT dirvish ([[https://github.com/alexluigit/dirvish][github]])
+   #+begin_src elisp
+     (use-package dirvish
+       :config
+       (dirvish-override-dired-mode))
+   #+end_src
