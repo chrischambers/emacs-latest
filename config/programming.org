@@ -288,7 +288,7 @@
         (eldoc-box-hover-mode 1))
 
       (defvar eglot-disabled-major-modes
-        '(emacs-lisp-mode lisp-mode web-mode))
+        '(emacs-lisp-mode lisp-mode))
 
       (defun my/eglot-ensure ()
         "Activates eglot... unless the major mode is blacklisted."
@@ -1193,6 +1193,22 @@
 ** Web Mode ([[https://github.com/fxbois/web-mode][github]]/[[https://web-mode.org/][docs]])
    #+begin_src elisp
      (use-package web-mode
+       :preface
+       (defun my/org-html-src-eglot-setup ()
+         "Enable eglot when editing Org source blocks in web-mode."
+         (when (and (derived-mode-p 'web-mode)
+                    (not buffer-file-name))
+           (setq-local buffer-file-name
+                       (concat (make-temp-file "org-src-" nil ".html")))
+           (eglot-ensure)))
+
+       :config
+       (with-eval-after-load 'eglot
+         (add-to-list 'eglot-server-programs
+                      `(web-mode . ,(eglot-alternatives
+                                     '(("vscode-html-language-server" "--stdio")
+                                       ("html-languageserver" "--stdio"))))))
+
        :mode
        (("\\.phtml\\'" . web-mode)
         ("\\.php\\'" . web-mode)
@@ -1202,11 +1218,14 @@
         ("\\.erb\\'" . web-mode)
         ("\\.mustache\\'" . web-mode)
         ("\\.djhtml\\'" . web-mode)
-        ("\\.html?\\'" . web-mode))
-       ;; :config
-       ;; (add-to-list 'eglot-server-programs '(html-mode . ("nil")))
-       )
+        ("\\.html?\\'" . web-mode)))
    #+end_src
+*** Additional web-mode/org-mode integration
+    #+begin_src elisp
+      (require 'web-mode)
+      (add-to-list 'org-src-lang-modes '("html" . web))
+      (add-hook 'org-src-mode-hook 'my/org-html-src-eglot-setup)
+    #+end_src
 *** Web Snippet Extras
    #+begin_src elisp
      (setq html-input-values
