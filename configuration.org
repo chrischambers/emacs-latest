@@ -134,6 +134,12 @@
      (use-package ement)
    #+end_src
 
+** restclient.el ([[https://github.com/pashky/restclient.el][github]]
+   #+begin_src elisp
+     (use-package restclient
+       :config
+       (require 'restclient))
+   #+end_src
 * Function for Opening in Browser
   #+begin_src elisp
     (defun my/org-src-path ()
