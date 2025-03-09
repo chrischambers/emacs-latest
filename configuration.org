@@ -168,14 +168,15 @@
           (when path
             (my/open-path-in-browser path)))))
 
+    (defun my/get-tangle-property ()
+      (cdr (assq :tangle (org-babel-parse-header-arguments
+                          (org-element-property :parameters
+                                                (org-element-at-point))))))
+
     (defun my/tangle-then-browse ()
       (interactive)
-      (when-let ((file-name
-                  (cdr (assq :tangle (org-babel-parse-header-arguments
-                                      (org-element-property :parameters
-                                                            (org-element-at-point))))))
-             (path (f-parent (buffer-file-name (current-buffer)))))
-        (when file-name
-          (org-babel-tangle)
-          (my/open-path-in-browser (f-join path file-name)))))
+      (when-let ((file-name (my/get-tangle-property))
+                 (path (f-parent (buffer-file-name (current-buffer)))))
+        (org-babel-tangle)
+        (my/open-path-in-browser (f-join path file-name))))
   #+end_src
