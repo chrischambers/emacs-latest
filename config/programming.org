@@ -463,48 +463,63 @@
     #+end_src
 
 **** Edebug
-    #+begin_src elisp
-      (use-package edebug
-        :no-require t
-        :straight nil
-        :preface
-        (require 'which-func)
-        (require 'edebug)
+     #+begin_src elisp
+       (use-package edebug-x
+         :general
+         (local-leader emacs-lisp-mode-map
+           "bs" '(edebug-x-show-breakpoints :which-key "show")))
+     #+end_src
 
-        (defvar my/edebugged-functions nil)
+     #+begin_src elisp
+       (use-package edebug
+         :no-require t
+         :straight nil
+         :preface
+         (require 'which-func)
+         (require 'edebug)
 
-        (defun my/edebug-instrument (symbol)
-          (eval-defun t)
-          (push symbol my/edebugged-functions)
-          (message "Added edebug instrumentation to %s" symbol))
+         (defvar my/edebugged-functions nil)
 
-        (defun my/edebug-uninstrument (symbol)
-          "Implementation from `edebug-remove-instrumentation`"
-          (when-let ((unwrapped
-                      (edebug--unwrap*-symbol-function symbol)))
-            (edebug--strip-plist symbol)
-            (defalias symbol unwrapped)
-            (setq my/edebugged-functions (delete symbol my/edebugged-functions))
-            (message "Removed edebug instrumentation from %s" symbol)))
+         (defun my/edebug-instrument (symbol)
+           (eval-defun t)
+           (push symbol my/edebugged-functions)
+           (message "Added edebug instrumentation to %s" symbol))
 
-        (defun my/toggle-edebug ()
-          (interactive)
-          (when-let* ((function-name (which-function))
-                      (function-symbol (intern function-name)))
-            (if (member function-symbol my/edebugged-functions)
-                (my/edebug-uninstrument function-symbol)
-              (my/edebug-instrument function-symbol))))
+         (defun my/edebug-uninstrument (symbol)
+           "Implementation from `edebug-remove-instrumentation`"
+           (when-let ((unwrapped
+                       (edebug--unwrap*-symbol-function symbol)))
+             (edebug--strip-plist symbol)
+             (defalias symbol unwrapped)
+             (setq my/edebugged-functions (delete symbol my/edebugged-functions))
+             (message "Removed edebug instrumentation from %s" symbol)))
 
-        :general
-        (local-leader emacs-lisp-mode-map
-          "b"  '(:ignore t :major-modes emacs-lisp-mode :which-key "breakpoint")
-          "ba" '(edebug-set-breakpoint :which-key "add")
-          "bd" '(edebug-unset-breakpoint :which-key "delete")
-          "bD" '(edebug-unset-breakpoints :which-key "delete all in form")
-          "d"  '(:ignore t :major-modes emacs-lisp-mode :which-key "debug")
-          "dd" '(my/toggle-edebug :which-key "debug")
-          "dt" '(toggle-debug-on-error :which-key "toggle auto-debug")))
-    #+end_src
+         (defun my/toggle-edebug ()
+           (interactive)
+           (when-let* ((function-name (which-function))
+                       (function-symbol (intern function-name)))
+             (if (member function-symbol my/edebugged-functions)
+                 (my/edebug-uninstrument function-symbol)
+               (my/edebug-instrument function-symbol))))
+
+         :config
+         (general-define-key
+          :keymaps '(edebug-mode-map)
+          "w" 'evil-forward-word-begin)
+         (general-define-key
+          :keymaps '(edebug-mode-map)
+          "gw" 'edebug-where)
+
+         :general
+         (local-leader emacs-lisp-mode-map
+           "b"  '(:ignore t :major-modes emacs-lisp-mode :which-key "breakpoint")
+           "ba" '(edebug-set-breakpoint :which-key "add")
+           "bd" '(edebug-unset-breakpoint :which-key "delete")
+           "bD" '(edebug-unset-breakpoints :which-key "delete all in form")
+           "d"  '(:ignore t :major-modes emacs-lisp-mode :which-key "debug")
+           "dd" '(my/toggle-edebug :which-key "debug")
+           "dt" '(toggle-debug-on-error :which-key "toggle auto-debug")))
+     #+end_src
 
 **** Re-bind backtrace-mode keys correctly
      #+begin_src elisp
