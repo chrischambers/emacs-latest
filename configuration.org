@@ -182,6 +182,7 @@
   #+end_src
 
 * TODO Play with this and dired and make a choice
+  [[https://github.com/alexluigit/dirvish][GitHub - alexluigit/dirvish: A polished Dired with batteries included.]]
 ** COMMENT dirvish ([[https://github.com/alexluigit/dirvish][github]])
    #+begin_src elisp
      (use-package dirvish
