@@ -175,9 +175,10 @@
     (defun my/tangle-then-browse ()
       (interactive)
       (when-let ((file-name (my/get-tangle-property))
-                 (path (f-parent (buffer-file-name (current-buffer)))))
+                 (parent-path (f-parent (buffer-file-name (current-buffer))))
+                 (path (f-join parent-path file-name)))
         (org-babel-tangle)
-        (my/open-path-in-browser (f-join path file-name))))
+        (my/open-path-in-browser path)))
   #+end_src
 
 * TODO Play with this and dired and make a choice
