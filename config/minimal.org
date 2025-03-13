@@ -118,6 +118,7 @@ you can work with.
         ;; "c"   (general-simulate-key "C-c" :which-key "C-c")
         "c"    '(org-capture :which-key "capture")
         ":"    'eval-expression
+        ";"    '(comment-line :which-key "comment")
         "SPC"  '(execute-extended-command :which-key "M-x")
         "."    '(repeat-complex-command :which-key "repeat command")
         "!"    '(with-editor-async-shell-command :which-key "async sh command")
