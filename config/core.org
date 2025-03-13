@@ -934,3 +934,12 @@ which aren't absolutely necessary, but are very important.
         "ml"  '(bookmark-jump :which-key "jump")
         "mm"  '(bookmark-set :which-key "make")))
   #+end_src
+* Enable Additional Image Formats
+  #+begin_src elisp
+    (use-package image
+      :straight nil
+      :no-require t
+      :custom
+      ;; Enable converting external formats (ie. webp) to internal ones.
+      (image-use-external-converter t))
+  #+end_src
