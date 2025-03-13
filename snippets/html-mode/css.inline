@@ -2,7 +2,7 @@
 # name: css (inline)
 # key: css
 # --
-<style type="text/css">
+<style>
         $1
 </style>
 $0
