@@ -164,7 +164,7 @@
               (buffer-substring-no-properties start end))))
 
         (defun my/ansible-doc-read-module (prompt)
-          "Read a Ansible module name from minibuffer (including
+          "Read an Ansible module name from minibuffer (including
       fully-qualified ansible modules) with PROMPT."
           (let* ((modules (ansible-doc-modules))
                  (symbol (my/python-variable-at-point))               ; modified
