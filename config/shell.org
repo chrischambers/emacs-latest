@@ -12,7 +12,9 @@
 
 * <<<vterm>>> ([[https://github.com/akermu/emacs-libvterm][github]])
   #+begin_src elisp
-    (use-package vterm)
+    (use-package vterm
+      :general
+      (leader "av" 'vterm))
   #+end_src
 
 * Keybindings
