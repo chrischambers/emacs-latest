@@ -1,0 +1,7 @@
+# key: >f
+# name: >defn (guardrails)
+# --
+(>defn ${1:fname}
+  [${2:args}]
+  [${3:arg-specs} => ${4:return-spec}]
+  ${5:body})
