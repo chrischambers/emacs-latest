@@ -757,6 +757,41 @@ which aren't absolutely necessary, but are very important.
 * <<<yasnippet>>>: Snippet expansion
   #+begin_src elisp
     (use-package yasnippet
+      :preface
+      (defun my/point-preceded-by-whitespace? (&optional offset)
+        (let* ((offset (or offset 0))
+               (pos (- (point) offset))
+               (region (buffer-substring-no-properties (1- pos) pos)))
+          (string-match "[ \t]" region)))
+
+      (defvar yas-current-trigger-text nil
+        "Holds the trigger text used to expand the current snippet.")
+
+      (defun my/yas-set-trigger-text (&rest _)
+        "Set `yas-current-trigger-text` to the trigger text before snippet expansion."
+        (when (not yas-current-trigger-text)
+          (let ((trigger-text
+                 (save-excursion
+                   (skip-chars-backward "^\n\t ")
+                   (let ((start (point)))
+                     (skip-chars-forward "^\n\t ")
+                     (buffer-substring-no-properties start (point))))))
+            (message "trigger-text set: '%s'" trigger-text)
+            (setq yas-current-trigger-text trigger-text))))
+      (advice-add 'yas--fetch :before #'my/yas-set-trigger-text)
+
+      (defun my/yas-clear-trigger-text (&rest _)
+        "Clear `yas-current-trigger-text` after snippet expansion."
+        (setq yas-current-trigger-text nil))
+      (advice-add 'yas--commit-snippet :after #'my/yas-clear-trigger-text)
+
+      (defun my/bol->point-whitespace? (&optional offset)
+        (let* ((offset (or offset (length yas-current-trigger-text)))
+               (pos (- (point) offset))
+               (line-start (line-beginning-position))
+               (region (buffer-substring-no-properties pos line-start)))
+          (string-match "^[ \t]*$" region)))
+
       :init
       (yas-global-mode 1)
       ;; :after company company-box

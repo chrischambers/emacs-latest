@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: Comment expression (for repl-based development)
 # key: c
+# condition: (my/bol->point-whitespace?)
 # --
 (comment
         $1
