@@ -51,6 +51,7 @@ which aren't absolutely necessary, but are very important.
       (when (memq window-system '(mac ns x))
         (exec-path-from-shell-initialize)))
   #+end_src
+
 * Startup message (timestamp)
   #+begin_src elisp
     (use-package startup
@@ -103,6 +104,7 @@ which aren't absolutely necessary, but are very important.
   #+begin_src elisp
     (add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
   #+end_src
+
 * Tweak window chrome
 ** Remove toolbar
    #+begin_src elisp
@@ -119,7 +121,7 @@ which aren't absolutely necessary, but are very important.
      (set-window-scroll-bars (minibuffer-window) nil nil)
    #+end_src
 
-** COMMENT Highlight the current line
+** Highlight the current line
    #+begin_src elisp
      (global-hl-line-mode 1)
    #+end_src
@@ -253,6 +255,7 @@ which aren't absolutely necessary, but are very important.
        (define-and-bind-quoted-text-object "dollar" "$" "\\$" "\\$")
        (global-evil-surround-mode 1))
    #+end_src
+
 ** Enable [[https://github.com/bling/evil-visualstar][<<<evil-visualstar>>>]]
    Provides ability to highlight a region and then hit =*= or =#= to forward/backward
    search, respectively:
@@ -305,6 +308,7 @@ which aren't absolutely necessary, but are very important.
         "g(" 'evil-lion-left
         "g)" 'evil-lion-right))
    #+end_src
+
 ** <<<evil-commentary>>>: Comment out via =gc<text-object>= or =gcc= (line) ([[https://github.com/linktohack/evil-commentary][github]])
    #+begin_src elisp
      (use-package evil-commentary
@@ -339,6 +343,7 @@ which aren't absolutely necessary, but are very important.
 	      ;; force evil keymaps to update after module loaded:
 	      (add-hook hook #'evil-normalize-keymaps)))))
    #+end_src
+
 ** Evil ex commands
    View a list of all commands by inspecting =evil-ex-commands=.
 
@@ -410,6 +415,7 @@ which aren't absolutely necessary, but are very important.
       :config
       (editorconfig-mode 1))
   #+end_src
+
 * <<<recentf>>>: Operate on recent files easily
   #+begin_src elisp
     (use-package recentf
@@ -494,6 +500,7 @@ which aren't absolutely necessary, but are very important.
      (require 'seq)
      (require 'thunk)
    #+end_src
+
 ** =inspect= function for pretty-printing and storing off a value for introspection
    #+begin_src elisp
      (defun inspect (contents &optional no-switch)
@@ -509,6 +516,7 @@ which aren't absolutely necessary, but are very important.
          (unless no-switch
            (switch-to-buffer new-buffer))))
    #+end_src
+
 ** Add utility libraries
 *** [[https://github.com/magnars/dash.el][dash]] - "a modern list library for emacs"
     #+begin_src elisp
@@ -693,7 +701,6 @@ which aren't absolutely necessary, but are very important.
   #+begin_src elisp
     (use-package emoji
       :straight nil
-      :no-require t
       :general
       (leader
         "ie"  '(:ignore t :which-key "emoji")
@@ -704,20 +711,6 @@ which aren't absolutely necessary, but are very important.
         "ier" '(emoji-recent :which-key "recent")
         "ies" '(emoji-search :which-key "search")))
   #+end_src
-
-*** COMMENT Render emojis via [[https://github.com/iqbalansari/emacs-emojify][emojify]]
-    #+begin_src elisp
-      (use-package emojify
-        :hook (after-init . global-emojify-mode)
-        :custom
-        (emojify-point-entered-behaviour 'uncover)
-        :general
-        (leader
-          "ie"  '(emojify-insert-emoji :which-key "emoji")
-          "he"  '(emojify-describe-emoji :which-key "describe emoji")
-          "hE"  '(emojify-apropos-emoji :which-key "apropos emoji")
-          "ve"  '(global-emojify-mode :which-key "emoji")))
-    #+end_src
 
 * Save view/point location of previously opened files
   #+begin_src elisp
@@ -822,6 +815,7 @@ which aren't absolutely necessary, but are very important.
   #+begin_src elisp
     (use-package ripgrep)
   #+end_src
+
 * Window management
 ** <<<switch-window>>> ([[https://github.com/dimitri/switch-window][github]])
    Improves =C-w w=:
@@ -849,6 +843,7 @@ which aren't absolutely necessary, but are very important.
   #+begin_src elisp
     (use-package hydra)
   #+end_src
+
 * Help / Info
 ** Info configuration
    #+begin_src elisp
@@ -969,6 +964,7 @@ which aren't absolutely necessary, but are very important.
         "ml"  '(bookmark-jump :which-key "jump")
         "mm"  '(bookmark-set :which-key "make")))
   #+end_src
+
 * Enable Additional Image Formats
   #+begin_src elisp
     (use-package image
