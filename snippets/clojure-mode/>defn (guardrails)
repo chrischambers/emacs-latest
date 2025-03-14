@@ -1,7 +1,10 @@
-# key: >f
+# -*- mode: snippet -*-
 # name: >defn (guardrails)
+# key: >f
+# expand-env: ((yas-indent-line 'fixed))
 # --
 (>defn ${1:fname}
-  [${2:args}]
-  [${3:arg-specs} => ${4:return-spec}]
+  ${2:"${3:Use markdown (esp. backticks around args) for docstrings.}"
+  }[${4:args}]
+  [${4:$(my/yas-clojure-create-g-spec yas-text)}]
   ${5:body})

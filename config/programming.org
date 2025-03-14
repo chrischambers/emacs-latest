@@ -846,7 +846,12 @@
         (kaocha-runner-output-win-max-height 20)
         :after (cider-mode))
     #+end_src
-
+*** Snippet Helpers
+    #+begin_src elisp
+      (defun my/yas-clojure-create-g-spec (string)
+        (let ((arg-spec (s-join " " (-repeat (length (s-split-words string)) "any?"))))
+          (s-join " " (list arg-spec "=>" "any?"))))
+    #+end_src
 * Other Languages
 ** Python
 *** Main Config
