@@ -121,7 +121,11 @@ which aren't absolutely necessary, but are very important.
      (set-window-scroll-bars (minibuffer-window) nil nil)
    #+end_src
 
-** Highlight the current line
+** COMMENT Highlight the current line
+   #+begin_note
+   This interferes with rainbow-mode.
+   #+end_note
+
    #+begin_src elisp
      (global-hl-line-mode 1)
    #+end_src
