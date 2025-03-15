@@ -181,6 +181,23 @@
         (my/open-path-in-browser path)))
   #+end_src
 
+* Colour Picker
+  #+begin_src elisp
+    (setq hex-colour-code-regex "\\b#?\\([A-Fa-f0-9]\\{3,6\\}\\)\\b")
+
+    (defun my/rgb-hex-at-point? ()
+      (when-let ((current-word (current-word))
+                 (matched (s-match hex-colour-code-regex current-word)))
+        (cadr matched)))
+
+    (defun my/colour-picker ()
+      "Use https://coolors.co"
+      (interactive)
+      (if-let ((rgb (my/rgb-hex-at-point?)))
+          (browse-url (format "https://coolors.co/%s" rgb))
+          (browse-url "https://coolors.co/color-picker")))
+  #+end_src
+
 * TODO Play with this and dired and make a choice
   [[https://github.com/alexluigit/dirvish][GitHub - alexluigit/dirvish: A polished Dired with batteries included.]]
 ** COMMENT dirvish ([[https://github.com/alexluigit/dirvish][github]])
