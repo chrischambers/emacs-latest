@@ -371,6 +371,7 @@
          (oz . t)
          (plantuml . t)
          (python . t)
+         (scala . t)
          (scheme . t)
          (shell . t)
          (sqlite . t)))
