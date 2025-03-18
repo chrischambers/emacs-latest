@@ -241,6 +241,7 @@
 
         "pP" '(my/switch-project-new-frame :which-key "switch (new frame)")))
   #+end_src
+
 ** =consult-buffer= with =beframe=
    Stolen from: [[https://protesilaos.com/emacs/beframe][Beframe (beframe.el) | Protesilaos Stavrou]]
    #+begin_src elisp
@@ -272,8 +273,10 @@
          ;; (add-to-list 'consult-buffer-sources 'beframe-consult-source)
          (defun my/consult-buffer ()
            (interactive)
-           (let* ((consult--source-buffer (plist-put consult--source-buffer :hidden t))
-                  (consult--source-buffer (plist-put consult--source-buffer :default nil))
+           (let* (;; (consult--source-buffer (plist-put consult--source-buffer :hidden t))
+                  ;; (consult--source-buffer (plist-put consult--source-buffer :default nil))
+                  (consult-buffer-sources (-remove-item 'consult--source-recent-file
+                                                        consult-buffer-sources))
                   (consult-buffer-sources (add-to-list 'consult-buffer-sources
                                                        'beframe-consult-source)))
              (consult-buffer)))))
