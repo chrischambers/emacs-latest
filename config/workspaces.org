@@ -234,7 +234,7 @@
                   "\\*info\\*")))
       :general
       (leader
-        "TAB"   '(:ignore t :which-key "workspaces")
+        "TAB"   '(:ignore t :which-key "frame")
         "TAB n" '(ns-next-frame :which-key "next")
         "TAB p" '(ns-prev-frame :which-key "prev")
         "TAB q" '(delete-frame :which-key "quit")
