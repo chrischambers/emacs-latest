@@ -229,7 +229,6 @@
       'beframe-global-buffers
        (-concat beframe-global-buffers
                 '("Async-native-compile-log"
-                  "\\*Messages\\*"
                   "\\*Warnings\\*"
                   "\\*Help\\*"
                   "\\*info\\*")))
