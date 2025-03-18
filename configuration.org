@@ -219,19 +219,19 @@
     (defun my/get-available-nix-packages ()
       "Retrieve a list of available Nix packages and cache them."
       (or my/nix-package-cache
-          (let ((prefix-length (length "nixpkgs.")))
-            (setq my/nix-package-cache
-                  (--map (s-chop-left prefix-length it)
-                        (split-string
-                         (shell-command-to-string "nix-env -qaP --json 2> /dev/null | jq -r 'keys[]'")
-                         "\n" t))))))
+          (let* ((cmd "nix search nixpkgs/nixpkgs-unstable ^ --json 2> /dev/null | jq 'keys[]'")
+                 (output (shell-command-to-string cmd))
+                 (sanitised (s-replace "\"" "" output))
+                 (sanitised (replace-regexp-in-string "^[^.]+\\.[^.]+\\." "" sanitised))
+                 (result (split-string sanitised "\n" t)))
+            (setq my/nix-package-cache result))))
 
-    (defun my/capture-original-environment ()
+    (defun my/capture-shell-environment ()
       "Capture the original environment variables before applying Nix environment."
       (when (not my/original-environment)
       (setq my/original-environment (copy-alist process-environment))))
 
-    (defun my/restore-original-environment ()
+    (defun my/restore-shell-environment ()
       "Restore the original environment variables."
       (interactive)
       (when my/original-environment
@@ -246,11 +246,12 @@
        (list (completing-read-multiple
               "Select Nix packages (comma-separated): "
               (my/get-available-nix-packages))))
-      (my/capture-original-environment)
+      (my/capture-shell-environment)
       (let* ((package-args (mapconcat 'identity packages " "))
              (cmd (format "nix-shell -p %s --run 'env'" package-args))
              (output (shell-command-to-string cmd)))
         (message cmd)
+        (message output)
         (dolist (line (split-string output "\n" t))
           (when (string-match "^\\([^=]+\\)=\\(.*\\)" line)
             (let ((var (match-string 1 line))
