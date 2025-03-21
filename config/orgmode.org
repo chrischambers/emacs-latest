@@ -365,6 +365,7 @@
          (dot . t)
          (haskell . t)
          (js . t)
+         (julia . t)
          (latex . t)
          (nix . t)
          (org . t)

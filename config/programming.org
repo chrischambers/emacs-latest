@@ -1437,3 +1437,8 @@
       (add-to-list 'org-src-lang-modes '("scala" . scala-ts))
       :mode "\\.s\\(cala\\|bt\\|c\\)$")
   #+end_src
+
+* Julia
+  #+begin_src elisp
+    (use-package julia-mode)
+  #+end_src
