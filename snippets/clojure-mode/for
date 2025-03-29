@@ -1,10 +1,10 @@
 # key: for
 # name: for
 # --
-(for [${1:${2:y} ${3:[1 2 3]}
-      ${4:x (range)
-      :let [z (* 2 x)]
+(for [${1:${2:x} ${3:[1 2 3]}
+      ${4:y (range)
+      :let [z (* 2 y)]
       :while (< z 10)
-      :when (even? x)}}]
-  ${5:[y x]})
+      :when (even? y)}}]
+  ${5:[x y]})
 $0
