@@ -7,4 +7,4 @@
   ${2:"${3:Use markdown (esp. backticks around args) for docstrings.}"
   }[${4:args}]
   [${4:$(my/yas-clojure-create-g-spec yas-text)}]
-  ${5:body})
+  $5)
