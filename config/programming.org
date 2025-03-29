@@ -763,8 +763,10 @@
         ('(insert motion) cider-repl-history-mode-map
          "q"    'cider-repl-history-quit)
 
-        ('(insert motion) cider-repl-mode-map
+        ('(insert motion normal) cider-repl-mode-map
          "C-l"  'cider-repl-clear-buffer
+         "C-p"  'cider-repl-previous-input
+         "C-n"  'cider-repl-next-input
          "C-r"  'cider-repl-previous-matching-input)
 
         ('(insert normal motion) cider-classpath-mode-map
