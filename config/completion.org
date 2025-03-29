@@ -250,7 +250,7 @@
               '("apple" "aniseed" "nan" "an" "banana" "orange" "grape" "kiwi")))
    #+end_src
 
-*** COMMENT Enable
+*** Enable
    #+begin_src elisp
      (customize-set-variable 'vertico-sort-function #'my/vertico-sort)
    #+end_src

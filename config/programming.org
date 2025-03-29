@@ -611,7 +611,7 @@
        :mode
        ("\\.edn$" . clojure-mode)
        ("\\.boot$" . clojure-mode)
-       ("\\.cljs.*$" . clojure-mode))
+       ("\\.cljs.*$" . clojurescript-mode))
    #+end_src
 
 *** Clojure Mode Extra Font Locking
