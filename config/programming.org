@@ -593,11 +593,18 @@
 *** Clojure Mode
    #+begin_src elisp
      (use-package clojure-mode
+       :preface
+       (defun my/clojure-add-guardrails-highlighting ()
+         "Highlight guardrails macros like defn in clojure-mode."
+         (font-lock-add-keywords
+          nil
+          '(("(\\(>defn\\|>def\\)\\_>" 1 'font-lock-keyword-face))))
        :custom
        ;; When evaluating a comment block, this will return the inner value instead
        ;; of nil:
        (clojure-toplevel-inside-comment-form t)
-
+       :config
+       (add-hook 'clojure-mode-hook #'my/clojure-add-guardrails-highlighting)
        :mode
        ("\\.edn$" . clojure-mode)
        ("\\.boot$" . clojure-mode)
