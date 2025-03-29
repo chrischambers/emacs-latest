@@ -265,3 +265,35 @@
     ; (my/update-emacs-env-from-nix
     ;  '("python3" "python313Packages.ipython" "python313Packages.python-lsp-server"))
   #+end_src
+* COMMENT Test clojure-ts-mode
+  #+begin_src elisp
+    (use-package clojure-ts-mode)
+  #+end_src
+
+* Playing
+  #+begin_src elisp
+    (defun my/clojure-remove-top-level-requires (&optional buffer)
+      (interactive "b")
+      (let ((buffer (or buffer (current-buffer))))
+        (with-current-buffer buffer
+          (replace-regexp "^(require [^)]*)\n*" ""))))
+
+    (defun my/clojure-replace-ns (replacement)
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward "^(ns " nil t)
+          (re-search-backward "(")
+          (let ((start (point))
+                (end (progn (forward-sexp) (point))))
+            (replace-region-contents start end (lambda () replacement))
+            (my/clojure-remove-top-level-requires)
+            (save-buffer)))))
+
+    (defun my/clojure-consolidate-ns (&rest libspecs)
+      (let* ((file-name (buffer-file-name (current-buffer)))
+             (libspecs (-map (lambda (ls) (format "'%s'" ls)) libspecs))
+             (cmd (concat "clj_consolidate_requires " file-name " " (s-join " " libspecs)))
+             (new-ns (s-trim (shell-command-to-string cmd))))
+        (when new-ns
+          (my/clojure-replace-ns new-ns))))
+  #+end_src
