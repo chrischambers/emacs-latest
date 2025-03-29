@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: >defn (guardrails)
-# key: >f
+# key: defn
+# condition: clojure-guardrails-enabled
 # expand-env: ((yas-indent-line 'fixed))
 # --
 (>defn ${1:fname}

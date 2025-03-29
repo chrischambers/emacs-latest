@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: defn
 # key: defn
+# condition: (not clojure-guardrails-enabled)
 # --
 (defn ${1:fname}
         ${2:"${3:Use markdown (esp. backticks around args) for docstrings.}"}
