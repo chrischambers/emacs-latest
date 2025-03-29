@@ -42,6 +42,7 @@
        :config
        (setf (alist-get 'clj-zprint apheleia-formatters)
              '("clj-zprint"))
+       (add-to-list 'apheleia-mode-alist '(clojure-ts-mode . clj-zprint))
        (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint)))
    #+end_src
 
@@ -188,7 +189,7 @@
           ;;(python-mode . run-python)))
           (python-mode . elpy-shell-switch-to-shell)))
        :general
-       (local-leader 'clojure-mode-map
+       (local-leader '(clojure-mode-map clojure-ts-mode-map)
          ","  '(my/clojure-repl :which-key "REPL"))
        (local-leader 'cider-repl-mode-map
          ","  '(cider-switch-to-last-clojure-buffer :which-key "REPL"))
@@ -329,6 +330,7 @@
 
      (defvar lisp-mode-config
        '((clojure-mode . clojure-mode-map)          ; clojure
+         (clojure-ts-mode . clojure-ts-mode-map)    ; clojure
          (lisp-mode . lisp-mode-map)                ; common lisp
          (scheme-mode . scheme-mode-map)            ; scheme/racket
          (emacs-lisp-mode . emacs-lisp-mode-map)    ; emacs lisp
@@ -381,6 +383,7 @@
    #+begin_src elisp
      (use-package evil-smartparens
        :hook ((clojure-mode . smartparens-mode)
+              (clojure-ts-mode . smartparens-mode)
               (cider-repl-mode . smartparens-mode)
               (smartparens-mode . evil-smartparens-mode)))
    #+end_src
@@ -671,8 +674,8 @@
         (cider-repl-wrap-history t)
 
         :general
-        (local-leader '(clojure-mode-map cider-repl-mode-map)
-          "?"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+        (local-leader '(clojure-mode-map clojure-ts-mode-map cider-repl-mode-map)
+          "?"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "docs")
           "?d"   '(cider-clojuredocs :which-key "clojuredocs")
           "?D"   '(cider-clojuredocs-web :which-key "clojuredocs (web)")
@@ -680,7 +683,7 @@
           "?C"   '(my/clojuredocs-cheatsheet :which-key "clojuredocs cheatsheet")
           "?j"   '(cider-javadoc :which-key "javadocs")
 
-          "d"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "d"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "debug")
           "dd"   '(my/debug-clojure-expression :which-key "debug expression")
           "de"   '(cider-enlighten-mode :which-key "enlighten on/off")
@@ -696,21 +699,28 @@
 
           "i"    '(cider-inspect :which-key "inspect")
 
-          "m"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "m"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "macro")
           "me"   '(cider-macroexpand-1 :which-key "expand (once)")
           "mE"   '(cider-macroexpand-all :which-key "expand (all)")
 
-          "n"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "n"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "namespace")
           "nb"   '(cider-browse-ns :which-key "browse")
           "nr"   '(cider-ns-refresh :which-key "refresh")
           "ns"   '(cider-repl-set-ns :which-key "set")
 
-          "r"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "r"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "refactor")
+          "rc"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
+                           :which-key "convert")
+          "rcl"   '(clojure-convert-collection-to-list :which-key "list")
+          "rcv"   '(clojure-convert-collection-to-vector :which-key "vector")
+          "rcm"   '(clojure-convert-collection-to-map :which-key "map")
+          "rcs"   '(clojure-convert-collection-to-set :which-key "set")
+          "rcq"   '(clojure-convert-collection-to-quoted-list :which-key "quoted list")
 
-          "t"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "t"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "test")
           "ta"   '(cider-test-run-project-tests :which-key "all")
           "tA"   '(cider-auto-test-mode :which-key "toggle auto-test")
@@ -721,7 +731,7 @@
           "tr"   '(cider-test-rerun-test :which-key "re-run last")
           "tR"   '(cider-test-rerun-failed-tests :which-key "re-run all failed")
 
-          "v"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "v"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "view")
           "vc"   '(cider-classpath :which-key "classpath")
           "vn"   '(cider-browse-ns :which-key "namespaces")
@@ -729,7 +739,7 @@
           "vs"   '(cider-browse-spec :which-key "specs")
           "vS"   '(cider-browse-spec-all :which-key "specs (all)"))
 
-        (local-leader clojure-mode-map
+        (local-leader '(clojure-mode-map clojure-ts-mode-map)
           "eb"   '(cider-load-buffer :which-key "buffer")
           "eB"   '(cider-load-buffer-and-switch-to-repl-buffer :which-key "buffer (and switch)")
           "eF"   '(cider-load-buffer :which-key "file"))
@@ -798,7 +808,8 @@
         (defun my/clojure-refactor ()
           (cljr-add-keybindings-with-prefix "C-s")
           (clj-refactor-mode))
-        :hook (clojure-mode . my/clojure-refactor)
+        :hook ((clojure-ts-mode . my/clojure-refactor)
+               (clojure-mode . my/clojure-refactor))
         :custom
         (cljr-warn-on-eval nil)
         ;; conflicts with clojure-lsp providing same facility:
@@ -820,7 +831,7 @@
           (add-to-list 'cljr-magic-require-namespaces mapping t))
         :general
         (local-leader cider-mode-map
-          "ra"    '(:ignore t :major-modes (clojure-mode cider-repl-mode)
+          "ra"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "add")
           "rap"  '(cljr-add-project-dependency :which-key "project deps")
           "rad"  '(cljr-add-declaration :which-key "declaration")
@@ -1410,6 +1421,7 @@
                (css-mode . emmet-mode)
                (web-mode . emmet-mode)
                (clojure-mode . emmet-mode)    ;; hiccup
+               (clojure-ts-mode . emmet-mode) ;; hiccup
                (cider-repl-mode . emmet-mode) ;; hiccup
                (rjsx-mode . emmet-mode))
         :config
