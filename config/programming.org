@@ -613,7 +613,7 @@
          :no-require t
          :preface
          (defun my/clojure-add-guardrails-highlighting ()
-           "Highlight guardrails macros like defn in clojure-mode."
+           "Highlight guardrails forms in clojure modes."
            (font-lock-add-keywords
             nil
             '(("(\\(>defn\\|>def\\)\\_>" 1 'font-lock-keyword-face))))
@@ -621,9 +621,24 @@
          (defvar clojure-guardrails-enabled nil
            "True for projects that have guardrails included -
        this is intended to be set via dir-locals.el")
-         :hook (clojure-mode . my/clojure-add-guardrails-highlighting))
+         :hook ((clojure-mode . my/clojure-add-guardrails-highlighting)
+                (clojure-ts-mode . my/clojure-add-guardrails-highlighting)))
      #+end_src
 
+*** Clojure Spec
+    #+begin_src elisp
+      (use-package clojure-spec
+        :straight nil
+        :no-require t
+        :preface
+        (defun my/clojure-add-spec-highlighting ()
+          "Highlight s/def in clojure modes."
+          (font-lock-add-keywords
+           nil
+           '(("(\\(s/def\\)\\_>" 1 'font-lock-keyword-face))))
+        :hook ((clojure-mode . my/clojure-add-spec-highlighting)
+               (clojure-ts-mode . my/clojure-add-spec-highlighting)))
+    #+end_src
 *** Clojure Mode Extra Font Locking
     #+begin_src elisp
       (use-package clojure-mode-extra-font-locking)
