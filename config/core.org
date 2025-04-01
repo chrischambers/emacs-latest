@@ -910,17 +910,41 @@ which aren't absolutely necessary, but are very important.
       (require 'dwim-shell-commands))
   #+end_src
 
-* Automatically use Tree-sitter where possible ([[https://github.com/renzmann/treesit-auto][github]])
-  If tree-sitter in Emacs crashes it's probably because the tree-sitter binary
-  has been updated, re-build emacs from source ([[https://www.reddit.com/r/emacs/comments/1cdq488/do_not_upgrade_treesitter_or_else_emacs_crashes/][source]]).
+* Tree-sitter
+** Main Settings
+   #+begin_src elisp
+     (use-package tree-sitter
+       :straight nil
+       :no-require t
+       :custom
+       (treesit-font-lock-level 4))
+   #+end_src
+
+** Automatically use Tree-sitter where possible ([[https://github.com/renzmann/treesit-auto][github]])
+   If tree-sitter in Emacs crashes it's probably because the tree-sitter binary
+   has been updated, re-build emacs from source ([[https://www.reddit.com/r/emacs/comments/1cdq488/do_not_upgrade_treesitter_or_else_emacs_crashes/][source]]).
+
+   #+begin_src elisp
+     (use-package treesit-auto
+       :custom
+       (treesit-auto-install 'prompt)
+       :config
+       (treesit-auto-add-to-auto-mode-alist 'all)
+       (global-treesit-auto-mode))
+   #+end_src
+
+** COMMENT Combobulate ([[https://github.com/mickeynp/combobulate][github]])
+   In particular, for its interactive query builder - it's unfortunate that it's
+   slightly different syntactically to the patterns used for
+   =treesit-query-capture=, etc.
 
   #+begin_src elisp
-    (use-package treesit-auto
-      :custom
-      (treesit-auto-install 'prompt)
-      :config
-      (treesit-auto-add-to-auto-mode-alist 'all)
-      (global-treesit-auto-mode))
+    (use-package combobulate
+      :general
+      ('(normal motion) combobulate-query-mode-map
+       "q" 'combobulate-query-builder-save-and-quit)
+      ('(insert emacs) combobulate-query-mode-map
+       "q" 'self-insert-command))
   #+end_src
 
 * <<<whitespace-cleanup-mode>>> ([[https://github.com/purcell/whitespace-cleanup-mode][github]]): Intelligently remove extra whitespace
