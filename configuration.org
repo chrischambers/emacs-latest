@@ -265,9 +265,25 @@
     ; (my/update-emacs-env-from-nix
     ;  '("python3" "python313Packages.ipython" "python313Packages.python-lsp-server"))
   #+end_src
-* COMMENT Test clojure-ts-mode
+* Test clojure-ts-mode
   #+begin_src elisp
-    (use-package clojure-ts-mode)
+    (use-package markdown-ts-mode
+      :config
+      (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
+      (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))
+  #+end_src
+
+  #+begin_src elisp
+    (use-package clojure-ts-mode
+      :config
+      ;; For reference, atm:
+      (setq clojure-ts-thing-settings-defaults
+             '((clojure
+                (sexp ,(regexp-opt clojure-ts--sexp-nodes))
+                (list ,(regexp-opt clojure-ts--list-nodes))
+                (text ,(regexp-opt '("comment"))))))
+      :custom
+      (clojure-ts-toplevel-inside-comment-form t))
   #+end_src
 
 * Playing
