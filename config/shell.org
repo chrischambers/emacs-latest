@@ -14,8 +14,8 @@
   #+begin_src elisp
     (use-package vterm
       :general
-      ('(insert motion) "M-p" 'vterm-send-up)
-      ('(insert motion) "M-n" 'vterm-send-down)
+      ('(insert motion) vterm-mode-map "M-p" 'vterm-send-up)
+      ('(insert motion) vterm-mode-map "M-n" 'vterm-send-down)
       (leader "av" 'vterm))
   #+end_src
 
