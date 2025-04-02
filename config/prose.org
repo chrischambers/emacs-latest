@@ -33,7 +33,6 @@
          "vd" '(wordnut-lookup-current-word :which-key "dictionary")))
    #+end_src
 
-
 * Spell CHecking
 ** COMMENT <<<flyspell>>>: Spell-checker
    #+begin_src elisp
@@ -54,12 +53,17 @@
 ** Jinx ([[https://github.com/minad/jinx][github]])
    #+begin_src elisp
      (use-package jinx
-       :hook (emacs-startup . global-jinx-mode)
        :straight nil
        :no-require t
        :preface
-       (add-to-list 'load-path
-                    "/nix/store/brc7l26k7vnhpypz0q3mivcrk4r1ln1z-emacs-jinx-20240515.1016/share/emacs/site-lisp/elpa/jinx-20240515.1016")
+       (add-to-list
+        'load-path
+        (s-trim
+         (shell-command-to-string
+          "dirname $(find $(nix path-info nixpkgs#emacsPackages.jinx) -type f -name 'jinx.el')")))
+       :hook (emacs-startup . global-jinx-mode)
+       :config
+       (put 'jinx-local-words 'safe-local-variable #'stringp)
        :bind (("M-$" . jinx-correct)
               ("C-M-$" . jinx-languages)))
    #+end_src

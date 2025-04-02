@@ -621,6 +621,8 @@
          (defvar clojure-guardrails-enabled nil
            "True for projects that have guardrails included -
        this is intended to be set via dir-locals.el")
+         :config
+         (put 'clojure-guardrails-enabled 'safe-local-variable #'booleanp)
          :hook ((clojure-mode . my/clojure-add-guardrails-highlighting)
                 (clojure-ts-mode . my/clojure-add-guardrails-highlighting)))
      #+end_src
