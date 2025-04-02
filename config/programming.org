@@ -15,7 +15,6 @@
     (use-package envrc
       :hook (after-init . envrc-global-mode))
   #+end_src
-* TODO Configure SQL(i) repl-toggle correctly
 * Auto-Format Code: Apheleia ([[https://github.com/radian-software/apheleia][github]])
   #+begin_src elisp
     (use-package apheleia
@@ -55,12 +54,12 @@
                  :around
                  #'my/projectile-toggle-test-advice)
    #+end_src
-* COMMENT Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
-#+begin_src elisp
-    (use-package format-all
-    :commands format-all-mode
-    :hook (prog-mode . format-all-mode))
-#+end_src
+** COMMENT Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
+   #+begin_src elisp
+     (use-package format-all
+       :commands format-all-mode
+       :hook (prog-mode . format-all-mode))
+   #+end_src
 * Flymake Configuration ([[https://www.gnu.org/software/emacs/manual/html_node/flymake/index.html#Top][docs]])
   #+begin_src elisp
     (use-package flymake
@@ -197,6 +196,7 @@
          ","  '(rtog/toggle-repl :which-key "REPL")))
    #+end_src
 
+*** TODO Configure SQL(i) repl-toggle correctly
 * Visual aids
 ** Highlight programming flags (e.g. TODO/FIXME)
    #+begin_src elisp
@@ -939,114 +939,6 @@
    #+end_src
 
 * Other Languages
-** Python
-*** Main Config
-    #+begin_src elisp
-      (use-package python
-        :mode
-        ("\\.py\\'" . python-mode)
-        ("\\.wsgi$" . python-mode)
-
-        :init
-        (setq-default indent-tabs-mode nil)
-
-        :custom
-        ;; Don't tell me you're working out the indentation:
-        ;; https://stackoverflow.com/questions/18778894/emacs-24-3-python-cant-guess-python-indent-offset-using-defaults-4
-        (python-indent-guess-indent-offset-verbose nil)
-        (python-indent-offset 4)
-        (python-shell-interpreter "ipython")
-        (python-shell-interpreter-args "--simple-prompt -i"))
-    #+end_src
-
-**** COMMENT pyls
-    #+begin_src elisp
-      (use-package pyls
-        :straight nil
-        :no-require t
-        :preface
-        (defun my/prep-python-lsp-dap ()
-          (require 'dap-python)
-          (lsp))
-        :hook (python-mode . my/prep-python-lsp-dap)
-        :custom
-        ;; (lsp-pylsp-plugins-pydocstyle-ignore ["D100" "D101" "D105" "D107"])
-        (dap-python-debugger 'debugpy))
-    #+end_src
-
-**** COMMENT lsp-python-ms
-     #+begin_src elisp
-       (use-package lsp-python-ms
-         :init (setq lsp-python-ms-auto-install-server t)
-         :hook (python-mode . (lambda ()
-                                 (require 'lsp-python-ms)
-                               (require 'dap-python)
-                                (lsp)))
-         :custom
-         (dap-python-debugger 'debugpy))
-     #+end_src
-
-**** COMMENT lsp-pyright
-     #+begin_src elisp
-      (use-package lsp-pyright
-        :commands (lsp lsp-deferred)
-        :hook (python-mode . (lambda ()
-                              (require 'lsp-pyright)
-                              (require 'dap-python)
-                               (lsp)))
-        :custom
-        (dap-python-debugger 'debugpy))
-     #+end_src
-
-**** COMMENT ein
-    #+begin_src elisp
-      (use-package ein
-        :config
-        (cond
-         ((eq system-type 'darwin) (setq ein:console-args '("--gui=osx" "--matplotlib=osx" "--colors=Linux")))
-         ((eq system-type 'gnu/linux) (setq ein:console-args '("--gui=gtk3" "--matplotlib=gtk3" "--colors=Linux"))))
-        (setq ein:query-timeout 1000))
-    #+end_src
-
-*** COMMENT virtualenvwrapper integration
-    #+begin_src elisp
-      (use-package virtualenvwrapper
-        :config
-        (venv-initialize-interactive-shells)
-        (venv-initialize-eshell))
-    #+end_src
-
-*** REPL
-    #+begin_src elisp
-    (with-eval-after-load 'evil
-      (evil-set-initial-state 'inferior-python-mode 'normal)
-      (general-def 'insert inferior-python-mode-map
-        "C-l" 'comint-clear-buffer
-        "C-p" 'comint-previous-input
-        "C-n" 'comint-next-input)
-      (general-def 'normal inferior-python-mode-map
-        "C-l" 'comint-clear-buffer))
-    #+end_src
-
-*** Testing/Debugging
-**** pytest ([[https://github.com/ionrock/pytest-el][github]])
-     #+begin_src elisp
-       (use-package pytest
-         :config
-         (setq pytest-cmd-flags "-x -s --spec")
-         :general
-         (local-leader python-mode-map
-           "t"  '(:ignore t :major-modes python-mode :which-key "test")
-           "ta" '(pytest-all :which-key "all")
-           "tA" '(pytest-pdb-all :which-key "all (pdb)")
-           "td" '(pytest-directory :which-key "directory")
-           "tD" '(pytest-pdb-directory :which-key "directory (pdb)")
-           "tm" '(pytest-module :which-key "module")
-           "tM" '(pytest-pdb-module :which-key "module (pdb)")
-           "tc" '(pytest-one :which-key "cursor")
-           "tC" '(pytest-one :which-key "cursor (pdb)")))
-     #+end_src
-
 ** Haskell
 *** Haskell Mode
     Installation: see [[https://www.haskell.org/platform/][Haskell Platform]]
@@ -1084,40 +976,6 @@
         (local-leader '(haskell-interactive-mode-map)
           "," '(haskell-interactive-switch-back :which-key "buffer <=> shell jump")))
     #+end_src
-
-** Oz
-   Minimally, we would want syntax highlighting to always be available - there
-   are many Oz blocks throughout my notes now:
-
-   #+begin_src elisp
-     (require 'oz)
-   #+end_src
-
-** Standard ML
-   #+begin_src elisp
-     (use-package sml-mode)
-   #+end_src
-
-** SQL
-   #+begin_src elisp
-     (use-package sql
-       :straight nil
-       :no-require t
-       :general
-       (local-leader sql-mode-map
-         "c"    '(sql-connect :which-key "connect")
-         "e"    '(:ignore t :major-modes sql-mode :which-key "eval")
-         "ee"   '(sql-send-line-and-next :which-key "expression")
-         "ef"   '(sql-send-paragraph :which-key "function")
-         "eF"   '(sql-send-buffer :which-key "file")
-         "er"   '(sql-send-region :which-key "region")
-         "eb"   '(sql-send-buffer :which-key "buffer")
-         "l"    '(:ignore t :major-modes sql-mode :which-key "list")
-         "la"   '(sql-list-all :which-key "all")
-         "lt"   '(sql-list-table :which-key "tables"))
-       (local-leader sqli-mode-map
-         "e"    '(:ignore t  :major-modes sqli-mode :which-key "eval")))
-   #+end_src
 
 ** Javascript
 *** COMMENT Tide ([[https://github.com/ananthakumaran/tide][github]])
@@ -1250,6 +1108,10 @@
         (add-hook 'after-save-hook 'my/import-js-fix))
     #+end_src
 
+** Julia
+   #+begin_src elisp
+     (use-package julia-mode)
+   #+end_src
 ** Nix
 *** Nix Mode ([[https://github.com/NixOS/nix-mode][github]]/[[https://github.com/NixOS/nix-mode/blob/master/nix-mode.org][docs]])
    #+begin_src elisp
@@ -1292,6 +1154,122 @@
       (use-package nix-sandbox)
     #+end_src
 
+** Oz
+   Minimally, we would want syntax highlighting to always be available - there
+   are many Oz blocks throughout my notes now:
+
+   #+begin_src elisp
+     (require 'oz)
+   #+end_src
+
+** Python
+*** Main Config
+    #+begin_src elisp
+      (use-package python
+        :mode
+        ("\\.py\\'" . python-mode)
+        ("\\.wsgi$" . python-mode)
+
+        :init
+        (setq-default indent-tabs-mode nil)
+
+        :custom
+        ;; Don't tell me you're working out the indentation:
+        ;; https://stackoverflow.com/questions/18778894/emacs-24-3-python-cant-guess-python-indent-offset-using-defaults-4
+        (python-indent-guess-indent-offset-verbose nil)
+        (python-indent-offset 4)
+        (python-shell-interpreter "ipython")
+        (python-shell-interpreter-args "--simple-prompt -i"))
+    #+end_src
+
+**** COMMENT pyls
+    #+begin_src elisp
+      (use-package pyls
+        :straight nil
+        :no-require t
+        :preface
+        (defun my/prep-python-lsp-dap ()
+          (require 'dap-python)
+          (lsp))
+        :hook (python-mode . my/prep-python-lsp-dap)
+        :custom
+        ;; (lsp-pylsp-plugins-pydocstyle-ignore ["D100" "D101" "D105" "D107"])
+        (dap-python-debugger 'debugpy))
+    #+end_src
+
+**** COMMENT lsp-python-ms
+     #+begin_src elisp
+       (use-package lsp-python-ms
+         :init (setq lsp-python-ms-auto-install-server t)
+         :hook (python-mode . (lambda ()
+                                 (require 'lsp-python-ms)
+                               (require 'dap-python)
+                                (lsp)))
+         :custom
+         (dap-python-debugger 'debugpy))
+     #+end_src
+
+**** COMMENT lsp-pyright
+     #+begin_src elisp
+      (use-package lsp-pyright
+        :commands (lsp lsp-deferred)
+        :hook (python-mode . (lambda ()
+                              (require 'lsp-pyright)
+                              (require 'dap-python)
+                               (lsp)))
+        :custom
+        (dap-python-debugger 'debugpy))
+     #+end_src
+
+**** COMMENT ein
+    #+begin_src elisp
+      (use-package ein
+        :config
+        (cond
+         ((eq system-type 'darwin) (setq ein:console-args '("--gui=osx" "--matplotlib=osx" "--colors=Linux")))
+         ((eq system-type 'gnu/linux) (setq ein:console-args '("--gui=gtk3" "--matplotlib=gtk3" "--colors=Linux"))))
+        (setq ein:query-timeout 1000))
+    #+end_src
+
+*** COMMENT virtualenvwrapper integration
+    #+begin_src elisp
+      (use-package virtualenvwrapper
+        :config
+        (venv-initialize-interactive-shells)
+        (venv-initialize-eshell))
+    #+end_src
+
+*** REPL
+    #+begin_src elisp
+    (with-eval-after-load 'evil
+      (evil-set-initial-state 'inferior-python-mode 'normal)
+      (general-def 'insert inferior-python-mode-map
+        "C-l" 'comint-clear-buffer
+        "C-p" 'comint-previous-input
+        "C-n" 'comint-next-input)
+      (general-def 'normal inferior-python-mode-map
+        "C-l" 'comint-clear-buffer))
+    #+end_src
+
+*** Testing/Debugging
+**** pytest ([[https://github.com/ionrock/pytest-el][github]])
+     #+begin_src elisp
+       (use-package pytest
+         :config
+         (setq pytest-cmd-flags "-x -s --spec")
+         :general
+         (local-leader python-mode-map
+           "t"  '(:ignore t :major-modes python-mode :which-key "test")
+           "ta" '(pytest-all :which-key "all")
+           "tA" '(pytest-pdb-all :which-key "all (pdb)")
+           "td" '(pytest-directory :which-key "directory")
+           "tD" '(pytest-pdb-directory :which-key "directory (pdb)")
+           "tm" '(pytest-module :which-key "module")
+           "tM" '(pytest-pdb-module :which-key "module (pdb)")
+           "tc" '(pytest-one :which-key "cursor")
+           "tC" '(pytest-one :which-key "cursor (pdb)")))
+     #+end_src
+
 ** Scala
    #+begin_src elisp
      (use-package scala-ts-mode
@@ -1300,10 +1278,32 @@
        :mode "\\.s\\(cala\\|bt\\|c\\)$")
    #+end_src
 
-** Julia
+** SQL
    #+begin_src elisp
-     (use-package julia-mode)
+     (use-package sql
+       :straight nil
+       :no-require t
+       :general
+       (local-leader sql-mode-map
+         "c"    '(sql-connect :which-key "connect")
+         "e"    '(:ignore t :major-modes sql-mode :which-key "eval")
+         "ee"   '(sql-send-line-and-next :which-key "expression")
+         "ef"   '(sql-send-paragraph :which-key "function")
+         "eF"   '(sql-send-buffer :which-key "file")
+         "er"   '(sql-send-region :which-key "region")
+         "eb"   '(sql-send-buffer :which-key "buffer")
+         "l"    '(:ignore t :major-modes sql-mode :which-key "list")
+         "la"   '(sql-list-all :which-key "all")
+         "lt"   '(sql-list-table :which-key "tables"))
+       (local-leader sqli-mode-map
+         "e"    '(:ignore t  :major-modes sqli-mode :which-key "eval")))
    #+end_src
+
+** Standard ML
+   #+begin_src elisp
+     (use-package sml-mode)
+   #+end_src
+
 * Web Development Related
 ** Web Mode ([[https://github.com/fxbois/web-mode][github]]/[[https://web-mode.org/][docs]])
    #+begin_src elisp
