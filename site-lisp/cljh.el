@@ -58,15 +58,17 @@
 ;; Node Operations:
 ;; --------------------------------------------------------------------------
 (defun cljh-def-node? (node)
-  (when-let ((node (treesit-node-child node 1)))
+  (when-let* ((node (treesit-node-child node 1))
+              (name (treesit-node-child-by-field-name node "name")))
     (when (cljh-symbol? node)
-      (string-match-p "^.?def$" (treesit-node-text node)))))
+      (string-match-p "^.?def$" (treesit-node-text name)))))
 
 (defun cljh-defn-node? (node)
   "Includes `defn', `>defn' `defmacro', ..."
-  (when-let ((node (treesit-node-child node 1)))
+  (when-let* ((node (treesit-node-child node 1))
+              (name (treesit-node-child-by-field-name node "name")))
     (when (cljh-symbol? node)
-      (string-match-p "^.?def.+" (treesit-node-text node)))))
+      (string-match-p "^.?def.+" (treesit-node-text name)))))
 
 (defun cljh-arity (defn-node)
   (seq-let [_ _ &rest parts] (treesit-node-children defn-node)
