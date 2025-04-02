@@ -96,3 +96,57 @@
               (matches (-filter (lambda (xs) (equal (nth 2 xs) name)) tests))
               (result (car matches)))
     result))
+
+;;; New
+(defun cljh-str-lit-display (node)
+  (->> node
+       treesit-node-text
+       substring-no-properties
+       (s-chop-left 1)
+       (s-chop-right 1)))
+
+(defun cljh--node-equal? (node type)
+  (equal (treesit-node-type node) type))
+
+(defun cljh-str? (node)
+  (cljh--node-equal? node "str_lit"))
+
+(defun cljh-vector? (node)
+  (cljh--node-equal? node "vec_lit"))
+
+(defun cljh-list? (node)
+  (cljh--node-equal? node "list_lit"))
+
+(defun cljh--display-defn-params (sym-lits)
+  (->> sym-lits
+       (-map (-compose #'cljh-node-display #'cdr))
+       (-remove (lambda (x) (equal x "&")))))
+
+(defun cljh--process-defn-params (node)
+  (cljh--display-defn-params
+   (treesit-query-capture node '((sym_lit name: (_) @name)))))
+
+(defun cljh--process-defn-parts (parts acc)
+  (if (not parts) acc
+    (seq-let [first &rest rest] parts
+      (cond
+       ((cljh-str? first)
+        (process-defn-parts
+         rest
+         (cons `(docstring ,(cljh-str-lit-display first)) acc)))
+
+       ((cljh-vector? first)
+        (cons `(params ,(cljh--process-defn-params first)) acc))
+
+       ((cljh-list? first)
+        (let ((params (treesit-query-capture
+                       (treesit-node-parent first)
+                       '((list_lit (vec_lit (_) @v :anchor))))))
+          (cons `(params ,(cljh--display-defn-params params)) acc)))
+
+       (t acc)))))
+
+(defun cljh-parse-defn (node)
+  (seq-let [_ name &rest parts] (treesit-node-children node 'named)
+    (let ((results `((name ,(cljh-node-display name)))))
+      (cljh--process-defn-parts parts results))))
