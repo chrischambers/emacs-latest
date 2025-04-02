@@ -3,14 +3,16 @@
 ;; Utility Functions:
 ;; --------------------------------------------------------------------------
 (defun cljh-node-display (node)
-  (substring-no-properties (treesit-node-text node)))
+  (when node
+    (substring-no-properties (treesit-node-text node))))
 
 (defun cljh-str-lit-display (node)
-  (->> node
-       treesit-node-text
-       substring-no-properties
-       (s-chop-left 1)
-       (s-chop-right 1)))
+  (when node
+    (->> node
+         treesit-node-text
+         substring-no-properties
+         (s-chop-left 1)
+         (s-chop-right 1))))
 
 (defun cljh-node-info (node)
   (when node
@@ -32,6 +34,9 @@
 (defun cljh-node-type-equal? (node type)
   (equal (treesit-node-type node) type))
 
+(defun cljh-symbol? (node)
+  (cljh-node-type-equal? node "sym_lit"))
+
 (defun cljh-str? (node)
   (cljh-node-type-equal? node "str_lit"))
 
@@ -44,41 +49,39 @@
 (defun cljh-direct-child? (node)
   (lambda (n) (member n (treesit-children-node node))))
 
+(defun cljh-filter-for-type (xs type)
+  (-filter (lambda (n) (cljh-node-type-equal? n type)) xs))
+
 (defun cljh-filter-children-for-type (node type)
-  (-filter (lambda (n) (cljh-node-type-equal? n type)) (treesit-node-children node)))
+  (cljh-filter-for-type (treesit-node-children node) type))
 
 ;; Node Operations:
 ;; --------------------------------------------------------------------------
 (defun cljh-def-node? (node)
-  (treesit-query-capture
-   node
-   '((list_lit
-      :anchor
-      (sym_lit name: (_) @name)
-      (:match  "^.?def" @name)))))
+  (when-let ((node (treesit-node-child node 1)))
+    (when (cljh-symbol? node)
+      (string-match-p "^.?def$" (treesit-node-text node)))))
 
 (defun cljh-defn-node? (node)
   "Includes `defn', `>defn' `defmacro', ..."
-  (treesit-query-capture
-   node
-   '((list_lit
-      :anchor
-      (sym_lit name: (_) @name)
-      (:match  "^.?def.+" @name)))))
+  (when-let ((node (treesit-node-child node 1)))
+    (when (cljh-symbol? node)
+      (string-match-p "^.?def.+" (treesit-node-text node)))))
 
 (defun cljh-arity (defn-node)
   (seq-let [_ _ &rest parts] (treesit-node-children defn-node)
     (if (equal (treesit-node-type (first parts)) "vec_lit")
         1
-      (length (--filter (equal (treesit-node-type it) "list_lit") parts)))))
+      (length (cljh-filter-for-type parts "list_lit")))))
 
 (defun cljh-defn-params (node)
-  (cljh-node-display
-   (if (= (cljh-arity node) 1)
-       (car (cljh-filter-children-for-type node "vec_lit"))
-     (when-let* ((list-nodes (cljh-filter-children-for-type node "list_lit"))
-                 (last-node (car (last list-nodes))))
-       (car (cljh-filter-children-for-type last-node "vec_lit"))))))
+  (let ((children (treesit-node-children node)))
+    (cljh-node-display
+     (if (= (cljh-arity node) 1)
+         (car (cljh-filter-for-type children "vec_lit"))
+       (when-let* ((list-nodes (cljh-filter-for-type children "list_lit"))
+                   (last-node (car (last list-nodes))))
+         (car (cljh-filter-children-for-type last-node "vec_lit")))))))
 
 (defun cljh-defn-docstring (node)
   (when-let ((results (cljh-filter-children-for-type node "str_lit")))
@@ -145,12 +148,14 @@
               (result (car matches)))
     result))
 
-;;; New
 (defun cljh-defn (node)
   (when (cljh-defn-node? node)
-    (let ((name (cljh-def-name node))
-          (docstring (cljh-defn-docstring node))
-          (params (cljh-defn-params node)))
-      `((name ,name)
-        (docstring ,docstring)
-        (params ,params)))))
+    (let* ((name (cljh-def-name node))
+           (docstring (cljh-defn-docstring node))
+           (params (cljh-defn-params node))
+           (result
+            `((name ,name)
+              (params ,params))))
+      (if docstring
+          (cons `(docstring ,docstring) result)
+        result))))
