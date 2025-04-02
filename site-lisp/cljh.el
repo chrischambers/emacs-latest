@@ -22,6 +22,9 @@
 (defun cljh-select-when-car-eql (sym xs)
   (cljh-select-when-car (lambda (x) (eql x sym)) xs))
 
+(defun cljh-filter-children-for-type (node type)
+  (--filter (equal (treesit-node-type it) type) (treesit-node-children node)))
+
 ;; Node Operations:
 ;; --------------------------------------------------------------------------
 (defun cljh-def-node? (node)
@@ -41,16 +44,23 @@
       (:match  "^.?def.+" @name)
       (_) @body))))
 
-;; Doesn't handle multiple-arity, or keyword / rest params very well yet
+(defun cljh-arity (defn-node)
+  (seq-let [_ _ &rest parts] (treesit-node-children defn-node)
+    (if (equal (treesit-node-type (first parts)) "vec_lit")
+        1
+      (length (--filter (equal (treesit-node-type it) "list_lit") parts)))))
+
+;; You'll still need to interrogate by type - position doesn't work - arbitrary
+;; docstrings
 (defun cljh-defn-params (node)
-  (when-let ((results (treesit-filter-child
-                       node
-                       (lambda (n) (equal (treesit-node-type n) "vec_lit"))))
-             (results (-> results
-                          car
-                          (treesit-query-capture '((sym_lit name: (_) @name))))))
-    (->> results
-         (-map (-compose #'cljh-node-display #'cdr)))))
+  (let ((children (treesit-node-children node)))
+    (cljh-node-display
+     (if (= (cljh-arity node) 1)
+         (car (--filter (equal (treesit-node-type it) "vec_lit") children))
+       (let* ((list-nodes (--filter (equal (treesit-node-type it) "list_lit") children))
+              (last-node (car (last list-nodes)))
+              (children (treesit-node-children last-node)))
+         (car (--filter (equal (treesit-node-type it) "vec_lit") children)))))))
 
 (defun cljh-def-name (node)
   (-> node
@@ -122,16 +132,38 @@
        (-map (-compose #'cljh-node-display #'cdr))
        (-remove (lambda (x) (equal x "&")))))
 
-(defun cljh--process-defn-params (node)
-  (cljh--display-defn-params
-   (treesit-query-capture node '((sym_lit name: (_) @name)))))
+(defun cljh-direct-child? (node)
+  (lambda (n) (member n (treesit-children-node node))))
+
+;; strategy idea: get bounds of defn /excluding final list (i.e. body)
+;; and bound the query search to that.
+;; You then check for:
+;; - the first vec_lit form, if present, and use that, parsing appropriately, or
+;; - the final list_lit's first vec_lit
+
+
+;; Another idea: create fn checking for multiple-arity? dispatch on that in all
+;; cases where it matters. By default, use the final arity params/body.
+
+;; cljh-arity: returns a number
+
+(defun cljh--process-defn-params (defn-node)
+  (when-let ((last-match
+              (last
+               (treesit-query-capture
+                defn-node
+                '((list_lit (vec_lit (_)) @v
+                            :anchor (list_lit) :anchor @l)
+                  (:pred call? (cljh-direct-child? defn-node) @l))
+                nil nil t))))
+    (cljh-node-display (car last-match))))
 
 (defun cljh--process-defn-parts (parts acc)
   (if (not parts) acc
     (seq-let [first &rest rest] parts
       (cond
        ((cljh-str? first)
-        (process-defn-parts
+        (cljh--process-defn-parts
          rest
          (cons `(docstring ,(cljh-str-lit-display first)) acc)))
 
