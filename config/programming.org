@@ -909,6 +909,29 @@
         (let ((arg-spec (s-join " " (-repeat (length (s-split-words string)) "any?"))))
           (s-join " " (list arg-spec "=>" "any?"))))
     #+end_src
+** Common Lisp
+   [[https://www.youtube.com/watch?v=VnWVu8VVDbI][Installing Common Lisp, Emacs, Slime & Quicklisp - YouTube]]
+
+   #+begin_src elisp
+     (use-package quicklisp-slime-helper
+       :no-require t
+       :straight nil
+       :preface
+       (load (expand-file-name "~/quicklisp/slime-helper.el"))
+       :custom
+       (inferior-lisp-program "sbcl")
+       :general
+       ('(insert motion) slime-repl-mode-map
+        "C-l"  'slime-repl-clear-buffer)
+       (local-leader 'lisp-mode-map
+         "ee" '(slime-eval-last-expression :which-key "expression")
+         "eb" '(slime-eval-buffer :which-key "buffer")
+         "er" '(slime-eval-region :which-key "region")
+         "c" '(:ignotre t :major-modes (lisp-mode) :which-key "compile")
+         "cc" '(slime-compile-defun :which-key "current function")
+         "cf" '(slime-compile-and-load-file :which-key "file")))
+   #+end_src
+
 * Other Languages
 ** Python
 *** Main Config
@@ -1266,6 +1289,18 @@
       (use-package nix-sandbox)
     #+end_src
 
+** Scala
+   #+begin_src elisp
+     (use-package scala-ts-mode
+       :init
+       (add-to-list 'org-src-lang-modes '("scala" . scala-ts))
+       :mode "\\.s\\(cala\\|bt\\|c\\)$")
+   #+end_src
+
+** Julia
+   #+begin_src elisp
+     (use-package julia-mode)
+   #+end_src
 * Web Development Related
 ** Web Mode ([[https://github.com/fxbois/web-mode][github]]/[[https://web-mode.org/][docs]])
    #+begin_src elisp
@@ -1464,39 +1499,3 @@
         :config
         (add-to-list 'emmet-jsx-major-modes 'rjsx-mode))
     #+end_src
-
-* Common Lisp
-  [[https://www.youtube.com/watch?v=VnWVu8VVDbI][Installing Common Lisp, Emacs, Slime & Quicklisp - YouTube]]
-
-  #+begin_src elisp
-    (use-package quicklisp-slime-helper
-      :no-require t
-      :straight nil
-      :preface
-      (load (expand-file-name "~/quicklisp/slime-helper.el"))
-      :custom
-      (inferior-lisp-program "sbcl")
-      :general
-      ('(insert motion) slime-repl-mode-map
-       "C-l"  'slime-repl-clear-buffer)
-      (local-leader 'lisp-mode-map
-        "ee" '(slime-eval-last-expression :which-key "expression")
-        "eb" '(slime-eval-buffer :which-key "buffer")
-        "er" '(slime-eval-region :which-key "region")
-        "c" '(:ignotre t :major-modes (lisp-mode) :which-key "compile")
-        "cc" '(slime-compile-defun :which-key "current function")
-        "cf" '(slime-compile-and-load-file :which-key "file")))
-  #+end_src
-
-* Scala
-  #+begin_src elisp
-    (use-package scala-ts-mode
-      :init
-      (add-to-list 'org-src-lang-modes '("scala" . scala-ts))
-      :mode "\\.s\\(cala\\|bt\\|c\\)$")
-  #+end_src
-
-* Julia
-  #+begin_src elisp
-    (use-package julia-mode)
-  #+end_src
