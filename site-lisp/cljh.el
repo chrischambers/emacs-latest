@@ -82,9 +82,55 @@ contain a vector form."
   (seq-let [_ _ &rest parts] (treesit-node-children defn-node 'named)
     (not (cljh-filter-for-type parts "vec_lit"))))
 
+(defun cljh--extract-as-impl (children previous-as?)
+  (cond
+   ((null children) nil)
+   (previous-as? (cljh-node-display (car children)))
+   ((string-equal
+     (treesit-node-text
+      (treesit-node-child-by-field-name (car children) "name")) "as")
+    (cljh--extract-as-impl (cdr children) t))
+   (t (cljh--extract-as-impl (cdr children) nil))))
+
+(defun cljh-extract-as (node)
+  (cljh--extract-as-impl (treesit-node-children node 'named) nil))
+
+(defun cljh--parse-params-impl (children vec-count map-count)
+  (if (null children)
+      nil
+    (let* ((first (car children))
+           (rest (cdr children))
+           (type (treesit-node-type first)))
+      (cond
+       ((string-equal type "sym_lit")
+        (if (string-equal
+             (treesit-node-text
+              (treesit-node-child-by-field-name first "name")) "&")
+            nil
+          (cons
+           (cljh-node-display first)
+           (cljh--parse-params-impl rest vec-count map-count))))
+
+       ((string-equal type "vec_lit")
+        (let ((as (cljh-extract-as first))
+              (name (format "v%s" vec-count)))
+          (if as
+              (cons as (cljh--parse-params-impl rest vec-count map-count))
+            (cons name (cljh--parse-params-impl rest (1+ vec-count) map-count)))))
+
+       ((string-equal type "map_lit")
+        (let ((as (cljh-extract-as first))
+              (name (format "m%s" map-count)))
+          (if as
+              (cons as (cljh--parse-params-impl rest vec-count map-count))
+            (cons name (cljh--parse-params-impl rest vec-count (1+ map-count))))))))))
+
+(defun cljh-parse-params (node)
+  (cljh--parse-params-impl (treesit-node-children node 'named) 1 1))
+
 (defun cljh-defn-params (node)
   (let ((children (treesit-node-children node)))
-    (cljh-node-display
+    (cljh-parse-params
      (if (not (cljh-arity-overloaded? node))
          (car (cljh-filter-for-type children "vec_lit"))
        (when-let* ((list-nodes (cljh-filter-for-type children "list_lit"))
@@ -150,7 +196,8 @@ contain a vector form."
 
 (defun cljh-test-name-in-buffer? (name)
   (when-let* ((tests (cljh-test-names-in-buffer))
-              (matches (-filter (lambda (xs) (equal (nth 2 xs) name)) tests))
+              (test-name (cljh-corresponding-test-name name))
+              (matches (-filter (lambda (xs) (equal (nth 2 xs) test-name)) tests))
               (result (car matches)))
     result))
 
@@ -251,5 +298,21 @@ Returns them as a list to be used in an interactive call."
     (nreverse strings)))
 
 (defun update-clojure-namespace (&rest libspecs)
+  "Consolidates top-level requires (and provided libspecs) into `ns' form."
   (interactive (cljh-read-multiple-strings "Provide libspecs (RET to finish): "))
   (apply #'cljh-consolidate-ns libspecs))
+
+(defun cljh-test-jump ()
+  (interactive)
+  (let* ((current-fn (cljh-defn-node-at (point)))
+         (name (cljh-def-name current-fn))
+         (_ (projectile-toggle-between-implementation-and-test))
+         (test-found? (cljh-test-name-in-buffer? name)))
+    (if test-found?
+        (let ((start-posn (car test-found?)))
+          (goto-char start-posn))
+      (progn
+        (cljh-consolidate-ns
+         "[clojure.test :as test :refer [are deftest is testing]]"
+         "[respecced.test :refer [check successful?]]")
+        (cljh-defn current-fn)))))
