@@ -454,18 +454,36 @@
          :straight nil
          :no-require t
          :preface
-         (defun my/clojure-add-guardrails-highlighting ()
-           "Highlight guardrails forms in clojure modes."
-           (font-lock-add-keywords
-            nil
-            '(("(\\(>defn\\|>def\\)\\_>" 1 'font-lock-keyword-face))))
-
          (defvar clojure-guardrails-enabled nil
            "True for projects that have guardrails included -
-       this is intended to be set via dir-locals.el")
+           this is intended to be set via dir-locals.el")
          (put 'clojure-guardrails-enabled 'safe-local-variable #'booleanp)
-         :hook ((clojure-mode . my/clojure-add-guardrails-highlighting)
-                (clojure-ts-mode . my/clojure-add-guardrails-highlighting)))
+
+         (defun my/clojure-guardrails-advice ()
+           (add-to-list 'clojure-ts--semantic-indent-rules-defaults '(">defn" . (:inner 0)))
+           (add-to-list 'clojure-ts-function-docstring-symbols ">defn")
+
+           ;; This is cached, so we need to trigger the changes to
+           ;; `clojure-ts-function-docstring-symbols' made above:
+           (setq clojure-ts--treesit-range-settings
+                 (treesit-range-rules
+                  :embed 'markdown_inline
+                  :host 'clojure
+                  (clojure-ts--docstring-query '@capture))))
+
+         (defun my/clojure-guardrails-extra-font-lock ()
+           (setq treesit-font-lock-settings
+                 (append
+                  (treesit-font-lock-rules
+                   :feature 'function
+                   :language 'clojure
+                   `(((list_lit meta: _ :? :anchor (sym_lit !namespace name: (sym_name) @font-lock-keyword-face))
+                      (:match ">defn" @font-lock-keyword-face))))
+                  treesit-font-lock-settings)))
+
+         :hook (clojure-ts-mode . my/clojure-guardrails-extra-font-lock)
+         :config
+         (advice-add #'clojure-ts-mode :before #'my/clojure-guardrails-advice))
      #+end_src
 
 *** COMMENT Clojure Spec
