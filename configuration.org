@@ -321,3 +321,7 @@
         (when new-ns
           (my/clojure-replace-ns new-ns))))
   #+end_src
+
+  #+begin_src elisp
+    (load "cljh.el")
+  #+end_src

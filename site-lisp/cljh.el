@@ -185,9 +185,31 @@
        (<= node-depth depth)))
    (treesit-query-capture root query)))
 
+(defun cljh-nth-level-forms (depth form-name)
+  (-map #'cljh-node-info
+        (cljh-select-when-car-eql
+         'list
+         (my/treesit-query-capture-with-depth
+          (treesit-buffer-root-node)
+          depth
+          `((list_lit :anchor (sym_lit name: _) @name
+                      (:equal @name ,form-name)) @list)))))
+
 (defun cljh-top-level-requires ()
-  (my/treesit-query-capture-with-depth
-   (treesit-buffer-root-node)
-   1
-   '((list_lit :anchor (sym_lit name: _) @name
-               (:equal @name "require")) @l)))
+  (cljh-nth-level-forms 1 "require"))
+
+(defun cljh-squeeze-blank-lines-around (&optional posn)
+  (interactive "d")
+  (let ((posn (or posn (point))))
+    (save-excursion
+      (goto-char posn)
+      (delete-blank-lines))))
+
+(defun cljh-delete-top-level-requires (&optional buffer)
+  (interactive "b")
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (dolist (parts (cljh-top-level-requires))
+        (seq-let [start end] parts
+          (delete-region start end)
+          (cljh-squeeze-blank-lines-around start))))))
