@@ -283,6 +283,17 @@
 
   #+begin_src elisp
     (use-package clojure-ts-mode
+      :preface
+      (defun my/unset-forward-sexp-function-var ()
+        "`forward-sexp' (and so everything that uses it, like `up-list')
+    behave differently when tree-sitter is active, as the variable
+    `foward-sexp-function' is set to `treesit-forward-sexp', and that is
+    deferred to instead.
+
+     For the moment, we simply unset that variable so as to make all the
+    functions behave consistently with their non-tree-sitter counterparts."
+        (setq forward-sexp-function nil))
+      :hook (clojure-ts-mode . my/unset-forward-sexp-function-var)
       :config
       ;; For reference, atm:
       (setq clojure-ts-thing-settings-defaults
