@@ -448,6 +448,44 @@
        ("\\.cljs.*$" . clojurescript-mode))
    #+end_src
 
+*** Clojure-ts-mode
+    #+begin_src elisp
+      (use-package markdown-ts-mode
+        :config
+        (add-to-list 'treesit-language-source-alist
+                     '(markdown
+                       "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+                       "split_parser"
+                       "tree-sitter-markdown/src"))
+        (add-to-list 'treesit-language-source-alist
+                     '(markdown-inline
+                       "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+                       "split_parser"
+                       "tree-sitter-markdown-inline/src")))
+    #+end_src
+
+    #+begin_src elisp
+      (use-package clojure-ts-mode
+        :preface
+        (defun my/unset-forward-sexp-function-var ()
+          "`forward-sexp' (and so everything that uses it, like `up-list')
+      behave differently when tree-sitter is active, as the variable
+      `foward-sexp-function' is set to `treesit-forward-sexp', and that is
+      deferred to instead.
+
+       For the moment, we simply unset that variable so as to make all the
+      functions behave consistently with their non-tree-sitter counterparts."
+          (setq forward-sexp-function nil))
+        :hook (clojure-ts-mode . my/unset-forward-sexp-function-var)
+        :config
+        (load "cljh.el")
+        :custom
+        (clojure-ts-toplevel-inside-comment-form t)
+        :general
+        (local-leader clojure-ts-mode-map
+          "tj"   '(clojure-test-jump :which-key "jump")))
+    #+end_src
+
 *** Clojure Guardrails
      #+begin_src elisp
        (use-package clojure-guardrails

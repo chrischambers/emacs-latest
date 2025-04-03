@@ -358,43 +358,48 @@ Returns them as a list to be used in an interactive call."
         )))")
 
 (defun cljh--jump-to-test ()
-  (let* ((current-fn (cljh-defn-node-at (point)))
-         (ns (cljh-ns-name))
-         (name (cljh-def-name current-fn))
-         (test-name (cljh-corresponding-test-name name))
-         (params (cljh-defn-params current-fn))
-         (param-string (s-join " " params))
-         (_ (projectile-toggle-between-implementation-and-test))
-         (test-found? (cljh-test-name-in-buffer? name)))
-    (if test-found?
-        (let ((start-posn (car test-found?)))
-          (goto-char start-posn))
-      (progn
-        (cljh-consolidate-ns
-         "[clojure.test :as test :refer [are deftest is testing]]"
-         "[respeced.test :refer [check successful?]]"
-         (format "[%s :refer [%s]]" ns name))
-        (goto-char (point-max))
-        (insert
-         (format cljh-test-template
-                 test-name
-                 name
-                 param-string
-                 name
-                 param-string
-                 (s-join " " (-repeat (1+ (length params)) "1"))))
-        (call-interactively #'apheleia-format-buffer)))))
+  (let ((current-fn (cljh-defn-node-at (point))))
+    (if (not current-fn)
+        (projectile-toggle-between-implementation-and-test)
+      (let* ((ns (cljh-ns-name))
+             (name (cljh-def-name current-fn))
+             (test-name (cljh-corresponding-test-name name))
+             (params (cljh-defn-params current-fn))
+             (param-string (s-join " " params))
+             (_ (projectile-toggle-between-implementation-and-test))
+             (test-found? (cljh-test-name-in-buffer? name)))
+        (if test-found?
+            (let ((start-posn (car test-found?)))
+              (goto-char start-posn))
+          (progn
+            (save-buffer)
+            (cljh-consolidate-ns
+             "[clojure.test :as test :refer [are deftest is testing]]"
+             "[respeced.test :refer [check successful?]]"
+             (format "[%s :refer [%s]]" ns name))
+            (goto-char (point-max))
+            (insert
+             (format cljh-test-template
+                     test-name
+                     name
+                     param-string
+                     name
+                     param-string
+                     (s-join " " (-repeat (1+ (length params)) "1"))))
+            (call-interactively #'apheleia-format-buffer)))))))
 
 (defun cljh--jump-to-implementation ()
-  (let* ((current-test (cljh-defn-node-at (point)))
-         (test-name (cljh-def-name current-test))
-         (name (cljh-corresponding-implementation-name test-name))
-         (_ (projectile-toggle-between-implementation-and-test))
-         (name-found? (cljh-defn-name-in-buffer? name)))
-    (when name-found?
-      (goto-char (car name-found?)))))
+  (let ((current-test (cljh-defn-node-at (point))))
+    (if (not current-test)
+        (projectile-toggle-between-implementation-and-test)
+      (let* ((test-name (cljh-def-name current-test))
+             (name (cljh-corresponding-implementation-name test-name))
+             (_ (projectile-toggle-between-implementation-and-test))
+             (name-found? (cljh-defn-name-in-buffer? name)))
+        (when name-found?
+          (goto-char (car name-found?)))))))
 
-(defun cljh-test-jump ()
+(defun clojure-test-jump ()
   (interactive)
   (if (cljh-test-file?)
       (cljh--jump-to-implementation)
