@@ -71,15 +71,21 @@
       (string-match-p "^.?def.+" (treesit-node-text name)))))
 
 (defun cljh-arity (defn-node)
-  (seq-let [_ _ &rest parts] (treesit-node-children defn-node)
-    (if (equal (treesit-node-type (first parts)) "vec_lit")
+  (seq-let [_ _ &rest parts] (treesit-node-children defn-node 'named)
+    (if (cljh-filter-for-type parts "vec_lit")
         1
       (length (cljh-filter-for-type parts "list_lit")))))
+
+(defun cljh-arity-overloaded? (defn-node)
+  "A function has arity overloading if, at its top-level, it doesn't
+contain a vector form."
+  (seq-let [_ _ &rest parts] (treesit-node-children defn-node 'named)
+    (not (cljh-filter-for-type parts "vec_lit"))))
 
 (defun cljh-defn-params (node)
   (let ((children (treesit-node-children node)))
     (cljh-node-display
-     (if (= (cljh-arity node) 1)
+     (if (not (cljh-arity-overloaded? node))
          (car (cljh-filter-for-type children "vec_lit"))
        (when-let* ((list-nodes (cljh-filter-for-type children "list_lit"))
                    (last-node (car (last list-nodes))))
@@ -90,13 +96,11 @@
     (cljh-str-lit-display (car results))))
 
 (defun cljh-defn-body (node)
-  (when-let* ((list-nodes (cljh-filter-children-for-type node "list_lit"))
-              (last-node (car (last list-nodes))))
-    (if (= (cljh-arity node) 1)
-        (cljh-node-display last-node)
-      (when-let* ((list-nodes (cljh-filter-children-for-type last-node "list_lit"))
-                  (last-node (car (last list-nodes))))
-        (cljh-node-display last-node)))))
+  (when-let* ((list-nodes (cljh-filter-children-for-type node "list_lit")))
+    (if (not (cljh-arity-overloaded? node))
+        (-map #'cljh-node-display list-nodes)
+      (when-let* ((list-nodes (cljh-filter-children-for-type (car (last list-nodes)) "list_lit")))
+        (-map #'cljh-node-display list-nodes)))))
 
 (defun cljh-def-name (node)
   (-> node
@@ -155,9 +159,11 @@
     (let* ((name (cljh-def-name node))
            (docstring (cljh-defn-docstring node))
            (params (cljh-defn-params node))
+           (body (cljh-defn-body node))
            (result
             `((name ,name)
-              (params ,params))))
+              (params ,params)
+              (body ,body))))
       (if docstring
           (cons `(docstring ,docstring) result)
         result))))
@@ -213,3 +219,24 @@
         (seq-let [start end] parts
           (delete-region start end)
           (cljh-squeeze-blank-lines-around start))))))
+
+(defun cljh-replace-ns (replacement)
+  (when (derived-mode-p 'clojure-mode)
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^(ns " nil t)
+        (re-search-backward "(")
+        (let ((start (point))
+              (end (progn (forward-sexp) (point))))
+          (replace-region-contents start end (lambda () replacement))
+          (cljh-delete-top-level-requires)
+          (save-buffer))))))
+
+(defun cljh-consolidate-ns (&rest libspecs)
+  (when (derived-mode-p 'clojure-mode)
+    (let* ((file-name (buffer-file-name (current-buffer)))
+           (libspecs (-map (lambda (ls) (format "'%s'" ls)) libspecs))
+           (cmd (concat "clj_consolidate_requires " file-name " " (s-join " " libspecs)))
+           (new-ns (s-trim (shell-command-to-string cmd))))
+      (when new-ns
+        (cljh-replace-ns new-ns)))))
