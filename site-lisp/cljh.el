@@ -178,6 +178,18 @@ contain a vector form."
 
 ;; Buffer Operations:
 ;; --------------------------------------------------------------------------
+(defun cljh-ns-name ()
+  (let* ((node (treesit-buffer-root-node))
+         (first-child (treesit-node-child node 0 'named))
+         (children (treesit-node-children first-child 'named)))
+    (when (string-equal
+           (treesit-node-text (treesit-node-child-by-field-name
+                               (car children) "name"))
+           "ns")
+      (cljh-node-display
+       (treesit-node-child-by-field-name
+        (nth 1 children) "name")))))
+
 (defun cljh-test-names-in-buffer ()
   (let* ((node (treesit-buffer-root-node))
          (query '((list_lit :anchor (sym_lit name: (_) @form-name)
@@ -302,10 +314,24 @@ Returns them as a list to be used in an interactive call."
   (interactive (cljh-read-multiple-strings "Provide libspecs (RET to finish): "))
   (apply #'cljh-consolidate-ns libspecs))
 
+(setq cljh-test-template
+      "
+(deftest %s
+    (testing \"it satisfies its spec\"
+      (is (successful? (check `%s))))
+    (testing \"it returns correct values for known inputs\"
+      (are [%s expected] (= expected (%s %s))
+        %s
+        )))")
+
 (defun cljh-test-jump ()
   (interactive)
   (let* ((current-fn (cljh-defn-node-at (point)))
+         (ns (cljh-ns-name))
          (name (cljh-def-name current-fn))
+         (test-name (cljh-corresponding-test-name name))
+         (params (cljh-defn-params current-fn))
+         (param-string (s-join " " params))
          (_ (projectile-toggle-between-implementation-and-test))
          (test-found? (cljh-test-name-in-buffer? name)))
     (if test-found?
@@ -314,5 +340,15 @@ Returns them as a list to be used in an interactive call."
       (progn
         (cljh-consolidate-ns
          "[clojure.test :as test :refer [are deftest is testing]]"
-         "[respecced.test :refer [check successful?]]")
-        (cljh-defn current-fn)))))
+         "[respeced.test :refer [check successful?]]"
+         (format "[%s :refer [%s]]" ns name))
+        (goto-char (point-max))
+        (insert
+         (format cljh-test-template
+                 test-name
+                 name
+                 param-string
+                 name
+                 param-string
+                 (s-join " " (-repeat (1+ (length params)) "1"))))
+        (call-interactively #'apheleia-format-buffer)))))
