@@ -240,3 +240,16 @@ contain a vector form."
            (new-ns (s-trim (shell-command-to-string cmd))))
       (when new-ns
         (cljh-replace-ns new-ns)))))
+
+(defun cljh-read-multiple-strings (prompt)
+  "Read multiple strings from the minibuffer until an empty string is entered.
+Returns them as a list to be used in an interactive call."
+  (let ((strings '())
+        (input nil))
+    (while (not (string-empty-p (setq input (read-string prompt))))
+      (push input strings))
+    (nreverse strings)))
+
+(defun update-clojure-namespace (&rest libspecs)
+  (interactive (cljh-read-multiple-strings "Provide libspecs (RET to finish): "))
+  (apply #'cljh-consolidate-ns libspecs))
