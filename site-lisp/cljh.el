@@ -161,3 +161,33 @@
       (if docstring
           (cons `(docstring ,docstring) result)
         result))))
+
+;; New
+(defun cljh--node-depth-from-impl (buffer-root root node depth)
+  (cond
+   ((equal node root) depth)
+   ((equal node buffer-root) nil)
+   (t (cljh--node-depth-from-impl
+       buffer-root
+       root
+       (treesit-node-parent node)
+       (1+ depth)))))
+
+(defun cljh-node-depth-from (root node)
+  "Compute the depth of NODE from the root."
+  (cljh--node-depth-from-impl (treesit-buffer-root-node) root node 0))
+
+(defun my/treesit-query-capture-with-depth (root depth query)
+  "Run `treesit-query-capture` but only return nodes at most `DEPTH` from the root."
+  (seq-filter
+   (lambda (p)
+     (when-let ((node-depth (cljh-node-depth-from root (cdr p))))
+       (<= node-depth depth)))
+   (treesit-query-capture root query)))
+
+(defun cljh-top-level-requires ()
+  (my/treesit-query-capture-with-depth
+   (treesit-buffer-root-node)
+   1
+   '((list_lit :anchor (sym_lit name: _) @name
+               (:equal @name "require")) @l)))
