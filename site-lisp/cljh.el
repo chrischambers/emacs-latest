@@ -25,6 +25,10 @@
 (defun cljh-corresponding-test-name (name)
   (format "%s-test" name))
 
+(defun cljh-corresponding-implementation-name (name)
+  (when (s-ends-with? "-test" name)
+    (s-chop-suffix "-test" name)))
+
 (defun cljh-select-when-car (f xs)
   (-map #'cdr (-filter (lambda (p) (funcall f (car p))) xs)))
 
@@ -55,20 +59,23 @@
 (defun cljh-filter-children-for-type (node type)
   (cljh-filter-for-type (treesit-node-children node) type))
 
+(defvar cljh-def-regex "^.?def$" )
+(defvar cljh-defn-regex "^.?def.+")
+
 ;; Node Operations:
 ;; --------------------------------------------------------------------------
 (defun cljh-def-node? (node)
   (when-let* ((node (treesit-node-child node 1))
               (name (treesit-node-child-by-field-name node "name")))
     (when (cljh-symbol? node)
-      (string-match-p "^.?def$" (treesit-node-text name)))))
+      (string-match-p cljh-def-regex (treesit-node-text name)))))
 
 (defun cljh-defn-node? (node)
   "Includes `defn', `>defn' `defmacro', ..."
   (when-let* ((node (treesit-node-child node 1))
               (name (treesit-node-child-by-field-name node "name")))
     (when (cljh-symbol? node)
-      (string-match-p "^.?def.+" (treesit-node-text name)))))
+      (string-match-p cljh-defn-regex (treesit-node-text name)))))
 
 (defun cljh-arity (defn-node)
   (seq-let [_ _ &rest parts] (treesit-node-children defn-node 'named)
@@ -190,6 +197,26 @@ contain a vector form."
        (treesit-node-child-by-field-name
         (nth 1 children) "name")))))
 
+(defun cljh-test-file? ()
+  (let ((ns (cljh-ns-name)))
+    (s-ends-with? "-test" ns)))
+
+(defun cljh-defn-names-in-buffer ()
+  (let* ((node (treesit-buffer-root-node))
+         (query `((list_lit :anchor (sym_lit name: (_) @form-name)
+                            :anchor (sym_lit name: (_) @name)
+                            (:match ,cljh-defn-regex @form-name)) @entire-form))
+         (results (-partition 3 (treesit-query-capture node query)))
+         (results (-map (lambda (triple)
+                          (let ((entire-form (cdr (car triple)))
+                                (name-form (cdr (nth 2 triple))))
+                            (list
+                             (treesit-node-start entire-form)
+                             (treesit-node-end entire-form)
+                             (cljh-node-display name-form))))
+                        results)))
+    results))
+
 (defun cljh-test-names-in-buffer ()
   (let* ((node (treesit-buffer-root-node))
          (query '((list_lit :anchor (sym_lit name: (_) @form-name)
@@ -205,6 +232,12 @@ contain a vector form."
                              (cljh-node-display name-form))))
                         results)))
     results))
+
+(defun cljh-defn-name-in-buffer? (name)
+  (when-let* ((defns (cljh-defn-names-in-buffer))
+              (matches (-filter (lambda (xs) (equal (nth 2 xs) name)) defns))
+              (result (car matches)))
+    result))
 
 (defun cljh-test-name-in-buffer? (name)
   (when-let* ((tests (cljh-test-names-in-buffer))
@@ -324,8 +357,7 @@ Returns them as a list to be used in an interactive call."
         %s
         )))")
 
-(defun cljh-test-jump ()
-  (interactive)
+(defun cljh--jump-to-test ()
   (let* ((current-fn (cljh-defn-node-at (point)))
          (ns (cljh-ns-name))
          (name (cljh-def-name current-fn))
@@ -352,3 +384,18 @@ Returns them as a list to be used in an interactive call."
                  param-string
                  (s-join " " (-repeat (1+ (length params)) "1"))))
         (call-interactively #'apheleia-format-buffer)))))
+
+(defun cljh--jump-to-implementation ()
+  (let* ((current-test (cljh-defn-node-at (point)))
+         (test-name (cljh-def-name current-test))
+         (name (cljh-corresponding-implementation-name test-name))
+         (_ (projectile-toggle-between-implementation-and-test))
+         (name-found? (cljh-defn-name-in-buffer? name)))
+    (when name-found?
+      (goto-char (car name-found?)))))
+
+(defun cljh-test-jump ()
+  (interactive)
+  (if (cljh-test-file?)
+      (cljh--jump-to-implementation)
+    (cljh--jump-to-test)))
