@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: gen-let
+# key: gen-let
+# --
+(require '[clojure.test.check.generators :refer [let] :rename {let gen-let}])
+(gen-let [${1:value-var} ${2:generator}]
+        ${3:body})

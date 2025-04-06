@@ -530,19 +530,17 @@
          :hook (clojure-ts-mode . my/clojure-guardrails-extra-font-lock))
      #+end_src
 
-*** COMMENT Clojure Spec
+*** Clojure Test.Check
     #+begin_src elisp
-      (use-package clojure-spec
+      (use-package clojure-test-check
         :straight nil
         :no-require t
         :preface
-        (defun my/clojure-add-spec-highlighting ()
-          "Highlight s/def in clojure modes."
-          (font-lock-add-keywords
-           nil
-           '(("(\\(s/def\\)\\_>" 1 'font-lock-keyword-face))))
-        :hook ((clojure-mode . my/clojure-add-spec-highlighting)
-               (clojure-ts-mode . my/clojure-add-spec-highlighting)))
+        (defun my/clojure-test-gen-let-indentation ()
+          (add-to-list
+           'clojure-ts--semantic-indent-rules-defaults
+           '("gen-let" . (:block 1))))
+        :hook (clojure-ts-mode . my/clojure-test-gen-let-indentation))
     #+end_src
 
 *** COMMENT Clojure Mode Extra Font Locking
