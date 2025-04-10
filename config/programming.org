@@ -46,6 +46,18 @@
    #+end_src
 
    #+begin_src elisp
+     (use-package apheleia-sql
+       :straight nil
+       :no-require t
+       :after apheleia
+       :config
+       (setf (alist-get 'pg-format apheleia-formatters)
+             '("pg_format" "-"))
+       (add-to-list 'apheleia-mode-alist '(sql-mode . pg-format))
+       (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . pg-format)))
+   #+end_src
+
+   #+begin_src elisp
      (defun my/projectile-toggle-test-advice (f &rest args)
        (cider-load-buffer)
        (apply f args))
@@ -196,7 +208,6 @@
          ","  '(rtog/toggle-repl :which-key "REPL")))
    #+end_src
 
-*** TODO Configure SQL(i) repl-toggle correctly
 * Visual aids
 ** Highlight programming flags (e.g. TODO/FIXME)
    #+begin_src elisp
@@ -1346,19 +1357,18 @@
        :straight nil
        :no-require t
        :general
-       (local-leader sql-mode-map
+       (local-leader '(sql-mode-map sql-interactive-mode-map)
          "c"    '(sql-connect :which-key "connect")
+         "l"    '(:ignore t :major-modes (sql-mode sql-interactive-mode) :which-key "list")
+         "la"   '(sql-list-all :which-key "all")
+         "lt"   '(sql-list-table :which-key "tables"))
+       (local-leader sql-mode-map
          "e"    '(:ignore t :major-modes sql-mode :which-key "eval")
          "ee"   '(sql-send-line-and-next :which-key "expression")
          "ef"   '(sql-send-paragraph :which-key "function")
          "eF"   '(sql-send-buffer :which-key "file")
          "er"   '(sql-send-region :which-key "region")
-         "eb"   '(sql-send-buffer :which-key "buffer")
-         "l"    '(:ignore t :major-modes sql-mode :which-key "list")
-         "la"   '(sql-list-all :which-key "all")
-         "lt"   '(sql-list-table :which-key "tables"))
-       (local-leader sqli-mode-map
-         "e"    '(:ignore t  :major-modes sqli-mode :which-key "eval")))
+         "eb"   '(sql-send-buffer :which-key "buffer")))
    #+end_src
 
 ** Standard ML
@@ -1568,3 +1578,5 @@
    #+begin_src elisp
      (use-package svelte-mode)
    #+end_src
+
+* TODO Configure SQL(i) repl-toggle correctly
