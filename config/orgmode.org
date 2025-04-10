@@ -1217,3 +1217,8 @@
            (let ((path (completing-read "Select project file: " (my/list-project-files))))
              (my/--archive-completed-project path)))))
    #+end_src
+* Setup vlc links to open appropriately
+  #+begin_src elisp
+    (load "org-vlc.el")
+    (org-add-link-type "vlc" #'org-vlc-open)
+  #+end_src
