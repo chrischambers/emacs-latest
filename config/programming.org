@@ -479,6 +479,7 @@
         :hook (clojure-ts-mode . my/unset-forward-sexp-function-var)
         :config
         (load "cljh.el")
+        (add-to-list 'org-src-lang-modes '("clojure" . clojure-ts))
         :custom
         (clojure-ts-toplevel-inside-comment-form t)
         :general
