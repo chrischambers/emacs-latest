@@ -54,6 +54,11 @@
      (org-babel-load-file (expand-file-name name user-emacs-directory)))
  #+end_src
 
+* Variables to make =safe-local-variable=
+  #+begin_src elisp
+    (put 'jinx-local-words 'safe-local-variable #'stringp) ;; jinx
+  #+end_src
+
 * [[./config/minimal.org][Minimal configuration]]
     #+begin_src elisp
     (my/config-load "config/minimal.org")

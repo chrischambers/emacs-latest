@@ -62,8 +62,6 @@
          (shell-command-to-string
           "dirname $(find $(nix path-info nixpkgs#emacsPackages.jinx) -type f -name 'jinx.el')")))
        :hook (emacs-startup . global-jinx-mode)
-       :config
-       (put 'jinx-local-words 'safe-local-variable #'stringp)
        :bind (("M-$" . jinx-correct)
               ("C-M-$" . jinx-languages)))
    #+end_src
