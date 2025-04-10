@@ -177,16 +177,16 @@
        ;; (rtog/fullscreen t) ; not sure about this
        (rtog/mode-repl-alist
         '((emacs-lisp-mode . ielm)
-          (ruby-mode . inf-ruby)
-          (js2-mode . skewer-repl)
-          (rjsx-mode . skewer-repl)
           (haskell-mode . haskell-interactive-switch)
+          (js2-mode . skewer-repl)
+          (lisp-mode . slime-repl)     ; requires that slime-auto-start is not 'never
+          (rjsx-mode . skewer-repl)
+          (ruby-mode . inf-ruby)
+          (nix-mode . nix-repl)
           (prolog-mode . run-prolog)
+          (python-mode . elpy-shell-switch-to-shell)
           (scheme-mode . scheme-repl)
-          (sml-mode . sml-prog-proc-switch-to)
-          (lisp-mode . slime-repl) ; requires that slime-auto-start is not 'never
-          ;;(python-mode . run-python)))
-          (python-mode . elpy-shell-switch-to-shell)))
+          (sml-mode . sml-prog-proc-switch-to)))
        :general
        (local-leader '(clojure-mode-map clojure-ts-mode-map)
          ","  '(my/clojure-repl :which-key "REPL"))
