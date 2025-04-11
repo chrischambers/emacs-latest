@@ -51,10 +51,10 @@
        :no-require t
        :after apheleia
        :config
-       (setf (alist-get 'pg-format apheleia-formatters)
-             '("pg_format" "-"))
-       (add-to-list 'apheleia-mode-alist '(sql-mode . pg-format))
-       (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . pg-format)))
+       (setf (alist-get 'sql-formatter apheleia-formatters)
+             `("sql-formatter" "-l" (symbol-name sql-dialect)))
+       (add-to-list 'apheleia-mode-alist '(sql-mode . sql-formatter))
+       (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . sql-formatter)))
    #+end_src
 
    #+begin_src elisp
