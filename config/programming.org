@@ -51,10 +51,19 @@
        :no-require t
        :after apheleia
        :config
-       (setf (alist-get 'sql-formatter apheleia-formatters)
-             `("sql-formatter" "-l" (symbol-name sql-dialect)))
-       (add-to-list 'apheleia-mode-alist '(sql-mode . sql-formatter))
-       (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . sql-formatter)))
+       (setf (alist-get 'prettier-sql apheleia-formatters)
+             `("prettier"
+               "--stdin-filepath"
+               filepath
+               "--plugin=prettier-plugin-sql-cst"
+               (s-join "" (list
+                           "--parser="
+                           (replace-regexp-in-string
+                            "^ansi$"
+                            "sqlite"
+                            (symbol-name sql-dialect))))))
+             (add-to-list 'apheleia-mode-alist '(sql-mode . pretier-sql))
+             (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . prettier-sql)))
    #+end_src
 
    #+begin_src elisp
