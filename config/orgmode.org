@@ -147,6 +147,10 @@
        (evil-org-agenda-set-keys))
    #+end_src
 
+** Set superscript (=^=) and subscript (=_=) to only work if suffix wrapped in ={}=
+   #+begin_src elisp
+     (customize-set-variable 'org-use-sub-superscripts '{})
+   #+end_src
 ** Default to showing pretty entities in all org buffers
 
    #+begin_src elisp
