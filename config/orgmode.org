@@ -10,7 +10,7 @@
   ;; -*- lexical-binding: t -*-
 #+end_src
 
-* <<<org>>> / <<<orgmode>>>
+* org / <<<orgmode>>>
   #+begin_src elisp
     (use-package org
       :preface

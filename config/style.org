@@ -210,8 +210,8 @@
        (org-mode . prettify-todo-indicators))
    #+end_src
 
-** Clojure
-   Inspiration: [[http://endlessparentheses.com/using-prettify-symbols-in-clojure-and-elisp-without-breaking-indentation.html][Using prettify-symbols in Clojure and Elisp without breaking indentation · En...]]
+** Clojure (not Tree-Sitter, but will work in REPL)
+   Inspiration: [[https://endlessparentheses.com/using-prettify-symbols-in-clojure-and-elisp-without-breaking-indentation.html][Using prettify-symbols in Clojure and Elisp without breaking indentation · En...]]
 
    #+begin_src elisp
      (defvar my/clojure-prettify-alist '())
@@ -239,152 +239,8 @@
      ;;                  lisp--prettify-symbols-alist)))
    #+end_src
 
-** COMMENT Lambdamacs Clojure Ligature Setup
-   #+begin_src elisp
-     ;; ------------------------------------------------------------
-     ;; Clojure ligatures
-     ;; ------------------------------------------------------------
-
-     ;;
-     ;; Clojure mode font-locking for partial
-     ;; To disable font locking at startup add this in your init.el
-     ;;
-     ;;    (setq lambdamacs/clojure-disable-font-locking t).
-     ;;
-     ;; NOTE: to disable font locking once is activated run this
-     ;;
-     ;;    (fset 'old-font-lock-add-keywords (symbol-function 'font-lock-add-keywords)) ;
-     ;;    (defalias 'font-lock-add-keywords 'ignore) ;
-     ;;
-     ;; And then reopen the buffer.
-     ;; To restore run:
-     ;;
-     ;;    (fset 'font-lock-add-keywords 'old-font-lock-add-keywords) ;
-     ;;
-     ;; And then reopen the buffer.
-     (unless (bound-and-true-p lambdamacs/clojure-disable-font-locking)
-
-       (defface clojure-font-locking-ligatures-face
-         '((t :inherit font-lock-keyword-face))
-         ;;(t :weight normal :foreground "#ff79c6"))
-
-         "Face for highlighting  ligatures.")
-
-       (defvar clojure-font-locking-ligatures-face 'clojure-font-locking-ligatures-face)
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(fn\\)[\[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "λ")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("\\(#\\)("
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "ƒ")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("\\(#\\){"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "∈")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(partial\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "Ƥ")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(comp\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "⨌")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(and\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "∧")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(or\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "∨")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(for\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "∀")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(reduce \\+\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "∑")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(reduce \\*\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "∏")
-                                      clojure-font-locking-ligatures-face))))))
-
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(reduce\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "ℝ")
-                                      clojure-font-locking-ligatures-face))))))
-
-       ;; -> LONG RIGHTWARDS ARROW
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(->\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "⟶")
-                                      clojure-font-locking-ligatures-face))))))
-
-       ;; ->> LONG RIGHTWARDS DOUBLE ARROW
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("(\\(->>\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "⟹")
-                                      clojure-font-locking-ligatures-face))))))
-
-       ;; => LONG RIGHTWARDS DOUBLE ARROW FROM BAR
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("[[:blank:]\n]\\(=>\\)[[:blank:]\n]"
-                            (0 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "⟾")
-                                      clojure-font-locking-ligatures-face))))))
-
-       ;; u/log, mu/log, u/log*, mu/log*
-       (eval-after-load 'clojure-mode
-         '(font-lock-add-keywords
-           'clojure-mode `(("[([:blank:]]\\(m?u\\)/\\(log\\*\\|log\\|trace\\)[[:blank:]\n]"
-                            (1 (progn (compose-region (match-beginning 1)
-                                                      (match-end 1) "μ")
-                                      clojure-font-locking-ligatures-face)))))))
-
-   #+end_src
-
 * Org styling
-** COMMENT Org-modern
+** Org-modern
    #+begin_src elisp
      (use-package org-modern
        :custom
@@ -392,6 +248,10 @@
        (org-modern-hide-stars nil)
        (org-modern-todo nil)
        ;; (org-modern-radio-target nil)
+       (org-modern-radio-target '("  " t " "))
+       :custom-face
+       (org-modern-label ((t (:height reset))))
+       (org-modern-radio-target ((t (:inherit org-link :underline nil))))
        :config
        (global-org-modern-mode))
    #+end_src
@@ -467,3 +327,34 @@
              (lambda (node) (org-roam-node-relpath node)))
        )
    #+end_src
+
+* Trial
+  #+begin_src elisp
+    (setq my/clojure-ligatures
+          '(("(\\(fn\\)[\[[:blank:]\n]"                                       "λ")
+            ("\\(#\\)("                                                       "ƒ")
+            ("\\(#\\){"                                                       "∈")
+            ("(\\(partial\\)[[:blank:]\n]"                                    "ƥ")
+            ("(\\(comp\\)[[:blank:]\n]"                                       "  ")
+            ("(\\(>=\\)[[:blank:]\n]"                                         "≥")
+            ("(\\(<=\\)[[:blank:]\n]"                                         "≤")
+            ("(\\(and\\)[[:blank:]\n]"                                        "∧")
+            ("(\\(or\\)[[:blank:]\n]"                                         "∨")
+            ("(\\(for\\)[[:blank:]\n]"                                        "∀")
+            ("(\\(reduce \\+\\)[[:blank:]\n]"                                 "∑")
+            ("(\\(reduce \\*\\)[[:blank:]\n]"                                 "∏")
+            ("(\\(reduce \\+'\\)[[:blank:]\n]"                                "∑")
+            ("(\\(reduce \\*'\\)[[:blank:]\n]"                                "∏")
+            ("(\\(reduce\\)[[:blank:]\n]"                                     "ℝ")
+            ("(\\(->\\)[[:blank:]\n]"                                         "⮕")
+            ("(\\(->>\\)[[:blank:]\n]"                                        "⮆")
+            ("[[:blank:]\n]\\(=>\\)[[:blank:]\n]"                             "󱞩")
+            ;; u/log, mu/log, u/log*, mu/log*
+            ("[([:blank:]]\\(m?u\\)/\\(log\\*\\|log\\|trace\\)[[:blank:]\n]"  "μ")))
+
+    (defun my/clojure-ligatures ()
+      (cl-loop for pair in my/clojure-ligatures
+               do (font-lock-add-keywords nil `((,(first pair) (1 (prog1 () (compose-region (match-beginning 1) (match-end 1) ,(second pair)))))))))
+
+    (add-hook 'clojure-ts-mode-hook #'my/clojure-ligatures)
+  #+end_src
