@@ -33,7 +33,7 @@
          "vd" '(wordnut-lookup-current-word :which-key "dictionary")))
    #+end_src
 
-* Spell CHecking
+* Spell Checking
 ** COMMENT <<<flyspell>>>: Spell-checker
    #+begin_src elisp
      (use-package flyspell
@@ -63,8 +63,15 @@
           "dirname $(find $(nix path-info nixpkgs#emacsPackages.jinx) -type f -name 'jinx.el')")))
        :hook (emacs-startup . global-jinx-mode)
        :bind (("M-$" . jinx-correct)
-              ("C-M-$" . jinx-languages)))
+              ("C-M-$" . jinx-languages)
+              ([remap ispell-word] . jinx-correct)
+              ([remap evil-next-flyspell-error] . jinx-next)
+              ([remap evil-prev-flyspell-error] . jinx-previous)))
    #+end_src
 
 * Sources
   - [] [[https://www.masteringemacs.org/article/wordsmithing-in-emacs][Wordsmithing in Emacs - Mastering Emacs]]
+
+# Local Variables:
+# jinx-local-words: "wordnut"
+# End:
