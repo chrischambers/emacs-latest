@@ -832,6 +832,8 @@
       (org-journal-dir (concat org-directory "/" "journals"))
       (org-journal-file-format "%Y-%m-%d.org")
       (org-journal-carryover-items "/!-DONE-CANCELLED")
+      ;; Don't hide other entries when jumping to journal:
+      (org-journal-hide-entries-p nil)
       :general
       (local-leader org-journal-mode-map
         "p" '(org-journal-previous-entry :which-key "prev")
