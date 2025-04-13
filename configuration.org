@@ -250,6 +250,7 @@
        (list (completing-read-multiple
               "Select Nix packages (comma-separated): "
               (my/get-available-nix-packages))))
+      (my/restore-shell-environment)
       (my/capture-shell-environment)
       (let* ((package-args (mapconcat 'identity packages " "))
              (cmd (format "nix-shell -p %s --run 'env'" package-args))
