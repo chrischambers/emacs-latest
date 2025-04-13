@@ -273,18 +273,41 @@
    #+end_src
 
 * Org styling
-** Org-modern
+** <<<org-modern>>>([[https://github.com/minad/org-modern][github]])
    #+begin_src elisp
      (use-package org-modern
        :custom
        ;;(org-modern-star t)
        (org-modern-hide-stars nil)
        (org-modern-todo nil)
+       ;; I can't make this look good:
+       (org-modern-table nil)
+       ;; (org-modern-table-vertical 1)
+       ;; (org-modern-table-horizontal 0.4)
        ;; (org-modern-radio-target nil)
        (org-modern-radio-target '("  " t " "))
+       (org-modern-block-fringe nil)
+       ;; (org-modern-block-name
+       ;;  '(("src" "󰘧" ))
+       ;;    ("quote" "" ))
+       (org-modern-block-name
+        '(("src" "󰘧" "")
+          ("important"
+           "❗ -------------------------------------------------------------"
+           " ----------------------------------------------------------------")
+          ("example"
+           " --------------------------------------------------------------"
+           " --------------------------------------------------------------")
+          ("quote"
+           "  -------------------------------------------------------------"
+           "  -------------------------------------------------------------")
+          ("note"
+           "📓 -------------------------------------------------------------"
+           " ---------------------------------------------------------------")))
        :custom-face
-       (org-modern-label ((t (:height reset))))
        (org-modern-radio-target ((t (:inherit org-link :underline nil))))
+       (org-modern-date-active ((t (:height 1.0))))
+       (org-modern-date-inactive ((t (:height 1.0))))
        :config
        (global-org-modern-mode))
    #+end_src
