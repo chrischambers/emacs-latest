@@ -99,6 +99,7 @@
         "id"  '(org-insert-drawer :which-key "drawer")
         "ii"  '(org-id-get-create :which-key "id")
         "in"  '(org-add-note :which-key "note")
+        "is"  '(org-insert-subheading :which-key "subheading")
 
         "k"  '(hydra-clock/body :which-key "klock")
 
