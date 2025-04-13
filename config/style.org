@@ -33,15 +33,14 @@
     (use-package doom-themes
       :demand t
       :preface
-      (defun my/theme-modify-faces (theme &rest xs)
-        (let ((custom--inhibit-theme-enable nil))
-         (apply #'custom-theme-set-faces theme
-                (cl-loop for x in xs
-                         collect `(,(car x) ((t ,@(cdr x))))))))
+      (defun my/theme-modify-faces (&rest xs)
+        (cl-loop
+         for x in xs
+         append (cl-loop for pair in (cdr x)
+                         do (apply #'set-face-attribute (first x) nil pair))))
 
       (defun my/doom-dracula-modifications ()
         (my/theme-modify-faces
-         'doom-dracula
          '(org-block (:background unspecified))
          '(org-block-begin-line (:background unspecified))
          '(org-block-end-line (:background unspecified))))
