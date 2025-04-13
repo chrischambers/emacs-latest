@@ -339,6 +339,8 @@
 ** <<<valign>>> ([[https://github.com/casouri/valign][github]]): Align tables with variable-pitch fonts/images properly
    #+begin_src elisp
      (use-package valign
+       :custom
+       (valign-fancy-bar t)
        :hook (org-mode . valign-mode))
    #+end_src
 
