@@ -11,9 +11,49 @@
 #+end_src
 
 * Theme
+** Theme Hooks
+   #+begin_src elisp
+     (defun disable-all-themes ()
+       "disable all active themes."
+       (dolist (i custom-enabled-themes) (disable-theme i)))
+
+     (defvar after-load-theme-hook nil
+       "Hook run after a color theme is loaded using `load-theme'.")
+
+     (defadvice load-theme (before disable-themes-first activate)
+       (disable-all-themes))
+
+     (defadvice load-theme (after run-after-load-theme-hook activate)
+       "Run `after-load-theme-hook'."
+       (run-hooks 'after-load-theme-hook))
+  #+end_src
+
 ** Doom Themes
   #+begin_src elisp
     (use-package doom-themes
+      :demand t
+      :preface
+      (defun my/theme-modify-faces (theme &rest xs)
+        (let ((custom--inhibit-theme-enable nil))
+         (apply #'custom-theme-set-faces theme
+                (cl-loop for x in xs
+                         collect `(,(car x) ((t ,@(cdr x))))))))
+
+      (defun my/doom-dracula-modifications ()
+        (my/theme-modify-faces
+         'doom-dracula
+         '(org-block (:background unspecified))
+         '(org-block-begin-line (:background unspecified))
+         '(org-block-end-line (:background unspecified))))
+
+      (defun my/apply-theme-modifications ()
+        (pcase custom-enabled-themes
+          ;; (`(modus-vivendi) (my/modus-theme-modifications))
+          (`(doom-dracula) (my/doom-dracula-modifications))
+          ;; Add more theme conditionals here
+          (_ nil)))
+
+      :hook (after-load-theme . my/apply-theme-modifications)
       :config
       (load-theme 'doom-dracula t)
       ;; Enable flashing mode-line on errors
@@ -62,20 +102,13 @@
      (use-package theme-cycler
        :no-require t
        :straight nil
-       :after doom-themes
-       :demand
+       :demand t
        :preface
-       (defun disable-all-themes ()
-         "disable all active themes."
-         (dolist (i custom-enabled-themes) (disable-theme i)))
        (defcustom my/themes (custom-available-themes) "The themes to cycle through")
        (defcustom my/themes-index 0 "Initial index of my/themes")
        :custom
        (my/themes '(doom-dracula modus-operandi poet nano))
        :config
-       (defadvice load-theme (before disable-themes-first activate)
-         (disable-all-themes))
-
        (defun my/select-theme (f)
          (interactive)
          (let ((themes-length (length my/themes))
