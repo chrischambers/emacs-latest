@@ -41,6 +41,7 @@
 
       (defun my/doom-dracula-modifications ()
         (my/theme-modify-faces
+         '(font-lock-comment-face (:foreground "#7D8BB5"))
          '(org-block (:background unspecified))
          '(org-block-begin-line (:background unspecified))
          '(org-block-end-line (:background unspecified))))
@@ -290,7 +291,7 @@
        ;;  '(("src" "󰘧" ))
        ;;    ("quote" "" ))
        (org-modern-block-name
-        '(("src" "󰘧" "")
+        '(("src" "󰘧" ".")
           ("important"
            "❗ -------------------------------------------------------------"
            " ----------------------------------------------------------------")
