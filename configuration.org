@@ -56,6 +56,7 @@
 
 * Variables to make =safe-local-variable=
   #+begin_src elisp
+    (put 'projectile-project-name 'safe-local-variable #'stringp) ;; projectile
     (put 'jinx-local-words 'safe-local-variable #'stringp) ;; jinx
   #+end_src
 
