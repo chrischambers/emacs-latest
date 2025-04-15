@@ -37,7 +37,7 @@
         (cl-loop
          for x in xs
          append (cl-loop for pair in (cdr x)
-                         do (apply #'set-face-attribute (first x) nil pair))))
+                         do (apply #'set-face-attribute (car x) nil pair))))
 
       (defun my/doom-dracula-modifications ()
         (my/theme-modify-faces
