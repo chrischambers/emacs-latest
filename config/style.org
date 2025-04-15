@@ -386,14 +386,14 @@
        )
    #+end_src
 
-* Trial
+* Clojure Tree-Sitter
   #+begin_src elisp
     (setq my/clojure-ligatures
           '(("(\\(fn\\)[\[[:blank:]\n]"                                       "λ")
             ("\\(#\\)("                                                       "ƒ")
             ("\\(#\\){"                                                       "∈")
             ("(\\(partial\\)[[:blank:]\n]"                                    "ƥ")
-            ("(\\(comp\\)[[:blank:]\n]"                                       "  ")
+            ("(\\(comp\\)[[:blank:]\n]"                                       "")
             ("(\\(>=\\)[[:blank:]\n]"                                         "≥")
             ("(\\(<=\\)[[:blank:]\n]"                                         "≤")
             ("(\\(and\\)[[:blank:]\n]"                                        "∧")
@@ -401,8 +401,8 @@
             ("(\\(for\\)[[:blank:]\n]"                                        "∀")
             ("(\\(reduce \\+\\)[[:blank:]\n]"                                 "∑")
             ("(\\(reduce \\*\\)[[:blank:]\n]"                                 "∏")
-            ("(\\(reduce \\+'\\)[[:blank:]\n]"                                "∑")
-            ("(\\(reduce \\*'\\)[[:blank:]\n]"                                "∏")
+            ("(\\(reduce \\+'\\)[[:blank:]\n]"                                "∑'")
+            ("(\\(reduce \\*'\\)[[:blank:]\n]"                                "∏'")
             ("(\\(reduce\\)[[:blank:]\n]"                                     "ℝ")
             ("(\\(->\\)[[:blank:]\n]"                                         "⮕")
             ("(\\(->>\\)[[:blank:]\n]"                                        "⮆")
@@ -412,7 +412,14 @@
 
     (defun my/clojure-ligatures ()
       (cl-loop for pair in my/clojure-ligatures
-               do (font-lock-add-keywords nil `((,(first pair) (1 (prog1 () (compose-region (match-beginning 1) (match-end 1) ,(second pair)))))))))
+               do
+               (font-lock-add-keywords
+                nil
+                `((,(first pair)
+                   (1 (prog1 ()
+                        (compose-region (match-beginning 1)
+                                        (match-end 1)
+                                        ,(second pair)))))))))
 
     (add-hook 'clojure-ts-mode-hook #'my/clojure-ligatures)
   #+end_src
