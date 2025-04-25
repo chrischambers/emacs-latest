@@ -53,14 +53,7 @@
 ** Jinx ([[https://github.com/minad/jinx][github]])
    #+begin_src elisp
      (use-package jinx
-       :straight nil
-       :no-require t
        :preface
-       (add-to-list
-        'load-path
-        (s-trim
-         (shell-command-to-string
-          "dirname $(find $(nix path-info nixpkgs#emacsPackages.jinx) -type f -name 'jinx.el')")))
        :hook (emacs-startup . global-jinx-mode)
        :bind (("M-$" . jinx-correct)
               ("C-M-$" . jinx-languages)
