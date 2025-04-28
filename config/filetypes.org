@@ -133,9 +133,7 @@
       (use-package ansible
         :straight (emacs-ansible
                    :host gitlab
-                   :repo "emacs-ansible/emacs-ansible"
-                   ;; The following prevents pulling in the entire ansible codebase:
-                   :nonrecursive t))
+                   :repo "emacs-ansible/emacs-ansible"))
     #+end_src
 
 *** poly-ansible ([[https://gitlab.com/mavit/poly-ansible][gitlab]])
