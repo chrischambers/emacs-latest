@@ -1,4 +1,4 @@
-#+TITLE: Miminal Configuration
+#+TITLE: Minimal Configuration
 #+AUTHOR: Chris Chambers
 #+EMAIL: magma.chambers@gmail.com
 #+LANGUAGE: en-gb
