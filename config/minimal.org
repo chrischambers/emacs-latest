@@ -26,6 +26,7 @@ you can work with.
     (use-package no-littering
       :config
       (require 'no-littering)
+      (customize-set-variable 'package-user-dir (no-littering-expand-var-file-name "elpa"))
       (setq custom-file (no-littering-expand-etc-file-name "custom.el")))
   #+end_src
 
