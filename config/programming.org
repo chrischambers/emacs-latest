@@ -506,12 +506,12 @@
         (local-leader clojure-ts-mode-map
           "tj"   '(clojure-test-jump :which-key "jump")))
     #+end_src
-
 *** Clojure Guardrails
      #+begin_src elisp
        (use-package clojure-guardrails
          :straight nil
          :no-require t
+         :after clojure-ts-mode
          :preface
          (defvar clojure-guardrails-enabled nil
            "True for projects that have guardrails included -
@@ -519,10 +519,6 @@
          (put 'clojure-guardrails-enabled 'safe-local-variable #'booleanp)
 
          (defun my/clojure-guardrails-advice ()
-           (add-to-list
-            'clojure-ts--semantic-indent-rules-defaults
-            '(">defn" . (:inner -1)))
-
            (add-to-list
             'clojure-ts-function-docstring-symbols
             ">defn")
@@ -548,7 +544,10 @@
              treesit-font-lock-settings)))
 
          (advice-add #'clojure-ts-mode :before #'my/clojure-guardrails-advice)
-         :hook (clojure-ts-mode . my/clojure-guardrails-extra-font-lock))
+         :hook (clojure-ts-mode . my/clojure-guardrails-extra-font-lock)
+         :custom
+         (clojure-ts-semantic-indent-rules
+          (add-to-list 'clojure-ts-semantic-indent-rules '(">defn" . ((:inner 0))))))
      #+end_src
 
 *** Clojure Test.Check
@@ -556,12 +555,10 @@
       (use-package clojure-test-check
         :straight nil
         :no-require t
-        :preface
-        (defun my/clojure-test-gen-let-indentation ()
-          (add-to-list
-           'clojure-ts--semantic-indent-rules-defaults
-           '("gen-let" . (:block 1))))
-        :hook (clojure-ts-mode . my/clojure-test-gen-let-indentation))
+        :after clojure-ts-mode
+        :custom
+        (clojure-ts-semantic-indent-rules
+         (add-to-list 'clojure-ts-semantic-indent-rules '("gen-let" . ((:block 1))))))
     #+end_src
 
 *** COMMENT Clojure Mode Extra Font Locking
