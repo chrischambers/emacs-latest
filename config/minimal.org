@@ -124,6 +124,13 @@ you can work with.
         "."    '(repeat-complex-command :which-key "repeat command")
         "!"    '(with-editor-async-shell-command :which-key "async sh command")
 
+        ;; Frame/workspace Operations
+        "TAB"   '(:ignore t :which-key "frame")
+        "TAB N" '(make-frame :which-key "new")
+        "TAB n" '(ns-next-frame :which-key "next")
+        "TAB p" '(ns-prev-frame :which-key "prev")
+        "TAB q" '(delete-frame :which-key "quit")
+
         ;; Application operations
         "a"    '(:ignore t :which-key "applications")
         "ad"   '(dired :which-key "dired")

@@ -185,22 +185,12 @@
       :preface
       (defun my/infer-frame-name (frame name)
         (when-let (((frame-list))
-                 (buffer (car (frame-parameter frame 'buffer-list)))
-                 (file-name (when (bufferp buffer) (buffer-file-name buffer)))
-                 (buf-name (buffer-name buffer))
-                 (dir (with-current-buffer buffer (or (vc-root-dir) default-directory))))
+                   (buffer (car (frame-parameter frame 'buffer-list)))
+                   (file-name (when (bufferp buffer) (buffer-file-name buffer)))
+                   (buf-name (buffer-name buffer))
+                   (dir (with-current-buffer buffer (or (vc-root-dir) default-directory))))
           (format "Ɛ: <%s>" (or projectile-project-name
                                 (projectile-project-name dir)))))
-
-      (defun my/switch-project-new-frame (dir)
-        "\"Switch\" to another project by running an Emacs command.
-    The available commands are presented as a dispatch menu
-    made from `project-switch-commands'.
-
-    When called in a program, it will use the project corresponding
-    to directory DIR."
-      (interactive (list (funcall project-prompter)))
-      (project-switch-project dir))
 
       (defun my/rename-frame (frame &optional name)
         (interactive
@@ -224,22 +214,13 @@
       (beframe-functions-in-frames '(my/switch-project-new-frame))
       :config
       (beframe-mode 1)
-
       (customize-set-variable
-      'beframe-global-buffers
+       'beframe-global-buffers
        (-concat beframe-global-buffers
                 '("Async-native-compile-log"
                   "\\*Warnings\\*"
                   "\\*Help\\*"
-                  "\\*info\\*")))
-      :general
-      (leader
-        "TAB"   '(:ignore t :which-key "frame")
-        "TAB n" '(ns-next-frame :which-key "next")
-        "TAB p" '(ns-prev-frame :which-key "prev")
-        "TAB q" '(delete-frame :which-key "quit")
-
-        "pP" '(my/switch-project-new-frame :which-key "switch (new frame)")))
+                  "\\*info\\*"))))
   #+end_src
 
 ** =consult-buffer= with =beframe=

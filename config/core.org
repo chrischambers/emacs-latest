@@ -459,6 +459,16 @@ which aren't absolutely necessary, but are very important.
           (when (f-exists? dir)
             (project--remember-dir dir)
             (project-switch-project dir))))
+
+      (defun my/switch-project-new-frame (dir)
+        "\"Switch\" to another project by running an Emacs command.
+    The available commands are presented as a dispatch menu
+    made from `project-switch-commands'.
+
+    When called in a program, it will use the project corresponding
+    to directory DIR."
+        (interactive (list (funcall project-prompter)))
+        (project-switch-project dir))
       :defer 1
       :custom
       (projectile-create-missing-test-files t)
@@ -488,6 +498,7 @@ which aren't absolutely necessary, but are very important.
         "pfd" '(projectile-find-dir :which-key "directory")
         ;;"pfr" '(project-find-regexp :which-key "regexp")
         "pp"  '(project-switch-project :which-key "switch")
+        "pP"  '(my/switch-project-new-frame :which-key "switch (new frame)")
         "pr"  '(project-forget-project :which-key "remove")
         "p/"  '(project-find-regexp :which-key "search")))
    #+end_src
