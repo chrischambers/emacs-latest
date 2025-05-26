@@ -636,6 +636,7 @@
 
           "d"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "debug")
+          "db"   '(cider-browse-instrumented-defs :which-key "browse instrumented")
           "dd"   '(my/debug-clojure-expression :which-key "debug expression")
           "de"   '(cider-enlighten-mode :which-key "enlighten on/off")
 
@@ -753,7 +754,35 @@
       ;;      (define-key clojure-mode-map (kbd "C-c u") 'cider-user-ns)
       ;;      (define-key cider-mode-map (kbd "C-c u") 'cider-user-ns)))
     #+end_src
+**** Cider Debugger
+     #+begin_src elisp
+       (with-eval-after-load 'cider-debug
+         (mapc
+          (lambda (replacement)
+            (let* ((from (car replacement))
+                   (to (cadr replacement))
+                   (item (assoc from cider-debug-prompt-commands)))
+              (when item
+                ;; Position matters, hence the update-in-place
+                (setf (car item) (car to))
+                (setf (cdr item) (cdr to)))))
+          '((?h (?H "here" "Here"))
+            (?i (?I "in" "In"))
+            (?j (?J "inject" "inJect"))
+            (?l (?L "locals" "Locals"))
+            (?s (?S "stacktrace" "Stacktrace")))))
 
+       (with-eval-after-load 'evil-collection-cider
+         (evil-collection-define-key 'normal 'cider--debug-mode-map
+           "b" 'evil-backward-word-begin
+           "i" 'evil-collection-cider-debug-in
+           "s" 'evil-avy-goto-char
+           "T" 'cider-debug-toggle-locals))
+
+       (defun my/cider-insert-conditional-breakpoint ()
+         (interactive)
+         (cider-eval-defun-at-point '(16)))
+     #+end_src
 *** CLJR / CLJ refactor
     #+begin_src elisp
       (use-package clj-refactor
