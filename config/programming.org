@@ -540,7 +540,8 @@
               :feature 'function
               :language 'clojure
               `(((list_lit meta: _ :? :anchor
-                           (sym_lit !namespace name: (sym_name) @font-lock-keyword-face))
+                           (sym_lit !namespace name: (sym_name) @font-lock-keyword-face)
+                           (sym_lit !namespace name: (sym_name) @font-lock-function-name-face))
                  (:match ">defn" @font-lock-keyword-face))))
              treesit-font-lock-settings)))
 
