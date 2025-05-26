@@ -206,6 +206,7 @@
           (nix-mode . nix-repl)
           (prolog-mode . run-prolog)
           (python-mode . elpy-shell-switch-to-shell)
+          (racket-mode . racket-repl)
           (scheme-mode . scheme-repl)
           (sml-mode . sml-prog-proc-switch-to)))
        :general
@@ -353,6 +354,7 @@
          (clojure-ts-mode . clojure-ts-mode-map)    ; clojure
          (lisp-mode . lisp-mode-map)                ; common lisp
          (scheme-mode . scheme-mode-map)            ; scheme/racket
+         (racket-mode . racket-mode-map)            ; racket
          (emacs-lisp-mode . emacs-lisp-mode-map)    ; emacs lisp
      ))
 
@@ -363,6 +365,7 @@
        '((cider-repl-mode . cider-repl-mode-map)    ; clojure
          (slime-repl-mode . slime-repl-mode-map)    ; common lisp
          (geiser-repl-mode . geiser-repl-mode-map)  ; scheme/racket
+         (racket-repl-mode . racket-repl-mode-map)  ; racket
          (inferior-emacs-lisp-mode
           . inferior-emacs-lisp-mode-map)           ; emacs lisp
      ))
@@ -999,6 +1002,7 @@
     #+end_src
 ** Scheme
    #+begin_src elisp
+
      (use-package geiser-racket
        :after geiser)
 
@@ -1009,14 +1013,37 @@
        ;;     (add-company-backend 'geiser-company-backend)))
        ;; :hook (geiser-mode . enable-yasnippet-with-geiser)
        ;; :after company yasnippet
+       (defun my/open-racket-guide ()
+         (interactive)
+         (browse-url "https://docs.racket-lang.org/guide/index.html"))
+
        :custom
        (geiser-default-implementation 'racket)
        :general
        (local-leader scheme-mode-map
+         "?"  '(:ignore t :major-modes scheme-mode-map :which-key "documentation")
+         "?g"  '(my/open-racket-guide :which-key "racket guide")
+         "??"  '(geiser-doc-look-up-manual :which-key "at point")
+         "e"  '(:ignore t :major-modes scheme-mode-map :which-key "eval")
          "ee" '(geiser-eval-last-sexp :which-key "expression")
          "eb" '(geiser-eval-buffer-and-go :which-key "buffer")
          "er" '(geiser-eval-region-and-go :which-key "region")
          "ed" '(geiser-eval-definition-and-go :which-key "definition")))
+   #+end_src
+
+   #+begin_src elisp
+     (with-eval-after-load 'eglot
+          (add-to-list 'eglot-server-programs
+                       '(scheme-mode "racket" "-l" "racket-langserver")))
+   #+end_src
+   #+begin_src elisp
+     (use-package racket-mode
+       :general
+       (local-leader racket-repl-mode-map
+         ","  '(previous-window-any-frame :which-key "REPL"))
+       (local-leader racket-mode-map
+         "e"  '(:ignore t :major-modes racket-mode-map :which-key "eval")
+         "ee" '(racket-eval-last-sexp :which-key "expression")))
    #+end_src
 
 * Other Languages
