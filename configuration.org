@@ -56,8 +56,10 @@
 
 * Variables to make =safe-local-variable=
   #+begin_src elisp
-    (put 'projectile-project-name 'safe-local-variable #'stringp) ;; projectile
-    (put 'jinx-local-words 'safe-local-variable #'stringp) ;; jinx
+    (put 'projectile-project-name 'safe-local-variable #'stringp)     ; projectile
+    (put 'jinx-local-words 'safe-local-variable #'stringp)            ; jinx
+    (put 'cider-preferred-build-tool 'safe-local-variable #'symbolp)  ; cider
+    (put 'cider-clojure-cli-aliases 'safe-local-variable #'stringp)   ; cider
   #+end_src
 
 * [[./config/minimal.org][Minimal configuration]]
