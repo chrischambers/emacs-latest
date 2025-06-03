@@ -167,6 +167,7 @@ you can work with.
         "fe"   '(my/find-emacs-lisp-file :which-key "elisp file")
         "ff"   '(find-file :which-key "find")
         "fr"   '(recentf-open-files :which-key "recent")
+        "fR"   '(rename-file :which-key "Rename")
         ;; "fF"  '(find-file-noselect :which-key "find (without updating recent files)")
 
         ;; Help operations
