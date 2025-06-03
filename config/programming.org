@@ -228,7 +228,7 @@
 
      (add-hook 'prog-mode-hook #'my/programming-highlight-terms)
    #+end_src
-** [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]]: colour parmeters uniquely
+** [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]]: colour parameters uniquely
    #+begin_src elisp
      (use-package color-identifiers-mode
        :hook (after-init . global-color-identifiers-mode))
