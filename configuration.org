@@ -274,3 +274,39 @@
     ; (my/update-emacs-env-from-nix
     ;  '("python3" "python313Packages.ipython" "python313Packages.python-lsp-server"))
   #+end_src
+
+* Migrate Clojure Code to Notes
+  #+begin_src elisp
+
+    (defvar my/clojure-project-root
+      (f-join my/notes-directory "code/clojure")
+      "Root of the Clojure code within notes")
+
+    (defun my/migrate-clojure-code-to-notes (buffer-name)
+      (interactive "b")
+      (when (member (f-ext buffer-name) (list "clj" "cljc"))
+        (let* ((buffer (get-buffer buffer-name))
+               (source1 (buffer-file-name buffer))
+
+               (projectile-create-missing-test-files nil)
+               (source2 (projectile-find-implementation-or-test source1))
+
+               (prefix (f-common-parent (list source1 source2)))
+               (dest1 (->> source1
+                           (s-chop-prefix prefix)
+                           (f-join my/clojure-project-root)))
+               (dest2 (->> source2
+                           (s-chop-prefix prefix)
+                           (f-join my/clojure-project-root))))
+          ;; (message "%s" (list dest1 dest2))
+          (when (not (f-exists? dest1))
+            (message "Copying from %s to %s..." source1 dest1)
+            (f-copy source1 dest1))
+          (when (and (f-exists? source2) (not (f-exists? dest2)))
+            (message "Copying from %s to %s..." source2 dest2)
+            (f-copy source2 dest2))
+          (progn
+            (kill-buffer buffer)
+            (find-file dest1)))))
+
+  #+end_src
