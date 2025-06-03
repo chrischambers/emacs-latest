@@ -176,7 +176,7 @@
          (setq my/cider-current-ns (cider-current-ns))
          (add-hook 'cider-repl-mode-hook #'my/cider-set-ns)
          (let ((params (if (my/notes-active-within-buffer?)
-                           (:project-dir my/notes-directory)
+                           `(:project-dir ,my/notes-directory)
                          nil)))
            (and (cider-jack-in params)
                 (cider-drink-a-sip))))
