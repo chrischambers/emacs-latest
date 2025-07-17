@@ -404,3 +404,6 @@ Returns them as a list to be used in an interactive call."
   (if (cljh-test-file?)
       (cljh--jump-to-implementation)
     (cljh--jump-to-test)))
+
+(local-leader '(clojure-mode-map clojure-ts-mode-map)
+  "nc"   '(update-clojure-namespace :which-key "clean"))
