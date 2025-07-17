@@ -535,21 +535,21 @@
          :preface
          (defvar clojure-guardrails-enabled nil
            "True for projects that have guardrails included -
-       this is intended to be set via dir-locals.el")
+              this is intended to be set via dir-locals.el")
          (put 'clojure-guardrails-enabled 'safe-local-variable #'booleanp)
 
-         (defun my/clojure-guardrails-advice ()
-           (add-to-list
-            'clojure-ts-function-docstring-symbols
-            ">defn")
+         ;; (defun my/clojure-guardrails-advice ()
+         ;;   (add-to-list
+         ;;    'clojure-ts-function-docstring-symbols
+         ;;    ">defn")
 
-           ;; This is cached, so we need to trigger the changes to
-           ;; `clojure-ts-function-docstring-symbols' made above:
-           (setq clojure-ts--treesit-range-settings
-                 (treesit-range-rules
-                  :embed 'markdown_inline
-                  :host 'clojure
-                  (clojure-ts--docstring-query '@capture))))
+         ;;   ;; This is cached, so we need to trigger the changes to
+         ;;   ;; `clojure-ts-function-docstring-symbols' made above:
+         ;;   (setq clojure-ts--treesit-range-settings
+         ;;         (treesit-range-rules
+         ;;          :embed 'markdown_inline
+         ;;          :host 'clojure
+         ;;          (clojure-ts--docstring-query '@capture))))
 
          (defun my/clojure-guardrails-extra-font-lock ()
            (setq-local
@@ -564,9 +564,24 @@
                  (:match ">defn" @font-lock-keyword-face))))
              treesit-font-lock-settings)))
 
-         (advice-add #'clojure-ts-mode :before #'my/clojure-guardrails-advice)
+         ;; (advice-add #'clojure-ts-mode :before #'my/clojure-guardrails-advice)
          :hook (clojure-ts-mode . my/clojure-guardrails-extra-font-lock)
+         :config
+         (require 'clojure-ts-mode)
+         (add-to-list 'clojure-ts-extra-def-forms ">defn")
          :custom
+         (clojure-ts-function-docstring-symbols
+               (rx line-start
+                   (or "definline"
+                       "defmulti"
+                       "defmacro"
+                       "defn"
+                       ">defn"
+                       "defn-"
+                       "defprotocol"
+                       "ns")
+                   line-end))
+
          (clojure-ts-semantic-indent-rules
           (add-to-list 'clojure-ts-semantic-indent-rules '(">defn" . ((:inner 0))))))
      #+end_src
