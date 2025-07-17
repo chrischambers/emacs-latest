@@ -308,5 +308,63 @@
           (progn
             (kill-buffer buffer)
             (find-file dest1)))))
+  #+end_src
+* Rebuild LaTeX
+  #+begin_src elisp
+    (defun my/org-rebuild-latex-previews-in-dir (dir)
+      "Rebuild LaTeX previews in all .org files under DIR."
+      (interactive "DDirectory: ")
+      (let ((org-files (directory-files-recursively dir "\\.org$")))
+        (dolist (file org-files)
+          (message "Processing %s" file)
+          (with-current-buffer (find-file-noselect file)
+            ;; Disable confirmation prompts for LaTeX previews
+            (let ((org-startup-with-latex-preview nil))
+              (org-mode)  ;; Ensure org-mode is enabled
+              ;; Remove old previews
+              (org-clear-latex-preview)
+              ;; Rebuild previews in the whole buffer
+              (org-latex-preview '(16)) ;; C-u C-u calls previews for entire buffer
+              ;; Optionally save the buffer if you want to persist preview overlays (not needed usually)
+              ;; (save-buffer)
+              )
+            ;; Close the buffer without saving if you opened it just for preview generation
+            (kill-buffer)))))
+  #+end_src
 
+* GPTel
+  #+begin_src elisp
+    (use-package gptel
+      :preface
+      (defun my/anthropic-api-key ()
+        (let ((entry (car (auth-source-search
+                           :host "api.anthropic.com"
+                           :user "apikey"
+                           :require '(:secret)))))
+          (when entry
+            (let ((secret (plist-get entry :secret)))
+              (if (functionp secret)
+                  (funcall secret)
+                secret)))))
+      :config
+      (gptel-make-anthropic "Claude" :stream t :key #'my/anthropic-api-key)
+      (gptel-make-openai "llama-cpp"
+                       :stream t
+                       :protocol "http"
+                       :host "localhost:11434"
+                       :models '(local-llama))
+
+      :custom
+      (gptel-default-mode #'org-mode)
+      ;; (gptel-model   'local-llama)
+      ;; (gptel-backend (gptel-make-openai "llama-cpp"
+      ;;                  :stream t
+      ;;                  :protocol "http"
+      ;;                  :host "localhost:11434"
+      ;;                  :models '(local-llama)))
+      :general
+      (leader "A" '(gptel :which-key "AI"))
+      (local-leader gptel-mode-map
+        "m"  '(gptel-menu :which-key "menu"))
+      )
   #+end_src
