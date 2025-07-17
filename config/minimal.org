@@ -141,16 +141,16 @@ you can work with.
         ;; Buffer operations
         "b"    '(:ignore t :which-key "buffer")
         ;; "bb"  '(ibuffer :which-key "switch buffer")
-        "bb"   '(switch-to-buffer :which-key "switch buffer")
-        "bd"   'kill-current-buffer
-        "bp"   'previous-buffer
-        "b["   'previous-buffer
-        "bn"   'next-buffer
-        "b]"   'next-buffer
-        "bo"   'kill-other-buffers
-        "bq"   'kill-buffer-and-window
-        ;; "bR"  'rename-file-and-buffer
-        "br"   '(revert-buffer :which-key "refresh buffer")
+        "bb"   '(switch-to-buffer :which-key "switch")
+        "bd"   '(kill-current-buffer :which-key "delete")
+        "bp"   '(previous-buffer :which-key "prev")
+        "b["   '(previous-buffer :which-key "prev")
+        "bn"   '(next-buffer :which-key "next")
+        "b]"   '(next-buffer :which-key "next")
+        "bo"   '(kill-other-buffers :which-key "only")
+        "bq"   '(kill-buffer-and-window :which-key "quit")
+        "br"   '(revert-buffer :which-key "refresh")
+        "bR"   '(rename-buffer :which-key "Rename")
 
         ;; Diff-related operations
         "d"    '(:ignore t :which-key "diff")
