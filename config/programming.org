@@ -426,6 +426,13 @@
 *** <<<evil cleverparens>>> ([[https://github.com/emacs-evil/evil-cleverparens][github]])
     #+begin_src elisp
       (use-package evil-cleverparens
+        :preface
+        (defun my/advise-evil-cp-insertion (orig-func &rest args)
+          "Advise certain commands to behave more intuitively when point is on the
+      opening delimiter of a form."
+          (when (member (char-after) '(?\( ?\[ ?\{))
+            (forward-char))
+          (apply orig-func args))
         :custom
         (evil-move-beyond-eol t)
         (evil-cleverparens-use-s-and-S nil)
@@ -449,7 +456,13 @@
            :states '(normal)
            :keymaps programming-maps
            "gh" '(sp-splice-sexp-killing-backward
-                  :which-key "splice (killing backwards)"))))
+                  :which-key "splice (killing backwards)")))
+
+        (dolist (cmd '(evil-cp-insert-at-beginning-of-form
+                       evil-cp-insert-at-end-of-form
+                       evil-cp-open-above-form
+                       evil-cp-open-below-form))
+          (advice-add cmd :around #'my/advise-evil-cp-insertion)))
     #+end_src
 ** <<<eval-sexp-fu>>>: Flash s-expressions when evaluated
    #+begin_src elisp
