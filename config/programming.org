@@ -840,17 +840,20 @@
         (dolist (mapping '(("async"  .   "clojure.core.async")
                            ("b" .        "better-cond.core")
                            ("browse" .   "clojure.java.browse")
-                           ("combo" .    "clojure.math.combinatorics")
-                           ("gen" .      "clojure.spec.gen.alpha")
-                           ("s"  .       "clojure.spec.alpha")
-                           ("stest" .    "clojure.spec.test.alpha")
+                           ("m" .        "medley.core")
                            ("match" .    "clojure.core.match")
-                           ("java-math". "clojure.math")
-                           ("math" .     "clojure.math.numeric-tower")
                            ("pprint" .   "clojure.pprint")
                            ("shell" .    "clojure.java.shell")
                            ("t" .        "tick.core")
-                           ("x" .        "net.cgrand.xforms")))
+                           ("x" .        "net.cgrand.xforms")
+
+                           ("combo" .    "clojure.math.combinatorics")
+                           ("math" .     "clojure.math.numeric-tower")
+                           ("java-math". "clojure.math")
+
+                           ("gen" .      "clojure.spec.gen.alpha")
+                           ("s"  .       "clojure.spec.alpha")
+                           ("stest" .    "clojure.spec.test.alpha")))
           (add-to-list 'cljr-magic-require-namespaces mapping t))
         :general
         (local-leader cider-mode-map
