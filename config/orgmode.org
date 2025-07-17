@@ -62,10 +62,10 @@
        '(
          :foreground default
          :background default
-         :scale 1.6
+         :scale 1.4
          ;; :html-foreground "Black"
          ;; :html-background "Transparent"
-         :html-scale 1.6
+         :html-scale 1.4
          :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")
          ))
       ;; Subnodes will inherit properties:
