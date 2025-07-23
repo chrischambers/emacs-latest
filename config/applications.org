@@ -174,7 +174,7 @@
       ;; (treemacs-tag-follow-delay 0.5)
       (treemacs-hide-gitignored-files-mode t)
       :config
-      (treemacs-project-follow-mode)
+      ;; (treemacs-project-follow-mode)
 
       ;; slightly lower the size of treemacs icons
       (treemacs-resize-icons 18)
@@ -206,7 +206,12 @@
       (push 'my/treemacs-ignored treemacs-ignored-file-predicates)
 
       ;; (treemacs-display-current-project-exclusively)
+      (defun my/treemacs-jump-to-buffer ()
+        (interactive)
+        (treemacs--do-follow-project))
       :general
+      (local-leader
+        "*" '(my/treemacs-jump-to-buffer :which-key "treemacs update"))
       (leader
         "fd"  '(treemacs :which-key "file-drawer")
         "fD"  '(treemacs-bookmark :which-key "file-drawer (from bookmark)")))
