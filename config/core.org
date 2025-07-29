@@ -114,7 +114,7 @@ which aren't absolutely necessary, but are very important.
 
 *** Enable menu-bar (it's occasionally useful for discovery)
     #+begin_src elisp
-      (menu-bar-mode 1)
+      (menu-bar-mode (if IS-LINUX 0 1))
     #+end_src
 
 *** Disable the (tiny) scrollbar in the minibuffer window
