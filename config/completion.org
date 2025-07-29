@@ -143,14 +143,14 @@
                 ((s-matches? almost-exactly?  s)                850)
                 ((let ((case-fold-search t))
                    (s-matches? almost-exactly?  s))             800)
-                ;; ((s-matches? at-word-boundaries? words)        800) ; case-insensitive
-                ((s-matches? when-starts-with-word? s)          750) ; case-insensitive
+                ;; ((s-matches? at-word-boundaries? words)        800) ; case-sensitive
+                ((s-matches? when-starts-with-word? s)          750) ; case-sensitive
                 ((let ((case-fold-search t))
                    (s-matches? when-starts-with-word?  s))      725)
-                ((s-matches? when-ends-with-word? s)            650) ; case-insensitive
+                ((s-matches? when-ends-with-word? s)            650) ; case-sensitive
                 ((let ((case-fold-search t))
                    (s-matches? when-ends-with-word?  s))        625)
-                ((s-matches? at-word-boundaries? s)             550) ; case-insensitive
+                ((s-matches? at-word-boundaries? s)             550) ; case-sensitive
                 ((let ((case-fold-search t))
                    (s-matches? at-word-boundaries?  s))         525)
                 ((s-starts-with? input s)                       450)
