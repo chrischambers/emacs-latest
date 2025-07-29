@@ -206,7 +206,6 @@
       (push 'my/treemacs-ignored treemacs-ignored-file-predicates)
 
       (require 'treemacs-project-follow-mode)
-      ;; (treemacs-display-current-project-exclusively)
       (defun my/treemacs-jump-to-buffer ()
         (interactive)
         (treemacs--do-follow-project))
