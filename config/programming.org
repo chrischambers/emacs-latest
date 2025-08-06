@@ -1738,3 +1738,8 @@
    #+end_src
 
 * TODO Configure SQL(i) repl-toggle correctly
+* Shell Scripting
+** sed
+   #+begin_src elisp
+     (use-package sed-mode)
+   #+end_src
