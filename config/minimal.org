@@ -191,7 +191,7 @@ you can work with.
         "hq"   '(shortdoc-display-group :which-key "quickref (shortdoc)")
         "hv"   'describe-variable
 
-        "hi"   '(info :which-key "info index")
+        "hi"   '(info :which-key "info")
         "hI"   '(info-apropos :which-key "info search")
 
         ;; Insert operations

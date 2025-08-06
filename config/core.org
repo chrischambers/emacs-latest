@@ -874,10 +874,11 @@ which aren't absolutely necessary, but are very important.
        :no-require t
        :straight nil
        :preface
-       (defun remove-unwanted-info-modes ()
+       (defun my/info-node-setup ()
+         (evil-insert-state)
          (evil-collection-unimpaired-mode 0) ; Allows [ and ] for navigation
          (display-fill-column-indicator-mode 0))
-       :hook (Info-mode . remove-unwanted-info-modes)
+       :hook (Info-mode . my/info-node-setup)
        :general
        ;; Unfortunately, there seems to be no way to set =SPC= to 'Info-scroll-up.
        ;; Toggling =general-override-mode= is global.
