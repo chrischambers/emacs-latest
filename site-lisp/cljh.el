@@ -324,11 +324,11 @@ contain a vector form."
           (cljh-delete-top-level-requires)
           (save-buffer))))))
 
-(defun cljh-consolidate-ns (&rest libspecs)
+(defun cljh-merge-requires (&rest libspecs)
   (when (derived-mode-p 'clojure-mode)
     (let* ((file-name (buffer-file-name (current-buffer)))
            (libspecs (-map (lambda (ls) (format "'%s'" ls)) libspecs))
-           (cmd (concat "clj_consolidate_requires " file-name " " (s-join " " libspecs)))
+           (cmd (concat "clj-merge-requires " file-name " " (s-join " " libspecs)))
            (new-ns (s-trim (shell-command-to-string cmd))))
       (when new-ns
         (cljh-replace-ns new-ns)))))
@@ -342,10 +342,10 @@ Returns them as a list to be used in an interactive call."
       (push input strings))
     (nreverse strings)))
 
-(defun update-clojure-namespace (&rest libspecs)
+(defun my/clojure-merge-requires (&rest libspecs)
   "Consolidates top-level requires (and provided libspecs) into `ns' form."
   (interactive (cljh-read-multiple-strings "Provide libspecs (RET to finish): "))
-  (apply #'cljh-consolidate-ns libspecs))
+  (apply #'cljh-merge-requires libspecs))
 
 (setq cljh-test-template
       "
@@ -373,7 +373,7 @@ Returns them as a list to be used in an interactive call."
               (goto-char start-posn))
           (progn
             (save-buffer)
-            (cljh-consolidate-ns
+            (cljh-merge-requires
              "[clojure.test :as test :refer [are deftest is testing]]"
              "[respeced.test :refer [check successful?]]"
              (format "[%s :refer [%s]]" ns name))
