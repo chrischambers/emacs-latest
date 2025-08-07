@@ -1008,3 +1008,7 @@ which aren't absolutely necessary, but are very important.
       ;; Enable converting external formats (ie. webp) to internal ones.
       (image-use-external-converter t))
   #+end_src
+* Detect major mode via shebang/ =-**- mode: ...-**-= hint
+  #+begin_src elisp
+    (add-hook 'find-file-hook #'set-auto-mode)
+  #+end_src
