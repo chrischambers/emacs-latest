@@ -69,7 +69,8 @@
    #+begin_src elisp
      (defun my/projectile-toggle-test-advice (f &rest args)
        (cider-load-buffer)
-       (apply f args))
+       (apply f args)
+       (cider-load-buffer))
 
      (advice-add #'projectile-toggle-between-implementation-and-test
                  :around
@@ -618,6 +619,19 @@
           (interactive)
           (cider-eval-defun-at-point t))
 
+        (defun my/cider-run-test ()
+          (interactive)
+          (let* ((found (cider--extract-test-var-at-point))
+                 (found-ns (car found))
+                 (found-var (cadr found)))
+            (if (not found-var)
+                (progn
+                  (projectile-toggle-between-implementation-and-test)
+                  (cider-test-run-test))
+              (cider-eval-defun-at-point)
+              (cider-test-update-last-test found-ns (list found-var))
+              (cider-test-execute found-ns (list found-var)))))
+
         :hook (cider-mode . (lambda () (set (make-local-variable 'global-eldoc-mode) nil)))
         :config
         (require 'ob-clojure)
@@ -707,7 +721,7 @@
                            :which-key "test")
           "ta"   '(cider-test-run-project-tests :which-key "all")
           "tA"   '(cider-auto-test-mode :which-key "toggle auto-test")
-          "tc"   '(cider-test-run-test :which-key "current")
+          "tc"   '(my/cider-run-test :which-key "current")
           "tf"   '(cider-test-toggle-fail-fast :which-key "fail-fast?")
           "tl"   '(cider-test-run-loaded-tests :which-key "loaded namespaces")
           "tn"   '(cider-test-run-ns-tests :which-key "namespace")
