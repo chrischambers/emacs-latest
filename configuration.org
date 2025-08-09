@@ -227,7 +227,7 @@
     (defun my/get-available-nix-packages ()
       "Retrieve a list of available Nix packages and cache them."
       (or my/nix-package-cache
-          (let* ((cmd "nix search nixpkgs/nixpkgs-unstable ^ --json 2> /dev/null | jq 'keys[]'")
+          (let* ((cmd "nix search nixpkgs ^ --json 2> /dev/null | jq 'keys[]'")
                  (output (shell-command-to-string cmd))
                  (sanitised (replace-regexp-in-string "\"[^\\.]+\\.[^\\.]+\\.\\([^\"]+\\)\"" "\\1" output))
                  (result (split-string sanitised "\n" t)))
