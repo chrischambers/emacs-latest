@@ -406,4 +406,4 @@ Returns them as a list to be used in an interactive call."
     (cljh--jump-to-test)))
 
 (local-leader '(clojure-mode-map clojure-ts-mode-map)
-  "nc"   '(update-clojure-namespace :which-key "clean"))
+  "nc"   '(my/clojure-merge-requires :which-key "clean"))
