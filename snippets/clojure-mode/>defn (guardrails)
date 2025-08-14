@@ -4,6 +4,7 @@
 # condition: clojure-guardrails-enabled
 # expand-env: ((yas-indent-line 'fixed))
 # --
+(require '[com.fulcrologic.guardrails.core :refer [=> >defn]])
 (>defn ${1:fname}
   ${2:"${3:Use markdown (esp. backticks around args) for docstrings.}"
   }[${4:args}]
