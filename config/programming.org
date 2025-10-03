@@ -732,6 +732,8 @@
           "nr"   '(cider-ns-refresh :which-key "refresh")
           "ns"   '(cider-repl-set-ns :which-key "set")
 
+          "q"    '(cider-restart :which-key "quit (restart REPL)")
+
           "r"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "refactor")
           "rc"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
@@ -763,7 +765,8 @@
 
         (local-leader '(clojure-mode-map clojure-ts-mode-map)
           "eb"   '(cider-load-buffer :which-key "buffer")
-          "eB"   '(cider-load-buffer-and-switch-to-repl-buffer :which-key "buffer (and switch)")
+          "eB"   '(cider-load-buffer-and-switch-to-repl-buffer
+                   :which-key "buffer (and switch)")
           "eF"   '(cider-load-buffer :which-key "file"))
 
         (local-leader cider-repl-mode-map
