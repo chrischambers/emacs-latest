@@ -633,6 +633,28 @@
               (cider-test-update-last-test found-ns (list found-var))
               (cider-test-execute found-ns (list found-var)))))
 
+        (defun my/clojure-create-src-file (user-input)
+          "Create a Clojure source file in the correct location.
+
+      Takes a valid namespace, filename, or even a space separated string, and
+      conforms it correctly."
+          (interactive "MPath/Namespace: ")
+          (let* ((parts (f-split user-input))
+                 (stripped-suffix (f-base (s-downcase (car (last parts)))))
+                 (file-name (s-replace-all
+                             '(("-" . "_") (" " . "_"))
+                             stripped-suffix))
+                 (root (projectile-project-root))
+                 (args (append
+                        (list root "src")
+                        (-butlast parts)
+                        (list (f-swap-ext file-name "clj"))))
+                 (absolute-file-path  (apply #'f-join args)))
+            (progn
+              (message "creating %s" absolute-file-path)
+              (f-touch absolute-file-path)
+              (find-file absolute-file-path))))
+
         :hook (cider-mode . (lambda () (set (make-local-variable 'global-eldoc-mode) nil)))
         :config
         (require 'ob-clojure)
