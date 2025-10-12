@@ -372,7 +372,12 @@ Returns them as a list to be used in an interactive call."
             (let ((start-posn (car test-found?)))
               (goto-char start-posn))
           (progn
+            ;; This next section is a hacky way of waiting for eglot/lsp
+            ;; to write the ns declaration to the top of the file.
             (save-buffer)
+            (sit-for 0.5)
+            (save-buffer)
+
             (cljh-merge-requires
              "[clojure.test :as test :refer [are deftest is testing]]"
              "[respeced.test :refer [check successful?]]"
