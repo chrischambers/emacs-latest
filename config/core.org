@@ -811,19 +811,7 @@ which aren't absolutely necessary, but are very important.
 
       :init
       (yas-global-mode 1)
-      ;; :after company company-box
-      ;; :preface
-      ;; (defun company-mode/backend-with-yas (backend)
-      ;;   (if (and (listp backend) (member 'company-yasnippet backend))
-      ;;       backend
-      ;;     (append (if (consp backend) backend (list backend))
-      ;;             '(:with company-yasnippet))))
-
-      ;; (defun add-company-backend (backend)
-      ;;   "Inserts a backend onto company-backend, enabling yasnippet completion where appropriate."
-      ;;   (push (company-mode/backend-with-yas backend) company-backends))
       :custom
-      ;; (company-backends (mapcar #'company-mode/backend-with-yas company-backends))
       (yas-snippet-dirs `(,(concat user-emacs-directory "snippets")))
       (yas-triggers-in-field t)
       :general
