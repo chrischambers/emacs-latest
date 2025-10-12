@@ -1073,7 +1073,7 @@
     (require 'table)
   #+end_src
 
-* <<<org-transclusion>>> ([[https://github.com/nobiot/org-transclusion][github]])
+* COMMENT <<<org-transclusion>>> ([[https://github.com/nobiot/org-transclusion][github]])
   #+begin_src elisp
     (use-package org-transclusion
       :after org
