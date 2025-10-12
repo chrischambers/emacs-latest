@@ -802,6 +802,7 @@ which aren't absolutely necessary, but are very important.
       (advice-add 'yas--commit-snippet :after #'my/yas-clear-trigger-text)
 
       (defun my/bol->point-whitespace? (&optional offset)
+        "`t' when trigger-text has nothing preceding it but whitespace."
         (let* ((offset (or offset (length yas-current-trigger-text)))
                (pos (- (point) offset))
                (line-start (line-beginning-position))
