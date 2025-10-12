@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: benchmark
+# key: bench
+# condition: (looking-back "^\\s-*bench" (line-beginning-position))
+# --
+(require '[criterium.core :refer [quick-bench]])
+(quick-bench $1)
