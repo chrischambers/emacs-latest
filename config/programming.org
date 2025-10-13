@@ -639,11 +639,9 @@
       Takes a valid namespace, filename, or even a space separated string, and
       conforms it correctly."
           (interactive "MPath/Namespace: ")
-          (let* ((parts (f-split user-input))
-                 (stripped-suffix (f-base (s-downcase (car (last parts)))))
-                 (file-name (s-replace-all
-                             '(("-" . "_") (" " . "_"))
-                             stripped-suffix))
+          (let* ((fix-separators (s-replace-all '(("-" . "_") (" " . "_")) user-input))
+                 (parts (f-split fix-separators))
+                 (file-name (f-base (s-downcase (car (last parts)))))
                  (root (projectile-project-root))
                  (args (append
                         (list root "src")
