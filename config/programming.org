@@ -30,6 +30,23 @@
       (apheleia-inhibit . t)))
   #+end_example
 
+** Python Formatting Config
+   #+begin_src elisp
+     (use-package flymake-ruff
+       :hook (flymake-mode . flymake-ruff-load)
+       :custom
+       (flymake-ruff-program-args '("check" "--select" "ALL" "--output-format" "concise" "--exit-zero" "--quiet" "-")))
+
+     (use-package apheleia-python
+       :straight nil
+       :no-require t
+       :after apheleia
+       :config
+       (unless (assoc 'uv-ruff apheleia-formatters)
+         (push '(uv-ruff . ("uvx" "ruff" "format" "--stdin-file-path" filepath)) apheleia-formatters)
+         (add-to-list 'apheleia-mode-alist '(python-mode . uv-ruff))))
+   #+end_src
+
 ** Clojure Formatting Config
    [[https://andersmurphy.com/2020/08/20/emacs-setting-up-apheleia-to-use-zprint.html][Emacs: setting up Apheleia to use Prettier and Zprint]]
 
