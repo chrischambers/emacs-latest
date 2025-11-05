@@ -104,7 +104,9 @@
        :straight nil
        :demand t
        :preface
-       (defcustom my/themes (custom-available-themes) "The themes to cycle through")
+       (defcustom my/themes (custom-available-themes) "The themes to cycle through.
+
+     The first entry in the list is considered the default theme.")
        (defcustom my/themes-index 0 "Initial index of my/themes")
        :custom
        (my/themes '(doom-dracula modus-operandi poet nano))
@@ -131,7 +133,16 @@
            (message (concat "loading theme: " (symbol-name selected-theme)))
            (load-theme selected-theme t)))
 
-       (load-theme (nth my/themes-index my/themes) t)
+       (defun my/load-default-theme ()
+           (interactive)
+           (load-theme (nth my/themes-index my/themes) t))
+
+       (my/load-default-theme)
+       (add-hook 'after-make-frame-functions
+               (lambda (frame)
+                 (with-selected-frame frame
+                   (my/load-default-theme))))
+
        :general
        (leader
          "T"  '(:ignore t :which-key "theme")
