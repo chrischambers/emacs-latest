@@ -145,6 +145,7 @@
       ;; This prevents dired from proliferating buffers as you navigate:
       (dired-kill-when-opening-new-dired-buffer t)
       (dired-dwim-target t)
+      (dired-listing-switches "-alh --group-directories-first")
       :general
       ('normal dired-mode-map
         ;; "RET" 'dired-find-alternate-file
