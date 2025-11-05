@@ -33,9 +33,7 @@
 ** Python Formatting Config
    #+begin_src elisp
      (use-package flymake-ruff
-       :hook (flymake-mode . flymake-ruff-load)
-       :custom
-       (flymake-ruff-program-args '("check" "--select" "ALL" "--output-format" "concise" "--exit-zero" "--quiet" "-")))
+       :hook (flymake-mode . flymake-ruff-load))
 
      (use-package apheleia-python
        :straight nil
@@ -43,7 +41,8 @@
        :after apheleia
        :config
        (unless (assoc 'uv-ruff apheleia-formatters)
-         (push '(uv-ruff . ("uvx" "ruff" "format" "--stdin-file-path" filepath)) apheleia-formatters)
+         (push '(uv-ruff . ("uvx" "ruff" "format" "--stdin-filename" filepath))
+               apheleia-formatters)
          (add-to-list 'apheleia-mode-alist '(python-mode . uv-ruff))))
    #+end_src
 
@@ -62,6 +61,7 @@
        (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint)))
    #+end_src
 
+** SQL Formatting Config
    #+begin_src elisp
      (use-package apheleia-sql
        :straight nil
@@ -83,16 +83,6 @@
              (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . prettier-sql)))
    #+end_src
 
-   #+begin_src elisp
-     (defun my/projectile-toggle-test-advice (f &rest args)
-       (cider-load-buffer)
-       (apply f args)
-       (cider-load-buffer))
-
-     (advice-add #'projectile-toggle-between-implementation-and-test
-                 :around
-                 #'my/projectile-toggle-test-advice)
-   #+end_src
 ** COMMENT Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
    #+begin_src elisp
      (use-package format-all
@@ -143,6 +133,18 @@
      (use-package eldoc-box
        ;;:hook (prog-mode . eldoc-box-hover-at-point-mode)
        )
+   #+end_src
+* Projectile Configuration
+** Reload Buffer when Toggling Between Implementation and Test
+   #+begin_src elisp
+     (defun my/projectile-toggle-test-advice (f &rest args)
+       (cider-load-buffer)
+       (apply f args)
+       (cider-load-buffer))
+
+     (advice-add #'projectile-toggle-between-implementation-and-test
+                 :around
+                 #'my/projectile-toggle-test-advice)
    #+end_src
 * REPL Functionality
 ** <<<comint>>>: Command Interpreter / REPL configuration
@@ -205,6 +207,22 @@
              (cider-switch-to-repl-buffer)
            (my/cider-startup)))
 
+      (defvar python-repl-source-buffer nil)
+
+      (defun my/python-repl ()
+        (interactive)
+        (progn
+          (when (derived-mode-p 'python-mode)
+            (setq python-repl-source-buffer (current-buffer)))
+          (call-interactively 'run-python)))
+
+       (defun python-switch-to-last-python-buffer ()
+         (interactive)
+         (let ((win (get-buffer-window python-repl-source-buffer)))
+           (if win
+               (select-window win)
+             (switch-to-buffer python-repl-source-buffer))))
+
        (defun scheme-repl ()
          (interactive)
          (geiser-mode-switch-to-repl nil))
@@ -223,15 +241,19 @@
           (ruby-mode . inf-ruby)
           (nix-mode . nix-repl)
           (prolog-mode . run-prolog)
-          (python-mode . elpy-shell-switch-to-shell)
+          ;; (python-mode . run-python)
+          ;; (python-ts-mode . run-python)
           (racket-mode . racket-repl)
           (scheme-mode . scheme-repl)
           (sml-mode . sml-prog-proc-switch-to)))
        :general
+       ;; ('normal 'inferior-python-mode-map "K" 'my/eldoc-show)
        (local-leader '(clojure-mode-map clojure-ts-mode-map)
          ","  '(my/clojure-repl :which-key "REPL"))
        (local-leader 'cider-repl-mode-map
          ","  '(cider-switch-to-last-clojure-buffer :which-key "REPL"))
+       (local-leader '(inferior-python-mode-map)
+         ","  '(python-switch-to-last-python-buffer :which-key "REPL"))
        (local-leader '(prog-mode-map comint-mode-map)
          ","  '(rtog/toggle-repl :which-key "REPL")))
    #+end_src
@@ -1408,9 +1430,7 @@
         ;; Don't tell me you're working out the indentation:
         ;; https://stackoverflow.com/questions/18778894/emacs-24-3-python-cant-guess-python-indent-offset-using-defaults-4
         (python-indent-guess-indent-offset-verbose nil)
-        (python-indent-offset 4)
-        (python-shell-interpreter "ipython")
-        (python-shell-interpreter-args "--simple-prompt -i"))
+        (python-indent-offset 4))
     #+end_src
 
 **** COMMENT pyls
@@ -1470,16 +1490,86 @@
         (venv-initialize-eshell))
     #+end_src
 
+*** Projectile Test-Jump Tuning
+    #+begin_src elisp
+      ;; Source: https://docs.projectile.mx/projectile/projects.html#test-dirsrc-dir-vs-related-files-fn
+
+      (with-eval-after-load 'projectile
+        (defun my-get-python-test-file (impl-file-path)
+          "Return the corresponding test file directory for IMPL-FILE-PATH"
+          (let* ((rel-path (f-relative impl-file-path (projectile-project-root)))
+                 (src-dir (car (f-split rel-path))))
+            (cond ((f-exists? (f-join (projectile-project-root) "test"))
+                   (projectile-complementary-dir impl-file-path src-dir "test"))
+                  ((f-exists? (f-join (projectile-project-root) "tests"))
+                   (projectile-complementary-dir impl-file-path src-dir "tests"))
+                  (t (error "Could not locate a test file for %s!" impl-file-path)))))
+
+        (defun my-get-python-impl-file (test-file-path)
+          "Return the corresponding impl file directory for TEST-FILE-PATH"
+          (if-let* ((root (projectile-project-root))
+                    (rel-path (f-relative test-file-path root))
+                    (src-dir-guesses `(,(f-base root) ,(downcase (f-base root)) "src"))
+                    (src-dir (cl-find-if (lambda (d) (f-exists-p (f-join root d)))
+                                         src-dir-guesses)))
+              (projectile-complementary-dir test-file-path "tests?" src-dir)
+            (error "Could not locate a impl file for %s!" test-file-path)))
+
+        (projectile-update-project-type
+         'python-pkg
+         :src-dir #'my-get-python-impl-dir
+         :test-dir #'my-get-python-test-dir))
+    #+end_src
 *** REPL
     #+begin_src elisp
-    (with-eval-after-load 'evil
-      (evil-set-initial-state 'inferior-python-mode 'normal)
-      (general-def 'insert inferior-python-mode-map
-        "C-l" 'comint-clear-buffer
-        "C-p" 'comint-previous-input
-        "C-n" 'comint-next-input)
-      (general-def 'normal inferior-python-mode-map
-        "C-l" 'comint-clear-buffer))
+      (with-eval-after-load 'evil
+        (evil-set-initial-state 'inferior-python-mode 'normal))
+
+      (use-package python-repl
+        :straight nil
+        :no-require t
+        :custom
+        (python-shell-interpreter "ipython")
+        (python-shell-interpreter-args "--simple-prompt -i")
+        :general
+        ('insert inferior-python-mode-map
+                 "C-l" 'comint-clear-buffer
+                 "C-p" 'comint-previous-input
+                 "C-n" 'comint-next-input)
+        ('normal inferior-python-mode-map
+                 "C-l" 'comint-clear-buffer))
+
+      (use-package ipython-shell-send
+        :preface
+        (defun ipython-shell-send-statement (&optional send-main msg)
+          "Send the statement at point to inferior ipython process.
+
+          The statement is delimited by `python-nav-beginning-of-statement' and
+          `python-nav-end-of-statement', but if the region  is active, the text
+          in the region is sent instead via `python-shell-send-region'.
+
+          Optional argument SEND-MAIN, if non-nil, means allow execution of code
+          inside blocks delimited by \"if __name__ == \\='__main__\\=':\".
+          Interactively, SEND-MAIN is the prefix argument.
+
+          Optional argument MSG, if non-nil, forces display of a user-friendly
+          message if there's no process running; it defaults to t when called
+          interactively."
+          (interactive (list current-prefix-arg t))
+          (if (region-active-p)
+              (ipython-shell-send-region (region-beginning) (region-end) send-main msg)
+            (ipython-shell-send-region
+             (save-excursion (python-nav-beginning-of-statement))
+             (save-excursion (python-nav-end-of-statement))
+             send-main msg)))
+
+        :general
+        (local-leader '(python-mode-map python-ts-mode-map)
+          "e"  '(:ignore t :major-modes (python-mode python-ts-mode) :which-key "evaluate")
+          "ee" '(ipython-shell-send-statement :which-key "expression")
+          "er" '(ipython-shell-send-region :which-key "region")
+          "eb" '(ipython-shell-send-buffer :which-key "buffer")
+          ","  '(my/python-repl :which-key "REPL")))
     #+end_src
 
 *** Testing/Debugging
@@ -1489,7 +1579,7 @@
          :config
          (setq pytest-cmd-flags "-x -s --spec")
          :general
-         (local-leader python-mode-map
+         (local-leader '(python-mode-map python-ts-mode-map)
            "t"  '(:ignore t :major-modes python-mode :which-key "test")
            "ta" '(pytest-all :which-key "all")
            "tA" '(pytest-pdb-all :which-key "all (pdb)")
