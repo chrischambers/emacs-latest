@@ -94,6 +94,10 @@
     (use-package nano-theme
       :straight (nano-theme :host github :repo "rougier/nano-theme"))
   #+end_src
+** Catppuccin Theme
+  #+begin_src elisp
+    (use-package catppuccin-theme)
+  #+end_src
 
 ** Custom Theme Selector
    [[https://emacs.stackexchange.com/questions/24088/make-a-function-to-toggle-themes][Make a function to toggle themes - Emacs Stack Exchange]]
@@ -109,7 +113,7 @@
      The first entry in the list is considered the default theme.")
        (defcustom my/themes-index 0 "Initial index of my/themes")
        :custom
-       (my/themes '(doom-dracula modus-operandi poet nano))
+       (my/themes '(catppuccin doom-dracula modus-operandi poet nano))
        :config
        (defun my/select-theme (f)
          (interactive)
