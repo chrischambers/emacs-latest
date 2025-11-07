@@ -284,8 +284,10 @@ which aren't absolutely necessary, but are very important.
      (use-package evil-numbers
        :general
        ('motion '(text-mode-map prog-mode-map)
-	"+" 'evil-numbers/inc-at-pt-incremental
-	"-" 'evil-numbers/dec-at-pt-incremental))
+        "g+" '(evil-numbers/inc-at-pt :which-key "increment number at point")
+        "g-" '(evil-numbers/inc-at-pt :which-key "decrement number at point")
+        "+" 'evil-numbers/inc-at-pt-incremental
+        "-" 'evil-numbers/dec-at-pt-incremental))
    #+end_src
 
 *** Increment/decrement timestamp or number at point in org-mode
