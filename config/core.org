@@ -1005,3 +1005,16 @@ which aren't absolutely necessary, but are very important.
   #+begin_src elisp
     (add-hook 'find-file-hook #'set-auto-mode)
   #+end_src
+* <<<diff-hl>>>: Highlight diff in fringe ([[https://github.com/dgutov/diff-hl][github]])
+  #+begin_src elisp
+    (use-package diff-hl
+      :config
+      (diff-hl-dired-mode 1)
+      (diff-hl-flydiff-mode 1)
+      (diff-hl-show-hunk-mouse-mode 1)
+      (global-diff-hl-mode)
+      :general
+      (leader "gi" '(diff-hl-show-hunk :which-key "interactive hunk edit"))
+      ('(motion normal) "g]" 'diff-hl-next-hunk)
+      ('(motion normal) "g[" 'diff-hl-previous-hunk))
+  #+end_src
