@@ -67,10 +67,11 @@ which aren't absolutely necessary, but are very important.
     #+begin_src elisp
       (when (version<= "26.0.50" emacs-version)
         ;; (global-display-line-numbers-mode)
+        (add-hook 'prog-mode-hook 'display-line-numbers-mode)
         (setq-default display-line-numbers-width 4))
     #+end_src
 
-* COMMENT Display global fill indicator (if emacs supports it)
+* Display global fill indicator (if emacs supports it)
   #+begin_src elisp
     (when (version<= "27.0.0" emacs-version)
       ;; (global-display-fill-column-indicator-mode)
