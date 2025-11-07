@@ -63,7 +63,7 @@
           (fringe-indicator-alist
            (continuation)))))
    #+end_src
-** cape
+** cape ([[https://github.com/minad/cape][github]])
    #+begin_src elisp
      (use-package cape
        :bind (("C-x C-l" . cape-line))
@@ -80,7 +80,7 @@
     ;; (add-to-list 'completion-at-point-functions #'yasnippet-capf)
     )
 #+end_src
-** kind-icon
+** kind-icon: Icons for completion menus ([[https://github.com/jdtsmith/kind-icon][github]])
    #+begin_src elisp
      (use-package kind-icon
        :after corfu

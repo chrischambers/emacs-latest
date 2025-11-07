@@ -112,7 +112,7 @@ which aren't absolutely necessary, but are very important.
       (tool-bar-mode 0)
     #+end_src
 
-*** Enable menu-bar (it's occasionally useful for discovery)
+*** Enable menu-bar on non-linux systems (it's occasionally useful for discovery)
     #+begin_src elisp
       (menu-bar-mode (if IS-LINUX 0 1))
     #+end_src
@@ -196,7 +196,7 @@ which aren't absolutely necessary, but are very important.
    #+end_src
 
 ** Disable dialog boxes
-   This is especially important on linux systems with window managers like
+   This is especially important on Linux systems with window managers like
    sway/hyprland:
    #+begin_src elisp
      (customize-set-variable 'use-dialog-box nil)
@@ -310,7 +310,7 @@ which aren't absolutely necessary, but are very important.
            "-" 'my/dec-timestamp-or-number))
    #+end_src
 
-** <<<evil-lion>>>: Left/right align on symbols like =:= with =g(= / =g)= ([[https://github.com/edkolev/evil-lion][github]])
+** <<<evil-lion>>>: Left/right align on symbols like =:= with =g(= and =g)= ([[https://github.com/edkolev/evil-lion][github]])
    #+begin_src elisp
      (use-package evil-lion
        :config
@@ -328,7 +328,7 @@ which aren't absolutely necessary, but are very important.
        (evil-commentary-mode))
    #+end_src
 
-   - =S-/= also comments out a line (in insert or normal mode)
+   - =Super /= also comments out a line (in insert or normal mode)
    - Can also be used in ex mode:
 
      #+begin_example
@@ -752,8 +752,8 @@ which aren't absolutely necessary, but are very important.
     (global-so-long-mode t)
   #+end_src
 
-* <<<avy>>> ([[https://github.com/abo-abo/avy][github]]) Quick cursor movement
-  There's a great explanation of the way to use avy [[http://pragmaticemacs.com/emacs/super-efficient-movement-using-avy/][here]].
+* <<<avy>>>([[https://github.com/abo-abo/avy][github]]) Quick cursor movement
+  There's a great explanation of the way to use avy [[https://pragmaticemacs.wordpress.com/2016/04/08/super-efficient-movement-using-avy/][here]].
 
   #+begin_src elisp
     (use-package avy
@@ -956,7 +956,7 @@ which aren't absolutely necessary, but are very important.
       :hook (after-init . global-whitespace-cleanup-mode))
   #+end_src
 
-* Folding via origami
+* <<<origami>>>: Folding ([[https://github.com/gregsexton/origami.el][github]])
   #+begin_src elisp
     (use-package origami
       :hook (after-init . global-origami-mode))
