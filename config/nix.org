@@ -1,0 +1,118 @@
+#+title: Nix Configuration
+#+author: Chris Chambers
+#+email: magma.chambers@gmail.com
+#+language: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:elisp :results value silent
+
+* Enable lexical binding
+#+begin_src elisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+** Nix Language
+*** Nix Mode ([[https://github.com/NixOS/nix-mode][github]]/[[https://github.com/NixOS/nix-mode/blob/master/nix-mode.org][docs]])
+   #+begin_src elisp
+     (use-package nix-mode
+       :mode ("\\.nix\\'" "\\.nix.in\\'")
+       :config
+       (require 'eglot)
+       (add-to-list 'eglot-server-programs '(nix-mode . ("nil"))))
+   #+end_src
+
+*** Nix DRV Mode
+   #+begin_src elisp
+     (use-package nix-drv-mode
+       :no-require t
+       :straight nil
+       :ensure nix-mode
+       :mode "\\.drv\\'")
+   #+end_src
+
+*** Nix Shell
+   #+begin_src elisp
+     (use-package nix-shell
+       :no-require t
+       :straight nil
+       :ensure nix-mode
+       :commands (nix-shell-unpack nix-shell-configure nix-shell-build))
+   #+end_src
+
+*** Nix REPL
+   #+begin_src elisp
+     (use-package nix-repl
+       :no-require t
+       :straight nil
+       :ensure nix-mode
+       :commands (nix-repl))
+   #+end_src
+
+*** COMMENT Nix-sandbox ([[https://github.com/nix-community/nix-emacs?tab=readme-ov-file][github]])
+    #+begin_src elisp
+      (use-package nix-sandbox)
+    #+end_src
+
+* Dynamically Update Emacs Environment Using Nix Packages
+  #+begin_src elisp
+    (require 'subr-x)  ;; For string-trim
+
+    (defvar my/nix-package-cache nil
+      "Cache of available Nix packages for completion.")
+
+    (defvar my/original-environment nil
+      "Stores the original environment variables before applying Nix environment.")
+
+    (defun my/get-available-nix-packages ()
+      "Retrieve a list of available Nix packages and cache them."
+      (or my/nix-package-cache
+          (let* ((cmd "nix search nixpkgs ^ --json 2> /dev/null | jq 'keys[]'")
+                 (output (shell-command-to-string cmd))
+                 (sanitised (replace-regexp-in-string "\"[^\\.]+\\.[^\\.]+\\.\\([^\"]+\\)\"" "\\1" output))
+                 (result (split-string sanitised "\n" t)))
+            (setq my/nix-package-cache result))))
+
+    (defun my/clear-nix-package-cache ()
+      (interactive)
+      (setq my/nix-package-cache nil))
+
+    (defun my/capture-shell-environment ()
+      "Capture the original environment variables before applying Nix environment."
+      (when (not my/original-environment)
+      (setq my/original-environment (copy-alist process-environment))))
+
+    (defun my/restore-shell-environment ()
+      "Restore the original environment variables."
+      (interactive)
+      (when my/original-environment
+        (setq process-environment (copy-alist my/original-environment))
+        (setq exec-path (split-string (getenv "PATH") path-separator))
+        (setq my/original-environment nil)
+        (message "Original environment restored successfully!")))
+
+    (defun my/update-emacs-env-from-nix (packages)
+      "Update Emacs environment variables using `nix-shell -p` with PACKAGES."
+      (interactive
+       (list (completing-read-multiple
+              "Select Nix packages (comma-separated): "
+              (my/get-available-nix-packages))))
+      (my/restore-shell-environment)
+      (my/capture-shell-environment)
+      (let* ((package-args (mapconcat 'identity packages " "))
+             (cmd (format "nix-shell -p %s --run 'env'" package-args))
+             (output (shell-command-to-string cmd)))
+        (message cmd)
+        (message output)
+        (dolist (line (split-string output "\n" t))
+          (when (string-match "^\\([^=]+\\)=\\(.*\\)" line)
+            (let ((var (match-string 1 line))
+                  (value (match-string 2 line)))
+              (setenv var value)
+              (when (string= var "PATH")
+                (setq exec-path (split-string value path-separator))))))
+        (message "Emacs environment updated successfully with selected Nix packages!")))
+
+    ; nix-shell -p python3 python313Packages.ipython python313Packages.python-lsp-server
+
+    ; (my/update-emacs-env-from-nix
+    ;  '("python3" "python313Packages.ipython" "python313Packages.python-lsp-server"))
+  #+end_src

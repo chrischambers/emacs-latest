@@ -116,6 +116,11 @@
     (my/config-load "config/ai.org")
     #+end_src
 
+* [[./config/nix.org][Nix configuration]]
+    #+begin_src elisp
+    (my/config-load "config/nix.org")
+    #+end_src
+
 * [[./config/mail.org][Mail configuration]]
     #+begin_src elisp
     (my/config-load "config/mail.org")
@@ -218,71 +223,6 @@
        :config
        (dirvish-override-dired-mode))
    #+end_src
-* Messing around with nix-shell integration
-  #+begin_src elisp
-    (require 'subr-x)  ;; For string-trim
-
-    (defvar my/nix-package-cache nil
-      "Cache of available Nix packages for completion.")
-
-    (defvar my/original-environment nil
-      "Stores the original environment variables before applying Nix environment.")
-
-    (defun my/get-available-nix-packages ()
-      "Retrieve a list of available Nix packages and cache them."
-      (or my/nix-package-cache
-          (let* ((cmd "nix search nixpkgs ^ --json 2> /dev/null | jq 'keys[]'")
-                 (output (shell-command-to-string cmd))
-                 (sanitised (replace-regexp-in-string "\"[^\\.]+\\.[^\\.]+\\.\\([^\"]+\\)\"" "\\1" output))
-                 (result (split-string sanitised "\n" t)))
-            (setq my/nix-package-cache result))))
-
-    (defun my/clear-nix-package-cache ()
-      (interactive)
-      (setq my/nix-package-cache nil))
-
-    (defun my/capture-shell-environment ()
-      "Capture the original environment variables before applying Nix environment."
-      (when (not my/original-environment)
-      (setq my/original-environment (copy-alist process-environment))))
-
-    (defun my/restore-shell-environment ()
-      "Restore the original environment variables."
-      (interactive)
-      (when my/original-environment
-        (setq process-environment (copy-alist my/original-environment))
-        (setq exec-path (split-string (getenv "PATH") path-separator))
-        (setq my/original-environment nil)
-        (message "Original environment restored successfully!")))
-
-    (defun my/update-emacs-env-from-nix (packages)
-      "Update Emacs environment variables using `nix-shell -p` with PACKAGES."
-      (interactive
-       (list (completing-read-multiple
-              "Select Nix packages (comma-separated): "
-              (my/get-available-nix-packages))))
-      (my/restore-shell-environment)
-      (my/capture-shell-environment)
-      (let* ((package-args (mapconcat 'identity packages " "))
-             (cmd (format "nix-shell -p %s --run 'env'" package-args))
-             (output (shell-command-to-string cmd)))
-        (message cmd)
-        (message output)
-        (dolist (line (split-string output "\n" t))
-          (when (string-match "^\\([^=]+\\)=\\(.*\\)" line)
-            (let ((var (match-string 1 line))
-                  (value (match-string 2 line)))
-              (setenv var value)
-              (when (string= var "PATH")
-                (setq exec-path (split-string value path-separator))))))
-        (message "Emacs environment updated successfully with selected Nix packages!")))
-
-    ; nix-shell -p python3 python313Packages.ipython python313Packages.python-lsp-server
-
-    ; (my/update-emacs-env-from-nix
-    ;  '("python3" "python313Packages.ipython" "python313Packages.python-lsp-server"))
-  #+end_src
-
 * Migrate Clojure Code to Notes
   #+begin_src elisp
 
