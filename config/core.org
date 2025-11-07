@@ -768,7 +768,8 @@ which aren't absolutely necessary, but are very important.
       ('normal
        ;; "s" 'avy-goto-word-1
        "s"   'avy-goto-char
-       "gs"  'avy-goto-char-2
+       ;; "gs"  'avy-goto-char-2
+       "gs"  'avy-goto-char-timer
        ;; "S" 'avy-goto-char-timer
        "S"   'avy-goto-line))
   #+end_src
