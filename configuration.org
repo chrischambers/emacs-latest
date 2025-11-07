@@ -237,6 +237,10 @@
                  (result (split-string sanitised "\n" t)))
             (setq my/nix-package-cache result))))
 
+    (defun my/clear-nix-package-cache ()
+      (interactive)
+      (setq my/nix-package-cache nil))
+
     (defun my/capture-shell-environment ()
       "Capture the original environment variables before applying Nix environment."
       (when (not my/original-environment)
