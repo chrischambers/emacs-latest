@@ -1,7 +1,8 @@
-; Bootstrap straight.el package manager.
+;; Bootstrap straight.el package manager.
 (setq straight-use-package-by-default t)
 (setq straight-vc-git-default-clone-depth 1)
 (setq straight-check-for-modifications '(watch-files find-when-checking))
+(setq straight-cache-autoloads nil)
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
