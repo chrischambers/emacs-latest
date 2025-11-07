@@ -564,7 +564,8 @@
 
 * <<<org-protocol>>> ([[https://github.com/bastibe/org-journal][github]])
   #+begin_src elisp
-    (server-start)
+    (load "server")
+    (unless (server-running-p) (server-start))
     (require 'org-protocol)
   #+end_src
 
