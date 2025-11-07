@@ -111,6 +111,10 @@
     #+begin_src elisp
     (my/config-load "config/applications.org")
     #+end_src
+* [[./config/ai.org][AI configuration]]
+    #+begin_src elisp
+    (my/config-load "config/ai.org")
+    #+end_src
 
 * [[./config/mail.org][Mail configuration]]
     #+begin_src elisp
@@ -332,39 +336,6 @@
             (kill-buffer)))))
   #+end_src
 
-* GPTel
+* Experiment
   #+begin_src elisp
-    (use-package gptel
-      :preface
-      (defun my/anthropic-api-key ()
-        (let ((entry (car (auth-source-search
-                           :host "api.anthropic.com"
-                           :user "apikey"
-                           :require '(:secret)))))
-          (when entry
-            (let ((secret (plist-get entry :secret)))
-              (if (functionp secret)
-                  (funcall secret)
-                secret)))))
-      :config
-      (gptel-make-anthropic "Claude" :stream t :key #'my/anthropic-api-key)
-      (gptel-make-openai "llama-cpp"
-                       :stream t
-                       :protocol "http"
-                       :host "localhost:11434"
-                       :models '(local-llama))
-
-      :custom
-      (gptel-default-mode #'org-mode)
-      ;; (gptel-model   'local-llama)
-      ;; (gptel-backend (gptel-make-openai "llama-cpp"
-      ;;                  :stream t
-      ;;                  :protocol "http"
-      ;;                  :host "localhost:11434"
-      ;;                  :models '(local-llama)))
-      :general
-      (leader "A" '(gptel :which-key "AI"))
-      (local-leader gptel-mode-map
-        "m"  '(gptel-menu :which-key "menu"))
-      )
   #+end_src

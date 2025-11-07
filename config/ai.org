@@ -1,0 +1,59 @@
+#+title: AI Configuration
+#+author: Chris Chambers
+#+email: magma.chambers@gmail.com
+#+language: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+property: header-args:elisp :results value silent
+
+* Enable lexical binding
+#+begin_src elisp
+  ;; -*- lexical-binding: t -*-
+#+end_src
+
+* GPTel
+  #+begin_src elisp
+    (use-package gptel
+      :preface
+      (defun my/anthropic-api-key ()
+        (let ((entry (car (auth-source-search
+                           :host "api.anthropic.com"
+                           :user "apikey"
+                           :require '(:secret)))))
+          (when entry
+            (let ((secret (plist-get entry :secret)))
+              (if (functionp secret)
+                  (funcall secret)
+                secret)))))
+      :config
+      (gptel-make-anthropic "Claude" :stream t :key #'my/anthropic-api-key)
+      (gptel-make-openai "llama-cpp"
+                       :stream t
+                       :protocol "http"
+                       :host "localhost:11434"
+                       :models '(local-llama))
+
+      :custom
+      (gptel-default-mode #'org-mode)
+      ;; (gptel-model   'local-llama)
+      ;; (gptel-backend (gptel-make-openai "llama-cpp"
+      ;;                  :stream t
+      ;;                  :protocol "http"
+      ;;                  :host "localhost:11434"
+      ;;                  :models '(local-llama)))
+      :general
+      (leader "A" '(gptel :which-key "AI"))
+      (local-leader gptel-mode-map
+        "m"  '(gptel-menu :which-key "menu"))
+      )
+  #+end_src
+
+* LLM Tools
+  #+begin_src elisp
+    (use-package llm-tool-collection
+      :straight (:host github :type git :repo "Skissue/llm-tool-collection")
+      :after gptel
+      :config
+      (require 'gptel)
+      (mapcar (apply-partially #'apply #'gptel-make-tool)
+              (llm-tool-collection-get-all)))
+  #+end_src
