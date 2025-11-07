@@ -106,18 +106,24 @@
         "Toggle a flymake error buffer."
         (interactive)
         (when (not (my/kill-flymake-diagnostic-buffers))
-        (flymake-show-buffer-diagnostics)))
+          (flymake-show-buffer-diagnostics)))
 
       (defun my/flymake-toggle-project-diagnostics ()
         "Toggle a flymake error buffer."
         (interactive)
         (when (not (my/kill-flymake-diagnostic-buffers))
-        (flymake-show-project-diagnostics)))
+          (flymake-show-project-diagnostics)))
 
       :config
       (evil-ex-define-cmd "cope[n]" 'my/flymake-toggle-buffer-diagnostics)
       (evil-ex-define-cmd "ccl[ose]" 'my/flymake-toggle-buffer-diagnostics)
-
+      (add-to-list 'display-buffer-alist
+                   `(,(rx bos "*Flymake diagnostics")
+                     (display-buffer-reuse-window
+                      display-buffer-in-side-window)
+                     (side            . bottom)
+                     (reusable-frames . visible)
+                     (window-height   . 0.30)))
       :general
       (local-leader prog-mode-map
         "l" '(:ignore t :which-key "lint")
