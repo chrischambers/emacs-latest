@@ -136,14 +136,14 @@ which aren't absolutely necessary, but are very important.
      #+begin_src elisp
        ;; Standard font when =variable-pitch-mode= is not active
        (eval `(set-face-attribute 'default nil
-                          :family "SauceCodePro Nerd Font"
+                          :family ,(if IS-WINDOWS "SauceCodePro NF" "SauceCodePro Nerd Font")
                           :height ,(if IS-MAC 140 110)
                           :weight 'normal
                           :width 'normal))
 
        ;; Used for code blocks/literals/constants, etc.
        (eval `(set-face-attribute 'fixed-pitch nil
-                          :family "SauceCodePro Nerd Font Mono"
+                          :family ,(if IS-WINDOWS "SauceCodePro NFM" "SauceCodePro Nerd Font Mono")
                           :height ,(if IS-MAC 140 110)
                           :weight 'normal
                           :width 'normal))
