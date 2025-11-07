@@ -1415,6 +1415,10 @@
      (require 'oz)
    #+end_src
 
+** Powershell
+   #+begin_src elisp
+     (use-package powershell)
+   #+end_src
 ** Python
 *** Main Config
     #+begin_src elisp
