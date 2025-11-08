@@ -166,7 +166,13 @@
    #+begin_src elisp
      (use-package dired-subtree)
    #+end_src
-
+* <<<dirvish>>> ([[https://github.com/alexluigit/dirvish][github]])
+  A nicer interface to dired, but has access to all the same functionality.
+  #+begin_src elisp
+    (use-package dirvish
+      :config
+      (dirvish-override-dired-mode))
+  #+end_src
 * <<<treemacs>>> ([[https://github.com/Alexander-Miller/treemacs][github]]): file drawer
   #+begin_src elisp
     (use-package treemacs
@@ -242,3 +248,9 @@
        :hook (dired-mode . treemacs-icons-dired-mode)
        :config (treemacs-icons-dired-mode))
    #+end_src
+* <<<restclient>>> ([[https://github.com/pashky/restclient.el][github]])
+  #+begin_src elisp
+    (use-package restclient
+      :config
+      (require 'restclient))
+  #+end_src

@@ -131,7 +131,146 @@
     (my/config-load "config/prose.org")
     #+end_src
 
-* Test Area
+
+* Unfiled
+** Function for Opening in Browser
+   #+begin_src elisp
+     (defun my/org-src-path ()
+       (if (not (org-src-edit-buffer-p))
+           (message "Not in an Org src edit buffer")
+         (let* ((src-buffer (org-src-source-buffer)) ;; Get main Org buffer
+                (pos (with-current-buffer src-buffer
+                       (org-babel-where-is-src-block-head)))) ;; Get block start position
+           (if (not pos)
+               (message "Could not locate source block")
+             (with-current-buffer src-buffer
+               (goto-char pos) ;; Move to source block
+               (let* ((element (org-element-at-point))
+                      (file-name (buffer-file-name (current-buffer)))
+                      (dir (f-parent file-name))
+                      (params (org-element-property :parameters element))
+                      (tangle (alist-get :tangle (org-babel-parse-header-arguments params))))
+                 (if tangle (f-join dir tangle) file-name)))))))
+
+     (defun my/open-path-in-browser (path)
+       (let* ((base-cmd  "open -a /Applications/Firefox\\ Developer\\ Edition.app")
+              (cmd (s-join " " (list base-cmd path))))
+         (message cmd)
+         (shell-command cmd)))
+
+     (defun my/open-in-browser (buffer)
+       (interactive "b")
+       (with-current-buffer buffer
+         (let ((path (if (org-src-edit-buffer-p)
+                         (my/org-src-path)
+                       (buffer-file-name (current-buffer)))))
+           (when path
+             (my/open-path-in-browser path)))))
+
+     (defun my/get-tangle-property ()
+       (cdr (assq :tangle (org-babel-parse-header-arguments
+                           (org-element-property :parameters
+                                                 (org-element-at-point))))))
+
+     (defun my/tangle-then-browse ()
+       (interactive)
+       (when-let ((file-name (my/get-tangle-property))
+                  (parent-path (f-parent (buffer-file-name (current-buffer))))
+                  (path (f-join parent-path file-name)))
+         (org-babel-tangle)
+         (my/open-path-in-browser path)))
+   #+end_src
+
+** Colour Picker
+   #+begin_src elisp
+     (setq hex-colour-code-regex "\\b#?\\([A-Fa-f0-9]\\{3,6\\}\\)\\b")
+
+     (defun my/rgb-hex-at-point? ()
+       (when-let ((current-word (current-word))
+                  (matched (s-match hex-colour-code-regex current-word)))
+         (cadr matched)))
+
+     (defun my/colour-picker ()
+       "Use https://coolors.co"
+       (interactive)
+       (if-let ((rgb (my/rgb-hex-at-point?)))
+           (browse-url (format "https://coolors.co/%s" rgb))
+           (browse-url "https://coolors.co/color-picker")))
+   #+end_src
+
+* Experiments
+** Insert clojure doc on eval
+  #+begin_src elisp
+    (defun eval-clojure-doc-current-line ()
+      "Evaluate current line with clojure.repl/doc and insert result below."
+      (interactive)
+      (when (and (eq major-mode 'org-mode)
+                 (featurep 'cider)
+                 (cider-connected-p))
+        (let* ((current-line (string-trim (thing-at-point 'line t)))
+               (doc-expr (format "(with-out-str (clojure.repl/doc %s))" current-line))
+               (result (nrepl-dict-get (cider-nrepl-sync-request:eval doc-expr) "value")))
+          (end-of-line)
+          (newline)
+          (insert (read result)))))
+  #+end_src
+** Migrate Clojure Code to Notes
+   #+begin_src elisp
+
+     (defvar my/clojure-project-root
+       (f-join my/notes-directory "code/clojure")
+       "Root of the Clojure code within notes")
+
+     (defun my/migrate-clojure-code-to-notes (buffer-name)
+       (interactive "b")
+       (when (member (f-ext buffer-name) (list "clj" "cljc"))
+         (let* ((buffer (get-buffer buffer-name))
+                (source1 (buffer-file-name buffer))
+
+                (projectile-create-missing-test-files nil)
+                (source2 (projectile-find-implementation-or-test source1))
+
+                (prefix (f-common-parent (list source1 source2)))
+                (dest1 (->> source1
+                            (s-chop-prefix prefix)
+                            (f-join my/clojure-project-root)))
+                (dest2 (->> source2
+                            (s-chop-prefix prefix)
+                            (f-join my/clojure-project-root))))
+           ;; (message "%s" (list dest1 dest2))
+           (when (not (f-exists? dest1))
+             (message "Copying from %s to %s..." source1 dest1)
+             (f-copy source1 dest1))
+           (when (and (f-exists? source2) (not (f-exists? dest2)))
+             (message "Copying from %s to %s..." source2 dest2)
+             (f-copy source2 dest2))
+           (progn
+             (kill-buffer buffer)
+             (find-file dest1)))))
+   #+end_src
+** Rebuild LaTeX
+   #+begin_src elisp
+     (defun my/org-rebuild-latex-previews-in-dir (dir)
+       "Rebuild LaTeX previews in all .org files under DIR."
+       (interactive "DDirectory: ")
+       (let ((org-files (directory-files-recursively dir "\\.org$")))
+         (dolist (file org-files)
+           (message "Processing %s" file)
+           (with-current-buffer (find-file-noselect file)
+             ;; Disable confirmation prompts for LaTeX previews
+             (let ((org-startup-with-latex-preview nil))
+               (org-mode)  ;; Ensure org-mode is enabled
+               ;; Remove old previews
+               (org-clear-latex-preview)
+               ;; Rebuild previews in the whole buffer
+               (org-latex-preview '(16)) ;; C-u C-u calls previews for entire buffer
+               ;; Optionally save the buffer if you want to persist preview overlays (not needed usually)
+               ;; (save-buffer)
+               )
+             ;; Close the buffer without saving if you opened it just for preview generation
+             (kill-buffer)))))
+   #+end_src
+
 ** COMMENT hyperbole ([[https://gitthub.com/rswgnu/hyperbole][github]])
    #+begin_src elisp
      (use-package hyperbole
@@ -143,143 +282,3 @@
    #+begin_src elisp
      (use-package ement)
    #+end_src
-
-** restclient.el ([[https://github.com/pashky/restclient.el][github]]
-   #+begin_src elisp
-     (use-package restclient
-       :config
-       (require 'restclient))
-   #+end_src
-* Function for Opening in Browser
-  #+begin_src elisp
-    (defun my/org-src-path ()
-      (if (not (org-src-edit-buffer-p))
-          (message "Not in an Org src edit buffer")
-        (let* ((src-buffer (org-src-source-buffer)) ;; Get main Org buffer
-               (pos (with-current-buffer src-buffer
-                      (org-babel-where-is-src-block-head)))) ;; Get block start position
-          (if (not pos)
-              (message "Could not locate source block")
-            (with-current-buffer src-buffer
-              (goto-char pos) ;; Move to source block
-              (let* ((element (org-element-at-point))
-                     (file-name (buffer-file-name (current-buffer)))
-                     (dir (f-parent file-name))
-                     (params (org-element-property :parameters element))
-                     (tangle (alist-get :tangle (org-babel-parse-header-arguments params))))
-                (if tangle (f-join dir tangle) file-name)))))))
-
-    (defun my/open-path-in-browser (path)
-      (let* ((base-cmd  "open -a /Applications/Firefox\\ Developer\\ Edition.app")
-             (cmd (s-join " " (list base-cmd path))))
-        (message cmd)
-        (shell-command cmd)))
-
-    (defun my/open-in-browser (buffer)
-      (interactive "b")
-      (with-current-buffer buffer
-        (let ((path (if (org-src-edit-buffer-p)
-                        (my/org-src-path)
-                      (buffer-file-name (current-buffer)))))
-          (when path
-            (my/open-path-in-browser path)))))
-
-    (defun my/get-tangle-property ()
-      (cdr (assq :tangle (org-babel-parse-header-arguments
-                          (org-element-property :parameters
-                                                (org-element-at-point))))))
-
-    (defun my/tangle-then-browse ()
-      (interactive)
-      (when-let ((file-name (my/get-tangle-property))
-                 (parent-path (f-parent (buffer-file-name (current-buffer))))
-                 (path (f-join parent-path file-name)))
-        (org-babel-tangle)
-        (my/open-path-in-browser path)))
-  #+end_src
-
-* Colour Picker
-  #+begin_src elisp
-    (setq hex-colour-code-regex "\\b#?\\([A-Fa-f0-9]\\{3,6\\}\\)\\b")
-
-    (defun my/rgb-hex-at-point? ()
-      (when-let ((current-word (current-word))
-                 (matched (s-match hex-colour-code-regex current-word)))
-        (cadr matched)))
-
-    (defun my/colour-picker ()
-      "Use https://coolors.co"
-      (interactive)
-      (if-let ((rgb (my/rgb-hex-at-point?)))
-          (browse-url (format "https://coolors.co/%s" rgb))
-          (browse-url "https://coolors.co/color-picker")))
-  #+end_src
-
-* TODO Play with this and dired and make a choice
-  [[https://github.com/alexluigit/dirvish][GitHub - alexluigit/dirvish: A polished Dired with batteries included.]]
-** COMMENT dirvish ([[https://github.com/alexluigit/dirvish][github]])
-   #+begin_src elisp
-     (use-package dirvish
-       :config
-       (dirvish-override-dired-mode))
-   #+end_src
-* Migrate Clojure Code to Notes
-  #+begin_src elisp
-
-    (defvar my/clojure-project-root
-      (f-join my/notes-directory "code/clojure")
-      "Root of the Clojure code within notes")
-
-    (defun my/migrate-clojure-code-to-notes (buffer-name)
-      (interactive "b")
-      (when (member (f-ext buffer-name) (list "clj" "cljc"))
-        (let* ((buffer (get-buffer buffer-name))
-               (source1 (buffer-file-name buffer))
-
-               (projectile-create-missing-test-files nil)
-               (source2 (projectile-find-implementation-or-test source1))
-
-               (prefix (f-common-parent (list source1 source2)))
-               (dest1 (->> source1
-                           (s-chop-prefix prefix)
-                           (f-join my/clojure-project-root)))
-               (dest2 (->> source2
-                           (s-chop-prefix prefix)
-                           (f-join my/clojure-project-root))))
-          ;; (message "%s" (list dest1 dest2))
-          (when (not (f-exists? dest1))
-            (message "Copying from %s to %s..." source1 dest1)
-            (f-copy source1 dest1))
-          (when (and (f-exists? source2) (not (f-exists? dest2)))
-            (message "Copying from %s to %s..." source2 dest2)
-            (f-copy source2 dest2))
-          (progn
-            (kill-buffer buffer)
-            (find-file dest1)))))
-  #+end_src
-* Rebuild LaTeX
-  #+begin_src elisp
-    (defun my/org-rebuild-latex-previews-in-dir (dir)
-      "Rebuild LaTeX previews in all .org files under DIR."
-      (interactive "DDirectory: ")
-      (let ((org-files (directory-files-recursively dir "\\.org$")))
-        (dolist (file org-files)
-          (message "Processing %s" file)
-          (with-current-buffer (find-file-noselect file)
-            ;; Disable confirmation prompts for LaTeX previews
-            (let ((org-startup-with-latex-preview nil))
-              (org-mode)  ;; Ensure org-mode is enabled
-              ;; Remove old previews
-              (org-clear-latex-preview)
-              ;; Rebuild previews in the whole buffer
-              (org-latex-preview '(16)) ;; C-u C-u calls previews for entire buffer
-              ;; Optionally save the buffer if you want to persist preview overlays (not needed usually)
-              ;; (save-buffer)
-              )
-            ;; Close the buffer without saving if you opened it just for preview generation
-            (kill-buffer)))))
-  #+end_src
-
-* Experiment
-  #+begin_src elisp
-  #+end_src
