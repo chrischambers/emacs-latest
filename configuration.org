@@ -131,7 +131,6 @@
     (my/config-load "config/prose.org")
     #+end_src
 
-
 * Unfiled
 ** Function for Opening in Browser
    #+begin_src elisp
@@ -249,6 +248,12 @@
              (find-file dest1)))))
    #+end_src
 ** Rebuild LaTeX
+*** TODO Workout how to run this in batch mode as a background process, and create script
+    This takes a very long time to run.
+
+    It also prompts interactively during the run if file contents have changed
+    as a result of opening + saving: might be best to just have this
+    auto-confirmed somehow?
    #+begin_src elisp
      (defun my/org-rebuild-latex-previews-in-dir (dir)
        "Rebuild LaTeX previews in all .org files under DIR."
@@ -281,4 +286,8 @@
 ** COMMENT Ement.el
    #+begin_src elisp
      (use-package ement)
+   #+end_src
+** COMMENT Colour Picker
+   #+begin_src elisp
+     (use-package webkit-color-picker)
    #+end_src
