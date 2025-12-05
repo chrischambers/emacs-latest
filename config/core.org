@@ -708,6 +708,7 @@ which aren't absolutely necessary, but are very important.
         (advice-add 'switch-to-buffer :around #'my/jump-advice)
         (advice-add 'bookmark--jump-via :around #'my/jump-advice)
         (advice-add 'org-open-at-point :around #'my/jump-advice)
+        (advice-add 'org-return :around #'my/jump-advice)
 
         (advice-add 'org-edit-special :around #'my/jump-advice)
         (advice-add 'org-edit-src-code :around #'my/jump-advice)
