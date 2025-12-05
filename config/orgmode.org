@@ -381,11 +381,19 @@
          (sqlite . t)))
     #+end_src
 
-*** Ditaa config
+*** ditaa config
    #+begin_src elisp
      (customize-set-variable 'org-ditaa-jar-path (concat no-littering-var-directory "ditaa.jar"))
    #+end_src
 
+*** plantuml config
+    This currently assumes a homebrew installation of plantuml rather than nix:
+    #+begin_src elisp
+      (if IS-MAC
+          (let* ((cmd "brew ls --verbose plantuml | grep '\.jar$'")
+                 (path (s-trim (shell-command-to-string cmd))))
+            (setq org-plantuml-jar-path path)))
+    #+end_src
 ** When editing a code snippet, use current window rather opening a new one
 
    #+begin_src elisp
