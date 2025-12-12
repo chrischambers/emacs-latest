@@ -345,6 +345,8 @@ Returns them as a list to be used in an interactive call."
 (defun my/clojure-merge-requires (&rest libspecs)
   "Consolidates top-level requires (and provided libspecs) into `ns' form."
   (interactive (cljh-read-multiple-strings "Provide libspecs (RET to finish): "))
+  (when (buffer-modified-p)
+    (save-buffer))
   (apply #'cljh-merge-requires libspecs))
 
 (setq cljh-test-template
