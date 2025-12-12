@@ -11,7 +11,7 @@
 #+end_src
 
 * Dictionaries
-** COMMENT Dictionary Config
+** Dictionary Config
    #+begin_src elisp
      (use-package dictionary-config
        :no-require t
@@ -57,6 +57,7 @@
        :hook (emacs-startup . global-jinx-mode)
        :bind (("M-$" . jinx-correct)
               ("C-M-$" . jinx-languages)
+              ([remap ispell-buffer] . jinx-correct-all)
               ([remap ispell-word] . jinx-correct)
               ([remap evil-next-flyspell-error] . jinx-next)
               ([remap evil-prev-flyspell-error] . jinx-previous)))
