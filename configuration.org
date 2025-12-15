@@ -291,3 +291,18 @@
    #+begin_src elisp
      (use-package webkit-color-picker)
    #+end_src
+** org-xournalpp ([[https://gitlab.com/vherrmann/org-xournalpp][github]])
+   #+begin_src elisp
+     (use-package org-xournalpp
+       :straight (org-xournalpp
+                  :type git
+                  :host gitlab
+                  :repo "vherrmann/org-xournalpp"
+                  :files ("resources" "*.el"))
+
+       :config
+       (when IS-MAC
+         (customize-set-variable
+          'org-xournalpp-executable "/Applications/Xournal++.app/Contents/MacOS/xournalpp"))
+       (add-hook 'org-mode-hook 'org-xournalpp-mode))
+   #+end_src
