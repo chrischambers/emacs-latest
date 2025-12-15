@@ -359,6 +359,33 @@ Returns them as a list to be used in an interactive call."
         %s
         )))")
 
+(setq cljh-private-test-template
+      "
+(deftest %s
+    (testing \"it returns correct values for known inputs\"
+      (are [%s expected] (= expected ((var sut/%s) %s))
+        %s
+        )))")
+
+
+(defun cljh--make-normal-test (ns name params param-string test-name)
+  (cljh-merge-requires
+   "[clojure.test :as test :refer [are deftest is testing]]"
+   "[respeced.test :refer [check successful?]]"
+   (format "[%s :refer [%s]]" ns name))
+  (goto-char (point-max))
+  (insert
+   (format cljh-test-template
+           test-name
+           name
+           param-string
+           name
+           param-string
+           (s-join " " (-repeat (1+ (length params)) "1")))))
+
+(defun cljh--make-private-test (ns name param-string test-name)
+  )
+
 (defun cljh--jump-to-test ()
   (let ((current-fn (cljh-defn-node-at (point))))
     (if (not current-fn)
@@ -379,20 +406,7 @@ Returns them as a list to be used in an interactive call."
             (save-buffer)
             (sit-for 0.5)
             (save-buffer)
-
-            (cljh-merge-requires
-             "[clojure.test :as test :refer [are deftest is testing]]"
-             "[respeced.test :refer [check successful?]]"
-             (format "[%s :refer [%s]]" ns name))
-            (goto-char (point-max))
-            (insert
-             (format cljh-test-template
-                     test-name
-                     name
-                     param-string
-                     name
-                     param-string
-                     (s-join " " (-repeat (1+ (length params)) "1"))))
+            (cljh--make-normal-test ns name params param-string test-name)
             (call-interactively #'apheleia-format-buffer)))))))
 
 (defun cljh--jump-to-implementation ()
