@@ -162,6 +162,14 @@ contain a vector form."
       treesit-node-text
       substring-no-properties))
 
+(defun cljh-private? (node)
+  (string-suffix-p "-"
+                   (-> node
+                       (treesit-node-child 1)
+                       (treesit-node-child-by-field-name "name")
+                       treesit-node-text
+                       substring-no-properties)))
+
 ;; Position Operations:
 ;; --------------------------------------------------------------------------
 (defun cljh-def-node-at (pos)
@@ -383,8 +391,18 @@ Returns them as a list to be used in an interactive call."
            param-string
            (s-join " " (-repeat (1+ (length params)) "1")))))
 
-(defun cljh--make-private-test (ns name param-string test-name)
-  )
+(defun cljh--make-private-test (ns name params param-string test-name)
+  (cljh-merge-requires
+   "[clojure.test :as test :refer [are deftest is testing]]"
+   (format "[%s :as sut]" ns))
+  (goto-char (point-max))
+  (insert
+   (format cljh-private-test-template
+           test-name
+           param-string
+           name
+           param-string
+           (s-join " " (-repeat (1+ (length params)) "1")))))
 
 (defun cljh--jump-to-test ()
   (let ((current-fn (cljh-defn-node-at (point))))
@@ -406,7 +424,9 @@ Returns them as a list to be used in an interactive call."
             (save-buffer)
             (sit-for 0.5)
             (save-buffer)
-            (cljh--make-normal-test ns name params param-string test-name)
+            (if (cljh-private? current-fn)
+                (cljh--make-private-test ns name params param-string test-name)
+              (cljh--make-normal-test ns name params param-string test-name))
             (call-interactively #'apheleia-format-buffer)))))))
 
 (defun cljh--jump-to-implementation ()
