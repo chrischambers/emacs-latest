@@ -954,7 +954,7 @@ which aren't absolutely necessary, but are very important.
       :hook (after-init . global-whitespace-cleanup-mode))
   #+end_src
 
-* <<<origami>>>: Folding ([[https://github.com/gregsexton/origami.el][github]])
+* COMMENT <<<origami>>>: Folding ([[https://github.com/gregsexton/origami.el][github]])
   #+begin_src elisp
     (use-package origami
       :hook (after-init . global-origami-mode))
