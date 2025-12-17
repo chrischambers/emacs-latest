@@ -749,13 +749,6 @@ which aren't absolutely necessary, but are very important.
     (customize-set-variable 'enable-recursive-minibuffers t)
   #+end_src
 
-* COMMENT <<<so-long-mode>>>: Handle minified files/files with very long line-length gracefully
-  Emacs performs badly with very long lines (e.g. minified JSON)
-
-  #+begin_src elisp
-    (global-so-long-mode t)
-  #+end_src
-
 * <<<avy>>>([[https://github.com/abo-abo/avy][github]]) Quick cursor movement
   There's a great explanation of the way to use avy [[https://pragmaticemacs.wordpress.com/2016/04/08/super-efficient-movement-using-avy/][here]].
 
