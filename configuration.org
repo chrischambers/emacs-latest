@@ -112,6 +112,7 @@
     #+begin_src elisp
     (my/config-load "config/applications.org")
     #+end_src
+
 * [[./config/ai.org][AI configuration]]
     #+begin_src elisp
     (my/config-load "config/ai.org")

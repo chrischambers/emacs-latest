@@ -256,9 +256,45 @@
            (interactive)
            (let* (;; (consult--source-buffer (plist-put consult--source-buffer :hidden t))
                   ;; (consult--source-buffer (plist-put consult--source-buffer :default nil))
-                  (consult-buffer-sources (-remove-item 'consult--source-recent-file
+                  (consult-buffer-sources (-remove-item 'consult-source-recent-file
                                                         consult-buffer-sources))
                   (consult-buffer-sources (add-to-list 'consult-buffer-sources
                                                        'beframe-consult-source)))
              (consult-buffer)))))
    #+end_src
+
+* OSX-specific Optimisations
+** Focus Frame on Creation
+ #+begin_src elisp
+   (when IS-MAC
+     (defun my-focus-emacs-frame (frame)
+       (start-process "focus-emacs" nil "osascript" "-e" "tell application \"Emacs\" to activate"))
+     (add-hook 'after-make-frame-functions 'my-focus-emacs-frame))
+ #+end_src
+
+** Better CMD-Q functionality
+ #+begin_src elisp
+   (defun only-current-frame-p ()
+     "Return t if the current frame is the only remaining frame.
+
+   Note that we're actually checking <= 2 frames, as it seems that with
+   my setup there's 2 by default:
+
+   `(frame-list)'
+
+   (#<frame Ɛ:  *Minibuf-1* 0x14a341f48> #<frame F1 0x149036bf0>)
+   "
+     (<= (length (frame-list)) 2))
+
+   (defun my/quit-or-delete-frame ()
+     "Quit Emacs if this is the only frame, otherwise delete the current frame."
+     (interactive)
+     (if (only-current-frame-p)
+         (save-buffers-kill-emacs) ; Perform usual quit action
+       ;; (delete-frame) ; Delete current frame
+       (save-buffers-kill-terminal)
+       ))
+
+   (when IS-MAC
+     (global-set-key (kbd "s-q") 'my/quit-or-delete-frame))
+ #+end_src
