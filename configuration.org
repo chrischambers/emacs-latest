@@ -56,6 +56,7 @@
 
 * Variables to make =safe-local-variable=
   #+begin_src elisp
+    (put 'smie-indent-basic 'safe-local-variable #'integerp)
     (put 'projectile-project-name 'safe-local-variable #'stringp)     ; projectile
     (put 'jinx-local-words 'safe-local-variable #'stringp)            ; jinx
     (put 'cider-preferred-build-tool 'safe-local-variable #'symbolp)  ; cider
