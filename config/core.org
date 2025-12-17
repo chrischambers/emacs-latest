@@ -161,23 +161,18 @@ which aren't absolutely necessary, but are very important.
 
 *** Initial display
    #+begin_src elisp
-     (if (display-graphic-p)
-         (progn
-           (setq frame-resize-pixelwise 1)
-           ;; `default-frame-alist': defaults for all frames
-           (setq default-frame-alist
-                 '((width . 172)  ; chars
-                   (height . 44)  ; lines
-                   (internal-border-width . 24)  ; padding, ala nano-emacs
-                   (vertical-scroll-bars . nil)
-                   (tool-bar-lines . 0)))
-           ;; `initial-frame-alist': defaults only for first frame
-           (setq initial-frame-alist default-frame-alist)
-           ;;(setq initial-frame-alist
-           ;;      '((width . 172)  ; chars
-           ;;        (height . 44)  ; lines
-           ;;        ))
-           ))
+     (setq frame-resize-pixelwise 1)
+
+     ;; `default-frame-alist': defaults for all frames
+     (setq default-frame-alist
+           '((width . 172)  ; chars
+             (height . 44)  ; lines
+             (internal-border-width . 24)  ; padding, ala nano-emacs
+             (vertical-scroll-bars . nil)
+             (tool-bar-lines . 0)))
+
+     ;; `initial-frame-alist': defaults only for first frame
+     (setq initial-frame-alist default-frame-alist)
    #+end_src
 
 *** COMMENT Rounded/Transparent title bars
