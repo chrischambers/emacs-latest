@@ -172,6 +172,7 @@ which aren't absolutely necessary, but are very important.
                    (vertical-scroll-bars . nil)
                    (tool-bar-lines . 0)))
            ;; `initial-frame-alist': defaults only for first frame
+           (setq initial-frame-alist default-frame-alist)
            ;;(setq initial-frame-alist
            ;;      '((width . 172)  ; chars
            ;;        (height . 44)  ; lines
@@ -959,9 +960,10 @@ which aren't absolutely necessary, but are very important.
       :hook (after-init . global-whitespace-cleanup-mode))
   #+end_src
 
-* COMMENT <<<origami>>>: Folding ([[https://github.com/gregsexton/origami.el][github]])
+* <<<origami>>>: Folding ([[https://github.com/gregsexton/origami.el][github]])
   #+begin_src elisp
     (use-package origami
+      :straight (origami :host github :repo "elp-revive/origami.el")
       :hook (after-init . global-origami-mode))
   #+end_src
 
