@@ -13,6 +13,8 @@
 * <<<elfeed>>>
   #+begin_src elisp
     (use-package elfeed
+      :defer 2
+      :commands elfeed
       :custom
       (elfeed-feeds '("https://blog.tecosaur.com/tmio/rss.xml")))
   #+end_src
@@ -76,7 +78,7 @@
       (leader "aC" '(calibredb :which-key "calibre")))
   #+end_src
 
-* <<<ERC>>>: Emacs IRC
+* COMMENT <<<ERC>>>: Emacs IRC
   #+begin_src elisp
     (use-package erc
       :preface

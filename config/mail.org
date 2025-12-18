@@ -92,7 +92,8 @@
 * <<<notmuch>>> ([[https://notmuchmail.org/][homepage]])
   #+begin_src elisp
     ;; this installs `notmuch' as a dependency
-    (use-package ol-notmuch)
+    (use-package ol-notmuch
+        :defer 1)
   #+end_src
 
   #+begin_src elisp

@@ -601,13 +601,14 @@
                                '("ROAM_ALIASES" "ROAM_EXCLUDE" "filetags")))
       (org-roam-completion-everywhere t)
       :config
-      (if IS-MAC
-        ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
-        ;; (customize-set-variable 'org-roam-graph-viewer (executable-find "gapplin"))
-        (customize-set-variable 'org-roam-graph-viewer (executable-find "firefox"))
-        (customize-set-variable 'org-roam-graph-viewer (executable-find "chromium")))
+      ;; (if IS-MAC
+      ;;   ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
+      ;;   ;; (customize-set-variable 'org-roam-graph-viewer (executable-find "gapplin"))
+      ;;   (customize-set-variable 'org-roam-graph-viewer (executable-find "firefox"))
+      ;;   (customize-set-variable 'org-roam-graph-viewer (executable-find "chromium")))
       ;; (custom-set-faces '(org-roam-link ((t (:inherit org-link :foreground "#61bfff")))))
-      (org-roam-db-autosync-mode)
+
+      ;; (org-roam-db-autosync-mode)
       (add-to-list 'display-buffer-alist
                    '("\\*org-roam\\*"
                      (display-buffer-in-direction)
@@ -880,6 +881,7 @@
   #+begin_src elisp
     (use-package org-roam-bibtex
       :after org-roam
+      :defer 2
       :custom
       (orb-roam-ref-format "org-ref-v3")
       :config
@@ -1094,6 +1096,7 @@
 * <<<org-chef>>> ([[https://github.com/Chobbes/org-chef][github]])
   #+begin_src elisp
     (use-package org-chef
+      :defer 1
       :preface
       (defun my/recipe-to-name (recipe)
         (when recipe

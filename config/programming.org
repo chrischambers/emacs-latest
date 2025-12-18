@@ -1840,7 +1840,8 @@
     #+end_src
 ** Svelte
    #+begin_src elisp
-     (use-package svelte-mode)
+     (use-package svelte-mode
+       :commands svelte-mode)
    #+end_src
 
 * TODO Configure SQL(i) repl-toggle correctly

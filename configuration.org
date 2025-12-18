@@ -9,6 +9,10 @@
   #+begin_src elisp
     ;; -*- lexical-binding: t -*-
   #+end_src
+* COMMENT =use-package= profiling
+   #+begin_src elisp
+     (setq use-package-compute-statistics t)
+   #+end_src
 
 * Set personal information
   #+begin_src elisp

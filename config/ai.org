@@ -24,6 +24,7 @@
               (if (functionp secret)
                   (funcall secret)
                 secret)))))
+      :commands gptel
       :config
       (gptel-make-anthropic "Claude" :stream t :key #'my/anthropic-api-key)
       (gptel-make-openai "llama-cpp"
