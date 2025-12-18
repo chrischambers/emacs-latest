@@ -584,6 +584,7 @@
 
     (use-package org-roam
       :after org
+      :defer t
       :straight (org-roam :type git
                           :host github
                           :repo "org-roam/org-roam"
@@ -607,8 +608,11 @@
       ;;   (customize-set-variable 'org-roam-graph-viewer (executable-find "firefox"))
       ;;   (customize-set-variable 'org-roam-graph-viewer (executable-find "chromium")))
       ;; (custom-set-faces '(org-roam-link ((t (:inherit org-link :foreground "#61bfff")))))
+      (add-hook 'emacs-startup-hook
+            (lambda ()
+              (run-with-idle-timer
+               1 nil #'org-roam-db-autosync-mode)))
 
-      ;; (org-roam-db-autosync-mode)
       (add-to-list 'display-buffer-alist
                    '("\\*org-roam\\*"
                      (display-buffer-in-direction)
