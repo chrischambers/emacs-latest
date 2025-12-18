@@ -611,7 +611,7 @@
       (add-hook 'emacs-startup-hook
             (lambda ()
               (run-with-idle-timer
-               1 nil #'org-roam-db-autosync-mode)))
+               5 nil #'org-roam-db-autosync-mode)))
 
       (add-to-list 'display-buffer-alist
                    '("\\*org-roam\\*"
