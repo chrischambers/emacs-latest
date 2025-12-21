@@ -601,6 +601,8 @@
                                org-default-properties
                                '("ROAM_ALIASES" "ROAM_EXCLUDE" "filetags")))
       (org-roam-completion-everywhere t)
+      (org-roam-file-exclude-regexp
+       (list "^#attachments/" "^\\.direnv/"))
       :config
       ;; (if IS-MAC
       ;;   ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
