@@ -269,65 +269,13 @@
 
    #+begin_src elisp
      (defun my/org-build-latex-previews (dir)
-       "Rebuild LaTeX previews in all .org files under DIR."
-       (interactive "DDirectory: ")
-       (let ((org-files (directory-files-recursively dir "\\.org$")))
-         (dolist (file org-files)
-           (message "Processing %s" file)
-           (with-current-buffer (find-file-noselect file)
-             ;; Disable confirmation prompts for LaTeX previews
-             (let ((org-startup-with-latex-preview nil))
-               (org-mode) ;; Ensure org-mode is enabled
-               ;; Remove old previews
-               (org-clear-latex-preview)
-               ;; Rebuild previews in the whole buffer
-               (org-latex-preview '(16)) ;; C-u C-u calls previews for entire buffer
-               ;; Optionally save the buffer if you want to persist preview overlays (not needed usually)
-               (when (buffer-modified-p)
-                 (message "Writing buffer %s" (buffer-name))
-                 (save-buffer)))
-             ;; Close the buffer without saving if you opened it just for preview generation
-             (kill-buffer)))))
+       "Rebuild LaTeX previews in all .org files under DIR.
 
-     (defun my/async-org-build-latex-previews (dir)
-       "Rebuild LaTeX previews in all .org files under DIR asynchronously."
-       (interactive "DDirectory: ")
-       (async-start
-        `(lambda ()
-           (let ((log)
-                 (org-files (directory-files-recursively ,dir "\\.org$")))
-             ,(async-inject-variables "org-latex")
-             ,(async-inject-variables "org-preview")
-             (push (format "latex: %s" (executable-find "latex")) log)
-             (push (format "dvipng: %s" (executable-find "dvipng")) log)
-             (push (format "org-preview-latex-default-process: %s" org-preview-latex-default-process) log)
-             (dolist (file org-files)
-               (push (format "Processing %s" file) log)
-               (with-current-buffer (find-file-noselect file)
-                 ;; Disable confirmation prompts for LaTeX previews
-                 (let ((org-startup-with-latex-preview nil))
-                   (org-mode) ;; Ensure org-mode is enabled
-                   ;; Remove old previews
-                   (org-clear-latex-preview)
-                   ;; Rebuild previews in the whole buffer
-                   (org-latex-preview '(16)) ;; C-u C-u calls previews for entire buffer
-                   ;; Optionally save the buffer if you want to persist preview overlays (not needed usually)
-                   (when (buffer-modified-p)
-                     (push (format "Writing buffer %s" (buffer-name)) log)
-                     (save-buffer)))
-                 ;; Close the buffer without saving if you opened it just for preview generation
-                 (kill-buffer)))
-             (nreverse log)))
-        (lambda (log)
-          (progn
-            (message "Latex rebuild finished asynchronously.")
-            (inspect log)))))
-
-     (defconst my/org-latex-fragment-regexp
-       "\\$[^$]\\|\\\\(\\|\\\\\\[\\|#\\+begin_\\(equation\\|align\\|math\\)"
-       "Quick test for LaTeX fragments in Org.")
-
-     (defun my/org-batch-generate-latex-previews (dir)
+     Note: this paradigm of reusing a temp buffer, looping over the files,
+     inserting their contents, processing and suppressing the save flag is
+     much faster than simply looping over the files, opening, processing and
+     killing them.
+     "
        (require 'org)
 
        ;; Required in batch
@@ -352,6 +300,53 @@
                ;; Silence modification state
                (set-buffer-modified-p nil))))
          count))
+
+     (defun my/org-build-latex-previews-subprocess (dir)
+       "Launch `~/bin/emacs-generate-latex-previews' helper."
+       (interactive "DDirectory: ")
+       (let ((process-environment
+              (cons "TERM=xterm-256color" process-environment)))
+         (start-process
+          "emacs-generate-latex-previews"
+          "*emacs-generate-latex-previews*"
+          "emacs-generate-latex-previews" dir)))
+
+     (defun my/async-org-build-latex-previews (dir)
+       "This doesn't work correctly, as `org--latex-preview-region' requires a
+     graphical interface, but the async process is headless.
+
+     I'm keeping it around for the useful patterns - i.e. pushing onto the
+     log, injecting variables.
+     "
+       (interactive "DDirectory: ")
+       (async-start
+        `(lambda ()
+           (let ((log)
+                 (org-files (directory-files-recursively ,dir "\\.org$")))
+             ,(async-inject-variables "org-latex")
+             ,(async-inject-variables "org-preview")
+             (push (format "latex: %s" (executable-find "latex")) log)
+             (push (format "dvipng: %s" (executable-find "dvipng")) log)
+             (push (format "org-preview-latex-default-process: %s" org-preview-latex-default-process) log)
+             (dolist (file org-files)
+               (push (format "Processing %s" file) log)
+               (with-current-buffer (find-file-noselect file)
+                 ;; Disable confirmation prompts for LaTeX previews
+                 (let ((org-startup-with-latex-preview nil))
+                   (org-mode) ;; Ensure org-mode is enabled
+                   (org-clear-latex-preview (point-min) (point-max))
+                   (org--latex-preview-region (point-min) (point-max))
+                   (when (buffer-modified-p)
+                     (push (format "Writing buffer %s" (buffer-name)) log)
+                     (save-buffer)))
+                 ;; Close the buffer without saving if you opened it just for preview generation
+                 (kill-buffer)))
+             (nreverse log)))
+        (lambda (log)
+          (progn
+            (message "Latex rebuild finished asynchronously.")
+            (inspect log)))))
+
    #+end_src
 
 ** COMMENT hyperbole ([[https://gitthub.com/rswgnu/hyperbole][github]])
