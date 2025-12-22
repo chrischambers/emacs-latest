@@ -260,8 +260,15 @@
     It also prompts interactively during the run if file contents have changed
     as a result of opening + saving: might be best to just have this
     auto-confirmed somehow?
+    #+begin_src elisp
+      (use-package async
+        :config
+        (autoload 'dired-async-mode "dired-async.el" nil t)
+        (dired-async-mode 1))
+    #+end_src
+
    #+begin_src elisp
-     (defun my/org-rebuild-latex-previews-in-dir (dir)
+     (defun my/org-build-latex-previews (dir)
        "Rebuild LaTeX previews in all .org files under DIR."
        (interactive "DDirectory: ")
        (let ((org-files (directory-files-recursively dir "\\.org$")))
@@ -270,16 +277,81 @@
            (with-current-buffer (find-file-noselect file)
              ;; Disable confirmation prompts for LaTeX previews
              (let ((org-startup-with-latex-preview nil))
-               (org-mode)  ;; Ensure org-mode is enabled
+               (org-mode) ;; Ensure org-mode is enabled
                ;; Remove old previews
                (org-clear-latex-preview)
                ;; Rebuild previews in the whole buffer
                (org-latex-preview '(16)) ;; C-u C-u calls previews for entire buffer
                ;; Optionally save the buffer if you want to persist preview overlays (not needed usually)
-               ;; (save-buffer)
-               )
+               (when (buffer-modified-p)
+                 (message "Writing buffer %s" (buffer-name))
+                 (save-buffer)))
              ;; Close the buffer without saving if you opened it just for preview generation
              (kill-buffer)))))
+
+     (defun my/async-org-build-latex-previews (dir)
+       "Rebuild LaTeX previews in all .org files under DIR asynchronously."
+       (interactive "DDirectory: ")
+       (async-start
+        `(lambda ()
+           (let ((log)
+                 (org-files (directory-files-recursively ,dir "\\.org$")))
+             ,(async-inject-variables "org-latex")
+             ,(async-inject-variables "org-preview")
+             (push (format "latex: %s" (executable-find "latex")) log)
+             (push (format "dvipng: %s" (executable-find "dvipng")) log)
+             (push (format "org-preview-latex-default-process: %s" org-preview-latex-default-process) log)
+             (dolist (file org-files)
+               (push (format "Processing %s" file) log)
+               (with-current-buffer (find-file-noselect file)
+                 ;; Disable confirmation prompts for LaTeX previews
+                 (let ((org-startup-with-latex-preview nil))
+                   (org-mode) ;; Ensure org-mode is enabled
+                   ;; Remove old previews
+                   (org-clear-latex-preview)
+                   ;; Rebuild previews in the whole buffer
+                   (org-latex-preview '(16)) ;; C-u C-u calls previews for entire buffer
+                   ;; Optionally save the buffer if you want to persist preview overlays (not needed usually)
+                   (when (buffer-modified-p)
+                     (push (format "Writing buffer %s" (buffer-name)) log)
+                     (save-buffer)))
+                 ;; Close the buffer without saving if you opened it just for preview generation
+                 (kill-buffer)))
+             (nreverse log)))
+        (lambda (log)
+          (progn
+            (message "Latex rebuild finished asynchronously.")
+            (inspect log)))))
+
+     (defconst my/org-latex-fragment-regexp
+       "\\$[^$]\\|\\\\(\\|\\\\\\[\\|#\\+begin_\\(equation\\|align\\|math\\)"
+       "Quick test for LaTeX fragments in Org.")
+
+     (defun my/org-batch-generate-latex-previews (dir)
+       (require 'org)
+
+       ;; Required in batch
+       (setq org-preview-latex-default-process 'dvisvgm)
+       (setq org-startup-with-latex-preview nil)
+
+       (let ((files (directory-files-recursively dir "\\.org$"))
+             (count 0))
+         (dolist (file files)
+           (with-temp-buffer
+             (let ((kill-buffer-query-functions nil))
+               (insert-file-contents file)
+               (setq buffer-file-name file)
+               (org-mode)
+
+               ;; Skip if no LaTeX fragments anywhere in file
+               (goto-char (point-min))
+               (org-clear-latex-preview)
+               (org-latex-preview '(16))
+               (setq count (1+ count))
+
+               ;; Silence modification state
+               (set-buffer-modified-p nil))))
+         count))
    #+end_src
 
 ** COMMENT hyperbole ([[https://gitthub.com/rswgnu/hyperbole][github]])
