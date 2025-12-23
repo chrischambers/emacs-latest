@@ -118,7 +118,7 @@
        "C-n"            #'next-line-or-history-element
        "C-p"            #'previous-line-or-history-element))
   #+end_src
-** IN-PROGRESS Attempt at custom sorting function
+** IN-PROGRESS COMMENT Attempt at custom sorting function
    :LOGBOOK:
    - State "IN-PROGRESS" from "TODO"          [2024-01-14 Sun 21:28]
    :END:
@@ -490,7 +490,7 @@
       (completion-styles '(hotfuzz)))  ; incompatible with orderless, as always matches
   #+end_src
 
-* COMMENT fussy
+* fussy
   #+begin_src elisp
     ;; (setq fussy-filter-fn 'fussy-filter-default)
     ;; (setq fussy-filter-fn 'fussy-filter-orderless)
@@ -505,12 +505,12 @@
     ;;   (setq fussy-score-fn 'flx-rs-score)
     ;;   (flx-rs-load-dyn))
 
-    (use-package fuz
-      :straight (fuz :type git :host github :repo "rustify-emacs/fuz.el")
-      :config
-      (setq fussy-score-fn 'fussy-fuz-score)
-      (unless (require 'fuz-core nil t)
-        (fuz-build-and-load-dymod)))
+    ;; (use-package fuz
+    ;;   :straight (fuz :type git :host github :repo "rustify-emacs/fuz.el")
+    ;;   :config
+    ;;   (setq fussy-score-fn 'fussy-fuz-score)
+    ;;   (unless (require 'fuz-core nil t)
+    ;;     (fuz-build-and-load-dymod)))
 
     ;; (use-package liquidmetal
     ;;   :ensure t
@@ -518,16 +518,16 @@
     ;;   :config
     ;;   (setq fussy-score-fn 'fussy-liquidmetal-score))
 
-    ;; (use-package fzf-native
-    ;;   :ensure t
-    ;;   :straight
-    ;;   (fzf-native
-    ;;    :repo "dangduc/fzf-native"
-    ;;    :host github
-    ;;    :files (:defaults "bin"))
-    ;;   :config
-    ;;   (setq fussy-score-fn 'fussy-fzf-native-score)
-    ;;   (fzf-native-load-dyn))
+    (use-package fzf-native
+      :ensure t
+      :straight
+      (fzf-native
+       :repo "dangduc/fzf-native"
+       :host github
+       :files (:defaults "bin"))
+      :config
+      (setq fussy-score-fn 'fussy-fzf-native-score)
+      (fzf-native-load-dyn))
 
     ;; (use-package hotfuzz
     ;;   :config
@@ -536,8 +536,7 @@
     (use-package fussy
       :straight (fussy :type git :host github :repo "jojojames/fussy")
       :custom
-      ;; (fussy-use-cache t)
-      (fussy-use-cache nil) ; avoid cache whilst testing
+      (fussy-use-cache t)
       (fussy-compare-same-score-fn 'fussy-histlen->strlen<)
 
       ;; For example, project-find-file uses 'project-files which uses
@@ -545,9 +544,19 @@
       ;; flx.
       (completion-category-defaults nil)
       (completion-category-overrides nil)
+      (fussy-score-ALL-fn 'fussy-fzf-score)
+      (fussy-filter-fn 'fussy-filter-orderless-flex)
       :config
-      (setq fussy-filter-fn 'fussy-filter-orderless-flex)
+      (advice-add 'corfu--capf-wrapper :before 'fussy-wipe-cache)
+      (add-hook 'corfu-mode-hook
+          (lambda ()
+            (setq-local fussy-max-candidate-limit 5000
+                        fussy-default-regex-fn 'fussy-pattern-first-letter
+                        fussy-prefer-prefix nil)))
+
       (push 'fussy completion-styles)
+      (fussy-setup)
+      (fussy-eglot-setup)
 
       ;; `eglot' defaults to flex, so set an override to point to fussy instead.
       (with-eval-after-load 'eglot
