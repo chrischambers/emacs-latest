@@ -430,11 +430,11 @@
                do
                (font-lock-add-keywords
                 nil
-                `((,(first pair)
+                `((,(car pair)
                    (1 (prog1 ()
                         (compose-region (match-beginning 1)
                                         (match-end 1)
-                                        ,(second pair)))))))))
+                                        ,(cadr pair)))))))))
 
     (add-hook 'clojure-ts-mode-hook #'my/clojure-ligatures)
   #+end_src
