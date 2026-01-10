@@ -17,7 +17,8 @@
        :mode ("\\.nix\\'" "\\.nix.in\\'")
        :config
        (require 'eglot)
-       (add-to-list 'eglot-server-programs '(nix-mode . ("nil"))))
+       ;; (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+       (add-to-list 'eglot-server-programs '(nix-mode . ("nixd"))))
    #+end_src
 
 *** Nix DRV Mode
