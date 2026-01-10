@@ -10,7 +10,7 @@
     ;; -*- lexical-binding: t -*-
   #+end_src
 
-* COMMENT Better defaults for window management?
+* Better defaults for window management?
   See: https://github.com/nex3/perspective-el#some-musings-on-emacs-window-layouts
 
   #+begin_src elisp
@@ -44,6 +44,125 @@
       then replace display-buffer-same-window with
       display-buffer-pop-up-window.)
   #+end_quote
+
+* <<<Beframe>>> ([[https://github.com/protesilaos/beframe][github]]/[[https://protesilaos.com/emacs/beframe][manual]])
+  #+begin_src elisp
+    (use-package beframe
+      :preface
+      (defun my/infer-frame-name (frame name)
+        (when-let (((frame-list))
+                   (buffer (car (frame-parameter frame 'buffer-list)))
+                   (file-name (when (bufferp buffer) (buffer-file-name buffer)))
+                   (buf-name (buffer-name buffer))
+                   (dir (with-current-buffer buffer (or (vc-root-dir) default-directory))))
+          (format "Ɛ: <%s>" (or projectile-project-name
+                                (projectile-project-name dir)))))
+
+      (defun my/rename-frame (frame &optional name)
+        (interactive
+         (let ((select-frame (beframe--frame-prompt :force-even-if-one)))
+           (list
+            (beframe--frame-object select-frame)
+            (when current-prefix-arg
+              (read-string
+               (format "Rename the frame now called `%s' to: "
+                       select-frame)
+               nil 'beframe--rename-frame-history select-frame)))))
+
+        (modify-frame-parameters
+         frame
+         (list (cons 'name (my/infer-frame-name frame name)))))
+
+      :hook
+      (after-init . (lambda () (require 'beframe)))
+      :custom
+      (beframe-rename-function #'my/rename-frame)
+      (beframe-functions-in-frames '(my/switch-project-new-frame))
+      :config
+      (beframe-mode 1)
+      (customize-set-variable
+       'beframe-global-buffers
+       (-concat beframe-global-buffers
+                '("Async-native-compile-log"
+                  "\\*Warnings\\*"
+                  "\\*Help\\*"
+                  "\\*info\\*"))))
+  #+end_src
+
+** =consult-buffer= with =beframe=
+   Stolen from: [[https://protesilaos.com/emacs/beframe][Beframe (beframe.el) | Protesilaos Stavrou]]
+   #+begin_src elisp
+     (with-eval-after-load 'beframe
+       (defvar consult-buffer-sources)
+       (declare-function consult--buffer-state "consult")
+
+       (with-eval-after-load 'consult
+         ;; (consult-customize consult--source-buffer :hidden t :default nil)
+
+         (defface beframe-buffer
+           '((t :inherit font-lock-string-face))
+           "Face for `consult' framed buffers.")
+
+         (defun my/beframe-buffer-names-sorted (&optional frame)
+           "Return the list of buffers from `beframe-buffer-names' sorted by visibility.
+     With optional argument FRAME, return the list of buffers of FRAME."
+           (beframe-buffer-names frame :sort #'beframe-buffer-sort-visibility))
+
+         (defvar beframe-consult-source
+           `( :name     "Frame-specific buffers (current frame)"
+              :narrow   ?F
+              :category buffer
+              :face     beframe-buffer
+              :history  beframe-history
+              :items    ,#'my/beframe-buffer-names-sorted
+              :action   ,#'switch-to-buffer
+              :state    ,#'consult--buffer-state))
+         ;; (add-to-list 'consult-buffer-sources 'beframe-consult-source)
+         (defun my/consult-buffer ()
+           (interactive)
+           (let* (;; (consult--source-buffer (plist-put consult--source-buffer :hidden t))
+                  ;; (consult--source-buffer (plist-put consult--source-buffer :default nil))
+                  (consult-buffer-sources (-remove-item 'consult-source-recent-file
+                                                        consult-buffer-sources))
+                  (consult-buffer-sources (add-to-list 'consult-buffer-sources
+                                                       'beframe-consult-source)))
+             (consult-buffer)))))
+   #+end_src
+
+* OSX-specific Optimisations
+** Focus Frame on Creation
+ #+begin_src elisp
+   (when IS-MAC
+     (defun my-focus-emacs-frame (frame)
+       (start-process "focus-emacs" nil "osascript" "-e" "tell application \"Emacs\" to activate"))
+     (add-hook 'after-make-frame-functions 'my-focus-emacs-frame))
+ #+end_src
+
+** Better CMD-Q functionality
+ #+begin_src elisp
+   (defun only-current-frame-p ()
+     "Return t if the current frame is the only remaining frame.
+
+   Note that we're actually checking <= 2 frames, as it seems that with
+   my setup there's 2 by default:
+
+   `(frame-list)'
+
+   (#<frame Ɛ:  *Minibuf-1* 0x14a341f48> #<frame F1 0x149036bf0>)
+   "
+     (<= (length (frame-list)) 2))
+
+   (defun my/quit-or-delete-frame ()
+     "Quit Emacs if this is the only frame, otherwise delete the current frame."
+     (interactive)
+     (if (only-current-frame-p)
+         (save-buffers-kill-emacs) ; Perform usual quit action
+       ;; (delete-frame) ; Delete current frame
+       (save-buffers-kill-terminal)))
+
+   (when IS-MAC
+     (global-set-key (kbd "s-q") 'my/quit-or-delete-frame))
+ #+end_src
 
 * COMMENT <<<persp-mode>>>: Frames with specific buffers ([[https://github.com/Bad-ptr/persp-mode.el][github]])
   #+begin_src elisp
@@ -179,122 +298,3 @@
        (add-to-list 'consult-buffer-sources 'consult--source-workspace))
 
    #+end_src
-* <<<Beframe>>> ([[https://github.com/protesilaos/beframe][github]]/[[https://protesilaos.com/emacs/beframe][manual]])
-  #+begin_src elisp
-    (use-package beframe
-      :preface
-      (defun my/infer-frame-name (frame name)
-        (when-let (((frame-list))
-                   (buffer (car (frame-parameter frame 'buffer-list)))
-                   (file-name (when (bufferp buffer) (buffer-file-name buffer)))
-                   (buf-name (buffer-name buffer))
-                   (dir (with-current-buffer buffer (or (vc-root-dir) default-directory))))
-          (format "Ɛ: <%s>" (or projectile-project-name
-                                (projectile-project-name dir)))))
-
-      (defun my/rename-frame (frame &optional name)
-        (interactive
-         (let ((select-frame (beframe--frame-prompt :force-even-if-one)))
-           (list
-            (beframe--frame-object select-frame)
-            (when current-prefix-arg
-              (read-string
-               (format "Rename the frame now called `%s' to: "
-                       select-frame)
-               nil 'beframe--rename-frame-history select-frame)))))
-
-        (modify-frame-parameters
-         frame
-         (list (cons 'name (my/infer-frame-name frame name)))))
-
-      :hook
-      (after-init . (lambda () (require 'beframe)))
-      :custom
-      (beframe-rename-function #'my/rename-frame)
-      (beframe-functions-in-frames '(my/switch-project-new-frame))
-      :config
-      (beframe-mode 1)
-      (customize-set-variable
-       'beframe-global-buffers
-       (-concat beframe-global-buffers
-                '("Async-native-compile-log"
-                  "\\*Warnings\\*"
-                  "\\*Help\\*"
-                  "\\*info\\*"))))
-  #+end_src
-
-** =consult-buffer= with =beframe=
-   Stolen from: [[https://protesilaos.com/emacs/beframe][Beframe (beframe.el) | Protesilaos Stavrou]]
-   #+begin_src elisp
-     (with-eval-after-load 'beframe
-       (defvar consult-buffer-sources)
-       (declare-function consult--buffer-state "consult")
-
-       (with-eval-after-load 'consult
-         ;; (consult-customize consult--source-buffer :hidden t :default nil)
-
-         (defface beframe-buffer
-           '((t :inherit font-lock-string-face))
-           "Face for `consult' framed buffers.")
-
-         (defun my/beframe-buffer-names-sorted (&optional frame)
-           "Return the list of buffers from `beframe-buffer-names' sorted by visibility.
-     With optional argument FRAME, return the list of buffers of FRAME."
-           (beframe-buffer-names frame :sort #'beframe-buffer-sort-visibility))
-
-         (defvar beframe-consult-source
-           `( :name     "Frame-specific buffers (current frame)"
-              :narrow   ?F
-              :category buffer
-              :face     beframe-buffer
-              :history  beframe-history
-              :items    ,#'my/beframe-buffer-names-sorted
-              :action   ,#'switch-to-buffer
-              :state    ,#'consult--buffer-state))
-         ;; (add-to-list 'consult-buffer-sources 'beframe-consult-source)
-         (defun my/consult-buffer ()
-           (interactive)
-           (let* (;; (consult--source-buffer (plist-put consult--source-buffer :hidden t))
-                  ;; (consult--source-buffer (plist-put consult--source-buffer :default nil))
-                  (consult-buffer-sources (-remove-item 'consult-source-recent-file
-                                                        consult-buffer-sources))
-                  (consult-buffer-sources (add-to-list 'consult-buffer-sources
-                                                       'beframe-consult-source)))
-             (consult-buffer)))))
-   #+end_src
-
-* OSX-specific Optimisations
-** Focus Frame on Creation
- #+begin_src elisp
-   (when IS-MAC
-     (defun my-focus-emacs-frame (frame)
-       (start-process "focus-emacs" nil "osascript" "-e" "tell application \"Emacs\" to activate"))
-     (add-hook 'after-make-frame-functions 'my-focus-emacs-frame))
- #+end_src
-
-** Better CMD-Q functionality
- #+begin_src elisp
-   (defun only-current-frame-p ()
-     "Return t if the current frame is the only remaining frame.
-
-   Note that we're actually checking <= 2 frames, as it seems that with
-   my setup there's 2 by default:
-
-   `(frame-list)'
-
-   (#<frame Ɛ:  *Minibuf-1* 0x14a341f48> #<frame F1 0x149036bf0>)
-   "
-     (<= (length (frame-list)) 2))
-
-   (defun my/quit-or-delete-frame ()
-     "Quit Emacs if this is the only frame, otherwise delete the current frame."
-     (interactive)
-     (if (only-current-frame-p)
-         (save-buffers-kill-emacs) ; Perform usual quit action
-       ;; (delete-frame) ; Delete current frame
-       (save-buffers-kill-terminal)
-       ))
-
-   (when IS-MAC
-     (global-set-key (kbd "s-q") 'my/quit-or-delete-frame))
- #+end_src
