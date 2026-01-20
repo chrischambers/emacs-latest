@@ -51,16 +51,20 @@
    #+end_src
 
 ** Jinx ([[https://github.com/minad/jinx][github]])
+   Dependencies: =nix=, =find=, =dirname=
    #+begin_src elisp
      (use-package jinx
        :straight nil
        :no-require t
        :preface
-       (add-to-list
-        'load-path
-        (s-trim
-         (shell-command-to-string
-          "dirname $(find $(nix path-info nixpkgs#emacsPackages.jinx) -type f -name 'jinx.el')")))
+       (cl-labels ((do (msg &rest args)
+                     (s-trim (shell-command-to-string (apply #'format msg args)))))
+         (let* ((pkg "nixpkgs#emacsPackages.jinx")
+                (built? (do "nix build %s" pkg))
+                (jinx-path (do "nix path-info %s" pkg))
+                (jinx-el-dir
+                 (do "dirname $(find '%s' -type f -name 'jinx.el')" jinx-path)))
+           (add-to-list 'load-path jinx-el-dir)))
        :hook (emacs-startup . global-jinx-mode)
        :bind (("M-$" . jinx-correct)
               ("C-M-$" . jinx-languages)
