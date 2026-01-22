@@ -379,3 +379,10 @@
           'org-xournalpp-executable "/Applications/Xournal++.app/Contents/MacOS/xournalpp"))
        (add-hook 'org-mode-hook 'org-xournalpp-mode))
    #+end_src
+
+* Config which should come last
+** Update all =transient= menus to use =q= to quit
+  #+begin_src elisp
+    (with-eval-after-load 'transient
+      (transient-bind-q-to-quit))
+  #+end_src
