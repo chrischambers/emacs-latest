@@ -1019,3 +1019,12 @@ which aren't absolutely necessary, but are very important.
       ('(motion normal) "g]" 'diff-hl-next-hunk)
       ('(motion normal) "g[" 'diff-hl-previous-hunk))
   #+end_src
+* visual-fill-column ([[https://codeberg.org/joostkremers/visual-fill-column][codeberg]]): better soft word-wrapping
+  When word-wrap (i.e. =visual-line-mode=) is toggled, wrap at =fill-column= rather
+  than window edge:
+  #+begin_src elisp
+    (use-package visual-fill-column
+      :config
+      ;; don't use `:hook' for this invocation, see docs:
+      (add-hook 'visual-line-mode-hook #'visual-fill-column-for-vline))
+  #+end_src
