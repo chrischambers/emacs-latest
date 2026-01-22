@@ -118,10 +118,7 @@
        "C-n"            #'next-line-or-history-element
        "C-p"            #'previous-line-or-history-element))
   #+end_src
-** IN-PROGRESS COMMENT Attempt at custom sorting function
-   :LOGBOOK:
-   - State "IN-PROGRESS" from "TODO"          [2024-01-14 Sun 21:28]
-   :END:
+** COMMENT Attempt at custom sorting function
    #+begin_src elisp
      (defun split-into-words (s)
       (replace-regexp-in-string "[-_/\\.]" " " s))
