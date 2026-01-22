@@ -25,13 +25,16 @@
                   (funcall secret)
                 secret)))))
       :commands gptel
+      :hook (gptel-mode . visual-line-mode)
       :config
-      (gptel-make-anthropic "Claude" :stream t :key #'my/anthropic-api-key)
+      (gptel-make-anthropic "Claude"
+        :stream t
+        :key #'my/anthropic-api-key)
       (gptel-make-openai "llama-cpp"
-                       :stream t
-                       :protocol "http"
-                       :host "localhost:11434"
-                       :models '(local-llama))
+        :stream t
+        :protocol "http"
+        :host "localhost:11434"
+        :models '(local-llama))
 
       :custom
       (gptel-default-mode #'org-mode)
