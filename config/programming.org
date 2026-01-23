@@ -315,6 +315,7 @@
        :hook (git-commit-mode . evil-insert-state)
        :custom
        (git-commit-summary-max-length 50)
+       (magit-commit-diff-inhibit-same-window t)
        :general
        (leader
          "g"   '(:ignore t :which-key "git")
