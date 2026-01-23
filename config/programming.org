@@ -144,9 +144,15 @@
 ** Reload Buffer when Toggling Between Implementation and Test
    #+begin_src elisp
      (defun my/projectile-toggle-test-advice (f &rest args)
-       (cider-load-buffer)
-       (apply f args)
-       (cider-load-buffer))
+       (if (derived-mode-p 'clojure-mode)
+           (progn
+             ;; This might seem ridiculous, but the duplicate call seems to be one of
+             ;; the few ways that I can successfully inject the test stub content for
+             ;; a new file:
+             (cider-load-buffer)
+             (apply f args)
+             (cider-load-buffer))
+         (apply f args)))
 
      (advice-add #'projectile-toggle-between-implementation-and-test
                  :around
