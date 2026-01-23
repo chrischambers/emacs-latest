@@ -54,7 +54,7 @@ which aren't absolutely necessary, but are very important.
       (exec-path-from-shell-arguments nil)
       :config
       (when (memq system-type '(gnu/linux darwin))
-        (exec-path-from-shell-initialize)))
+        (add-hook 'emacs-startup-hook #'exec-path-from-shell-initialize)))
   #+end_src
 
 * Startup message (timestamp)
