@@ -143,7 +143,7 @@
          "Tn" '(my/next-theme :which-key "next")))
    #+end_src
 
-** Fix $LaTeX$ background on Theme Change
+** Fix LaTeX background on Theme Change
    Thanks to hlissner - from [[https://github.com/hlissner/emacs-solaire-mode/issues/24][this issue]]:
 
    #+begin_src elisp
