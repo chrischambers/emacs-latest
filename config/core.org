@@ -183,18 +183,16 @@ which aren't absolutely necessary, but are very important.
 *** COMMENT Rounded/Transparent title bars
    #+begin_src elisp
      (when IS-MAC
-       (progn
-         (add-to-list 'default-frame-alist '(undecorated-round . t))
-         ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-         (add-to-list 'default-frame-alist '(ns-appearance . light))))
+       (add-to-list 'default-frame-alist '(undecorated-round . t))
+       ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+       (add-to-list 'default-frame-alist '(ns-appearance . light)))
    #+end_src
 
 *** Set window placement in OSX (laptop)
     #+begin_src elisp
       (when IS-MAC
-        (progn
-          (add-to-list 'initial-frame-alist '(top . 0))
-          (add-to-list 'initial-frame-alist '(left . 0))))
+        (add-to-list 'initial-frame-alist '(top . 0))
+        (add-to-list 'initial-frame-alist '(left . 0)))
     #+end_src
 
 ** Set Frame Title
