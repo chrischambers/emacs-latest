@@ -363,7 +363,7 @@
       (defun my/setup-less-annoying-eldoc ()
         (interactive)
         (eldoc-mode -1)
-        (eldoc-box-hover-mode 1))
+        (eldoc-box-hover-mode -1))
 
       (defvar eglot-disabled-major-modes
         '(emacs-lisp-mode lisp-mode))
@@ -708,9 +708,9 @@
               (f-touch absolute-file-path)
               (find-file absolute-file-path))))
 
-        :hook (cider-mode . (lambda () (set (make-local-variable 'global-eldoc-mode) nil)))
         :config
         (require 'ob-clojure)
+        :hook (cider-mode . (lambda () (eldoc-mode -1)))
         :custom
         (org-babel-clojure-backend 'cider)
         (cider-repl-display-help-banner nil)
