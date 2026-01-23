@@ -342,27 +342,6 @@ which aren't absolutely necessary, but are very important.
      :g/TODO/evil-commentary
      #+end_example
 
-** Provide function for fixing interaction between (minor) mode and evil
-   #+begin_src elisp
-     (defun my/keymap-fix-with-evil-mode (mode &optional hook map)
-       "Allows (minor) mode to use evil as a base, but its keybindings take precedence.
-
-     Solution derived from: https://github.com/emacs-evil/evil/issues/511
-     "
-       (let* ((base (symbol-name mode))
-	      (hook (if hook hook (intern (concat base "-hook"))))
-	      (map (if map map (intern (concat base "-map")))))
-
-	 (evil-set-initial-state mode 'normal)
-	 (eval-after-load mode
-	   '(progn
-	      ;; module's keybindings should have stronger priority than
-	      ;; normal-mode keybindings:
-	      (evil-make-overriding-map map 'normal)
-	      ;; force evil keymaps to update after module loaded:
-	      (add-hook hook #'evil-normalize-keymaps)))))
-   #+end_src
-
 ** Evil ex commands
    View a list of all commands by inspecting =evil-ex-commands=.
 
