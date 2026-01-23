@@ -493,8 +493,7 @@
     ;; (setq fussy-filter-fn 'fussy-filter-orderless)
     ;; (setq fussy-score-fn 'flx-score)
     ;; (setq fussy-default-regex-fn 'fussy-pattern-flex-2)
-    (use-package orderless
-      :ensure t)
+    (use-package orderless)
 
     ;; (use-package flx-rs
     ;;   :straight (flx-rs :repo "jcs-elpa/flx-rs" :fetcher github :files (:defaults "bin"))
