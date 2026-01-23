@@ -282,9 +282,11 @@
      (add-hook 'prog-mode-hook #'my/programming-highlight-terms)
    #+end_src
 ** [[https://github.com/ankurdave/color-identifiers-mode][<<<color-identifiers-mode>>>]]: colour parameters uniquely
+   Potentially expensive - maybe enable ad-hoc?
    #+begin_src elisp
      (use-package color-identifiers-mode
-       :hook (after-init . global-color-identifiers-mode))
+       ;; :hook (after-init . global-color-identifiers-mode)
+       )
    #+end_src
 
 ** [[https://github.com/fanael/rainbow-delimiters][<<<rainbow-delimiters>>>]]: colour matching parentheses
