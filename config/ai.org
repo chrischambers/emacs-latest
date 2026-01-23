@@ -24,7 +24,6 @@
               (if (functionp secret)
                   (funcall secret)
                 secret)))))
-      :commands gptel
       :hook (gptel-mode . visual-line-mode)
       :config
       (gptel-make-anthropic "Claude"
@@ -105,6 +104,7 @@
     Default output should read like high-quality technical notes, not a chat conversation.
     "
        gptel-directives)
+      (setq gptel--system-message (alist-get 'default gptel-directives))
 
       :custom
       (gptel-default-mode #'org-mode)
@@ -125,8 +125,7 @@
   #+begin_src elisp
     (use-package llm-tool-collection
       :straight (:host github :type git :repo "Skissue/llm-tool-collection")
-      :after gptel
-      :config
+      :preface
       (require 'gptel)
       (setq all-llm-tools
             (mapcar (apply-partially #'apply #'gptel-make-tool)
