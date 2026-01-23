@@ -17,17 +17,14 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(straight-use-package 'org)
-
 (straight-use-package 'gcmh)
 (gcmh-mode 1)
 (straight-use-package 'use-package)
 (straight-use-package 'org)
 (org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory))
 
-(eval-when-compile
-  (setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
-  (when (file-exists-p custom-file)
-    (load custom-file)))
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file 'noerror))
 
 (put 'dired-find-alternate-file 'disabled nil)
