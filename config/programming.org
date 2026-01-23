@@ -79,8 +79,8 @@
                             "^ansi$"
                             "sqlite"
                             (symbol-name sql-dialect))))))
-             (add-to-list 'apheleia-mode-alist '(sql-mode . pretier-sql))
-             (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . prettier-sql)))
+       (add-to-list 'apheleia-mode-alist '(sql-mode . prettier-sql))
+       (add-to-list 'apheleia-mode-alist '(sql-interactive-mode . prettier-sql)))
    #+end_src
 
 ** COMMENT Format-all: format all programming files automatically on save ([[https://github.com/lassik/emacs-format-all-the-code][github]])
