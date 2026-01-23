@@ -27,10 +27,10 @@
 
 * Set file paths
   #+begin_src elisp
-    (setq my/resources-directory (concat user-emacs-directory "resources")
+    (setq my/resources-directory (expand-file-name "resources" user-emacs-directory)
           my/notes-directory (file-truename "~/Dropbox/notes")
           my/ebooks-directory (file-truename "~/Ebooks")
-          my/book-notes-directory (concat my/notes-directory "/" "sources"))
+          my/book-notes-directory (expand-file-name "sources" my/notes-directory))
   #+end_src
 
 * Bootstrap config-related functions

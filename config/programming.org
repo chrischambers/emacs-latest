@@ -729,7 +729,7 @@
 
         (cider-test-show-report-on-success t)
 
-        (cider-repl-history-file (concat no-littering-var-directory "cider-history"))
+        (cider-repl-history-file (expand-file-name "cider-history" no-littering-var-directory))
         (cider-repl-wrap-history t)
 
         (cider-auto-select-test-report-buffer nil)

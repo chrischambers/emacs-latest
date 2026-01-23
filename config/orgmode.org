@@ -51,11 +51,11 @@
       (org-directory my/notes-directory)
       (org-archive-location
        (concat
-        (concat org-directory "/#archives/completed_tasks.org")
+        (expand-file-name "#archives/completed_tasks.org" org-directory)
         "::* From %s"))
       (org-log-done 'time)
       ;; (org-log-reschedule 'note)
-      (org-preview-latex-image-directory (concat org-directory "/latex-images/"))
+      (org-preview-latex-image-directory (expand-file-name "latex-images/" org-directory))
       (org-preview-latex-default-process 'dvisvgm)
       (org-format-latex-options
        '(
@@ -249,7 +249,7 @@
     #+begin_src elisp
       (customize-set-variable
        'org-clock-sound
-       (concat my/resources-directory "/" "org-clock-sound.wav"))
+       (expand-file-name "org-clock-sound.wav" my/resources-directory))
     #+end_src
 
 **** Fix for OSX
@@ -270,7 +270,7 @@
      (with-eval-after-load 'org 'general
       (local-leader org-mode-map
         "+" '(org-attach :which-key "attachments..."))
-      (customize-set-variable 'org-attach-id-dir (concat org-directory "/" "#attachments")))
+      (customize-set-variable 'org-attach-id-dir (expand-file-name "#attachments" org-directory)))
    #+end_src
 
 ** <<<org-cliplink>>> ([[https://github.com/rexim/org-cliplink][github]]): Insert link using page-title as description automatically via
@@ -384,7 +384,7 @@
 
 *** ditaa config
    #+begin_src elisp
-     (customize-set-variable 'org-ditaa-jar-path (concat no-littering-var-directory "ditaa.jar"))
+     (customize-set-variable 'org-ditaa-jar-path (expand-file-name "ditaa.jar" no-littering-var-directory))
    #+end_src
 
 *** plantuml config
@@ -694,8 +694,8 @@
     (use-package org-capture
       :straight nil
       :init
-      (setq my/org-capture-templates (concat user-emacs-directory "templates/"))
-      (setq my/default-template (concat my/org-capture-templates "default.org"))
+      (setq my/org-capture-templates (expand-file-name "templates" user-emacs-directory))
+      (setq my/default-template (expand-file-name "default.org" my/org-capture-templates))
       :preface
       (defvar my/captured-title nil)
 
@@ -741,7 +741,7 @@
           (org-id-new)))
 
       :custom
-      (org-default-notes-file (concat org-directory "/todo.org"))
+      (org-default-notes-file (expand-file-name "todo.org" org-directory))
 
       (org-capture-templates
        `(("t" "Task" entry
@@ -749,65 +749,65 @@
           "* TODO %?")
          ("a" "Algorithm" plain
           (file (lambda () (my/get-filepath-from-title "memex/#algorithms")))
-          (file ,(concat my/org-capture-templates "algorithm.org"))
+          (file ,(expand-file-name "algorithm.org" my/org-capture-templates))
           :auto-id t
           :jump-to-captured t)
          ("b" "Book Notes" plain
           (file (lambda () (my/get-filepath-from-title my/book-notes-directory)))
-          (file ,(concat my/org-capture-templates "book-notes.org"))
+          (file ,(expand-file-name "book-notes.org" my/org-capture-templates))
           :jump-to-captured t)
          ("p" "Project" plain
           (file (lambda () (my/get-filepath-from-title "projects" :date)))
-          (file ,(concat my/org-capture-templates "project.org"))
+          (file ,(expand-file-name "project.org" my/org-capture-templates))
           :auto-id t
           :jump-to-captured t)
          ("Q" "Quote" plain (file (lambda () (my/get-filepath-from-title "memex/#quotes")))
-          (file ,(concat my/org-capture-templates "quote.org"))
+          (file ,(expand-file-name "quote.org" my/org-capture-templates))
           :auto-id t)
          ("w" "Word" plain
           (file (lambda () (my/get-filepath-from-title "memex/#words")))
-          (file ,(concat my/org-capture-templates "word.org")))))
+          (file ,(expand-file-name "word.org" my/org-capture-templates)))))
 
       (org-roam-capture-templates
-       `(("d" "default" plain (file ,(concat my/org-capture-templates "default.org"))
+       `(("d" "default" plain (file ,(expand-file-name "default.org" my/org-capture-templates))
           :if-new (file+head "memex/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("q" "quote" plain (file ,(concat my/org-capture-templates "quote.org"))
+         ("q" "quote" plain (file ,(expand-file-name "quote.org" my/org-capture-templates))
           :if-new (file+head "memex/#quotes/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("p" "person" plain (file ,(concat my/org-capture-templates "default.org"))
+         ("p" "person" plain (file ,(expand-file-name "default.org" my/org-capture-templates))
           :if-new (file+head "memex/#people/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("a" "algorithm" plain (file ,(concat my/org-capture-templates "algorithm.org"))
+         ("a" "algorithm" plain (file ,(expand-file-name "algorithm.org" my/org-capture-templates))
           :if-new (file+head "memex/#algorithms/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("c" "category theory" plain (file ,(concat my/org-capture-templates "category_theory.org"))
+         ("c" "category theory" plain (file ,(expand-file-name "category_theory.org" my/org-capture-templates))
           :if-new (file+head "memex/#math/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("e" "exercise" plain (file ,(concat my/org-capture-templates "exercise.org"))
+         ("e" "exercise" plain (file ,(expand-file-name "exercise.org" my/org-capture-templates))
           :if-new (file+head "memex/#exercises/${slug}.org" "#+title: Exercise: ${title}\n")
           :unnarrowed t)
          ("l" "language")
-         ("ln" "natural language" plain (file ,(concat my/org-capture-templates "default.org"))
+         ("ln" "natural language" plain (file ,(expand-file-name "default.org" my/org-capture-templates))
           :if-new (file+head "memex/#languages/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("lp" "programming language" plain (file ,(concat my/org-capture-templates "programming_language.org"))
+         ("lp" "programming language" plain (file ,(expand-file-name "programming_language.org" my/org-capture-templates))
           :if-new (file+head "memex/#programming_languages/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("m" "math" plain (file ,(concat my/org-capture-templates "math.org"))
+         ("m" "math" plain (file ,(expand-file-name "math.org" my/org-capture-templates))
           :if-new (file+head "memex/#math/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("n" "nutrient" plain (file ,(concat my/org-capture-templates "nutrient.org"))
+         ("n" "nutrient" plain (file ,(expand-file-name "nutrient.org" my/org-capture-templates))
           :if-new (file+head "memex/#nutrients/${slug}.org" "#+title: Nutrient: ${title}\n")
           :unnarrowed t)
-         ("t" "trail" plain (file ,(concat my/org-capture-templates "trail.org"))
+         ("t" "trail" plain (file ,(expand-file-name "trail.org" my/org-capture-templates))
           :if-new (file+head "memex/##trails/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
-         ("w" "word" plain (file ,(concat my/org-capture-templates "word.org"))
+         ("w" "word" plain (file ,(expand-file-name "word.org" my/org-capture-templates))
           :if-new (file (lambda () (my/get-filepath-from-title "memex/#words")))
           :unnarrowed t :disable-auto-id t)
-         ("b" "book" plain (file ,(concat my/org-capture-templates "book-notes.org"))
-          :if-new (file+head ,(concat my/book-notes-directory "/${slug}.org") "#+title: ${title}\n")
+         ("b" "book" plain (file ,(expand-file-name my/org-capture-templates "book-notes.org"))
+          :if-new (file+head ,(expand-file-name "${slug}.org" my/book-notes-directory) "#+title: ${title}\n")
           :unnarrowed t))))
   #+end_src
 
@@ -844,7 +844,7 @@
   #+begin_src elisp
     (use-package org-journal
       :custom
-      (org-journal-dir (concat org-directory "/" "journals"))
+      (org-journal-dir (expand-file-name "journals" org-directory))
       (org-journal-file-format "%Y-%m-%d.org")
       (org-journal-carryover-items "/!-DONE-CANCELLED")
       ;; Don't hide other entries when jumping to journal:
@@ -864,7 +864,7 @@
   #+begin_src elisp
     (use-package ivy-bibtex
       :custom
-      (bibtex-completion-bibliography (concat my/ebooks-directory "/" "references.bib"))
+      (bibtex-completion-bibliography (expand-file-name "references.bib" my/ebooks-directory))
       (bibtex-completion-library-path my/ebooks-directory)
       (bibtex-completion-pdf-field "file")
       (bibtex-completion-notes-path org-directory)
@@ -1136,7 +1136,7 @@
       :config
       (push `("c" "Cookbook" plain
               (file my/get-recipe-filepath-from-url)
-              (file ,(concat my/org-capture-templates "recipe.org"))) org-capture-templates)
+              (file ,(expand-file-name "recipe.org" my/org-capture-templates))) org-capture-templates)
       (push '("m" "Manual Cookbook" entry (file org-cookbook)
               "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n") org-capture-templates))
   #+end_src
