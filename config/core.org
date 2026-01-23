@@ -25,7 +25,7 @@ which aren't absolutely necessary, but are very important.
 
 ** Set display severity
    #+begin_src elisp
-     (customize-set-variable 'warning-minimum-level :error)
+     (customize-set-variable 'warning-minimum-level :warning)
    #+end_src
 
 ** Include timestamp in =*Warnings*= buffer
