@@ -13,25 +13,19 @@
 * Theme
 ** Theme Hooks
    #+begin_src elisp
-     (defun disable-all-themes ()
-       "disable all active themes."
-       (dolist (i custom-enabled-themes) (disable-theme i)))
-
      (defvar after-load-theme-hook nil
        "Hook run after a color theme is loaded using `load-theme'.")
+     ;; (advice-add 'load-theme :after (run-hooks 'after-load-theme-hook))
 
-     (defadvice load-theme (before disable-themes-first activate)
-       (disable-all-themes))
-
-     (defadvice load-theme (after run-after-load-theme-hook activate)
-       "Run `after-load-theme-hook'."
-       (run-hooks 'after-load-theme-hook))
+     (defun disable-all-themes (&rest _)
+       "disable all active themes."
+       (mapc #'disable-theme custom-enabled-themes))
+     (advice-add 'load-theme :before #'disable-all-themes)
   #+end_src
 
 ** Doom Themes
   #+begin_src elisp
     (use-package doom-themes
-      :demand t
       :preface
       (defun my/theme-modify-faces (&rest xs)
         (cl-loop
@@ -55,7 +49,6 @@
 
       :hook (after-load-theme . my/apply-theme-modifications)
       :config
-      (load-theme 'doom-dracula t)
       ;; Enable flashing mode-line on errors
       (doom-themes-visual-bell-config)
       ;; Apparently, improves org-mode's native fontification:
@@ -84,12 +77,12 @@
       (customize-set-variable
        'my/themes (custom-available-themes))
     #+end_src
-** Poet Theme
+** COMMENT Poet Theme
   #+begin_src elisp
     (use-package poet-theme)
   #+end_src
 
-** Nano Theme
+** COMMENT Nano Theme
   #+begin_src elisp
     (use-package nano-theme
       :straight (nano-theme :host github :repo "rougier/nano-theme"))
@@ -113,7 +106,7 @@
      The first entry in the list is considered the default theme.")
        (defcustom my/themes-index 0 "Initial index of my/themes")
        :custom
-       (my/themes '(catppuccin doom-dracula modus-operandi poet nano))
+       (my/themes '(catppuccin doom-dracula modus-operandi))
        :config
        (defun my/select-theme (f)
          (interactive)
@@ -133,19 +126,14 @@
          (my/select-theme '1-))
 
        (defun my/load-indexed-theme ()
-         (let ((selected-theme (nth my/themes-index my/themes)))
-           (message (concat "loading theme: " (symbol-name selected-theme)))
-           (load-theme selected-theme t)))
+         (let ((theme (nth my/themes-index my/themes)))
+           (message "loading theme: %s" theme)
+           (load-theme theme t)))
 
-       (defun my/load-default-theme ()
-           (interactive)
-           (load-theme (nth my/themes-index my/themes) t))
-
-       (my/load-default-theme)
        (add-hook 'after-make-frame-functions
                (lambda (frame)
                  (with-selected-frame frame
-                   (my/load-default-theme))))
+                   (my/load-indexed-theme))))
 
        :general
        (leader
