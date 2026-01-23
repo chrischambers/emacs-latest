@@ -251,8 +251,9 @@
        :config (treemacs-icons-dired-mode))
    #+end_src
 * <<<restclient>>> ([[https://github.com/pashky/restclient.el][github]])
+  Consider [[https://github.com/alf/ob-restclient.el][GitHub - alf/ob-restclient.el]]
+
   #+begin_src elisp
     (use-package restclient
-      :config
-      (require 'restclient))
+      :commands (restclient-mode))
   #+end_src
