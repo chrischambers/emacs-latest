@@ -1369,11 +1369,12 @@
           (interactive)
           (when (-contains? js-modes major-mode)
             (import-js-fix)))
+        (defun my/import-js-setup ()
+          (add-hook 'after-save-hook #'my/import-js-fix nil t)) ; t => buffer-local
         :init
         (dolist (mode js-modes)
-          (add-hook mode #'run-import-js))
-        :config
-        (add-hook 'after-save-hook 'my/import-js-fix))
+          (add-hook (intern (format "%s-hook" mode)) #'my/import-js-setup)
+          (add-hook (intern (format "%s-hook" mode)) #'run-import-js)))
     #+end_src
 
 ** Julia
