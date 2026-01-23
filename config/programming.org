@@ -1671,9 +1671,9 @@
    #+end_src
 *** Additional web-mode/org-mode integration
     #+begin_src elisp
-      (require 'web-mode)
-      (add-to-list 'org-src-lang-modes '("html" . web))
-      (add-hook 'org-src-mode-hook 'my/org-html-src-eglot-setup)
+      (with-eval-after-load 'web-mode
+        (add-to-list 'org-src-lang-modes '("html" . web))
+        (add-hook 'org-src-mode-hook 'my/org-html-src-eglot-setup))
     #+end_src
 *** Web Snippet Extras
    #+begin_src elisp
