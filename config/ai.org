@@ -35,9 +35,80 @@
         :protocol "http"
         :host "localhost:11434"
         :models '(local-llama))
+      (alist-set
+       'default
+       "You are an assistant operating in “no-glaze / precision mode”.
+
+    General style:
+    - Be concise, direct, and factual. No motivational language, fluff, or conversational padding.
+    - Prefer clarity and correctness over politeness or verbosity.
+    - Do not speculate. If something is uncertain or unknown, say so explicitly.
+    - Separate facts from interpretation or opinion.
+
+    Sources and evidence:
+    - When making factual or empirical claims, provide links to sources.
+    - Prefer authoritative, primary, or well-established secondary sources:
+      - Official documentation
+      - Academic papers
+      - Standards bodies (W3C, ISO, IETF, etc.)
+      - Reputable engineering blogs (e.g. JVM team, Python core devs, compiler/runtime teams)
+      - Government or institutional publications when relevant
+    - Avoid low-quality blogs, SEO content, or unverified claims.
+    - If multiple viewpoints exist, summarise the disagreement and link to representative sources.
+
+    Technical orientation:
+    - Assume the user is a senior developer.
+    - Default to technically precise explanations.
+    - Avoid beginner-level over-explanation unless explicitly requested.
+    - Prefer conceptual clarity and correct mental models over surface descriptions.
+    - Use correct terminology; define it briefly if ambiguity is likely.
+
+    Programming preferences:
+    - The user primarily works with:
+      - Clojure and the JVM
+      - Python
+      - Emacs / Emacs Lisp
+      - Functional programming concepts
+    - When relevant, include:
+      - Idiomatic Clojure and JVM details
+      - Trade-offs between runtimes, GC strategies, and memory models
+      - Practical Emacs integration considerations
+
+    Product and tool recommendations:
+    - Do not recommend products casually.
+    - When recommending:
+      - Compare multiple serious candidates
+      - Summarise aggregated user reviews and professional reviews
+      - List concrete pros/cons
+      - Link to credible review sources
+
+    Geographic context:
+    - The user is in the UK.
+    - When discussing:
+      - Law, transport, energy, pricing, or public services → assume UK context unless stated otherwise.
+
+    Thinking style:
+    - Prefer structured answers:
+      - Definitions → mechanisms → implications → trade-offs
+    - Use bullet points, tables, or hierarchies where they add precision.
+    - Avoid rhetorical language and storytelling.
+
+    LLM usage philosophy:
+    - Treat LLMs as analytical tools and thinking partners, not oracles.
+    - Support parallel reasoning, cross-checking, and model comparison.
+    - Encourage verification against primary sources when stakes are high.
+
+    When unsure:
+    - Say “I don’t know” or “This is not well-established”.
+    - Suggest how to verify or where authoritative answers may be found.
+
+    Default output should read like high-quality technical notes, not a chat conversation.
+    "
+       gptel-directives)
 
       :custom
       (gptel-default-mode #'org-mode)
+      (gptel-model 'gpt-5.2)
       ;; (gptel-model   'local-llama)
       ;; (gptel-backend (gptel-make-openai "llama-cpp"
       ;;                  :stream t
@@ -47,8 +118,7 @@
       :general
       (leader "A" '(gptel :which-key "AI"))
       (local-leader gptel-mode-map
-        "m"  '(gptel-menu :which-key "menu"))
-      )
+        "m"  '(gptel-menu :which-key "menu")))
   #+end_src
 
 * LLM Tools
@@ -59,5 +129,165 @@
       :config
       (require 'gptel)
       (mapcar (apply-partially #'apply #'gptel-make-tool)
-              (llm-tool-collection-get-all)))
+              (llm-tool-collection-get-all))
+      :custom
+      ;; Default: activate all tools in GPTel
+      ;; (each still requires confirmation to run)
+      (gptel-tools
+       (#s(gptel-tool
+           llm-tc/bash "bash"
+           "Executes bash COMMAND, returning its standard output.\nSignals an error if the command fails (non-zero exit code)."
+           ((:name "command" :description
+                   "Command string to execute in bash" :type "string"))
+           t "system" t nil)
+
+        #s(gptel-tool
+           llm-tc/list-buffers "list_buffers"
+           "Lists active, user-relevant buffers (excluding internal buffers)."
+           nil nil "buffers" nil t)
+
+        #s(gptel-tool
+           llm-tc/buffer-search "buffer_search"
+           "Search within a Emacs buffer using Emacs regex"
+           ((:name "pattern" :description
+                   "Regex pattern to search for in buffer contents.\nRegex syntax is that of Emacs -- parentheses are NOT escaped!\n  example: search for \"'(defun\", not \"\\\\(defun\"."
+                   :type "string")
+            (:name "buffer" :description
+                   "Name of buffer in which to search" :type "string"))
+           nil "buffers" nil t)
+
+        #s(gptel-tool
+           llm-tc/replace-buffer "replace_buffer"
+           "Completely overwrites the contents of BUFFER-NAME with CONTENT."
+           ((:name "buffer_name" :description
+                   "Name of the buffer to overwrite" :type "string")
+            (:name "content" :description "Content to write to the buffer"
+                   :type "string"))
+           nil "buffers" t nil)
+
+        #s(gptel-tool
+           llm-tc/edit-buffer "edit_buffer"
+           "Edits Emacs buffers by replacing exactly one occurrence of old_string."
+           ((:name "buffer_name" :description
+                   "Name of the buffer to modify" :type "string")
+            (:name "old_string" :description
+                   "Text to replace (must match exactly)" :type "string")
+            (:name "new_string" :description
+                   "Text to replace old_string with" :type "string"))
+           nil "buffers" nil nil)
+
+        #s(gptel-tool
+           llm-tc/view-buffer "view_buffer"
+           "View contents of BUFFER-NAME with optional OFFSET and LIMIT."
+           ((:name "buffer_name" :description
+                   "Name of the buffer to view." :type "string")
+            (:name "offset" :description
+                   "Line number to start reading from (0-based)."
+                   :optional t :type "integer")
+            (:name "limit" :description
+                   "Maximum number of lines to return." :optional t :type
+                   "integer"))
+           nil "buffers" nil nil)
+
+        #s(gptel-tool
+           llm-tc/ls "ls"
+           "Lists files and directories"
+           ((:name "path" :description
+                   "Absolute or relative path to directory to list.  Supports '~'."
+                   :type "string")
+            (:name "ignore" :description
+                   "Array of Elisp regexp patterns (e.g., \"\\\\.pdf$\") to ignore"
+                   :optional t :type "array" :items (:type "string")))
+           nil "filesystem" nil t)
+
+        #s(gptel-tool
+           llm-tc/grep "grep"
+           "Content search using regex"
+           ((:name "pattern" :description
+                   "Regex pattern to search in file contents" :type
+                   "string")
+            (:name "include" :description
+                   "File pattern to include in search" :optional t :type
+                   "string")
+            (:name "path" :description "Directory to search in" :optional
+                   t :type "string"))
+           nil "filesystem" nil t)
+
+        #s(gptel-tool
+           llm-tc/replace-file "replace_file"
+           "Completely overwrites file at FILE with the given CONTENT."
+           ((:name "file" :description
+                   "Absolute or relative path to file to write.  Supports '~'."
+                   :type "string")
+            (:name "content" :description "Content to write to the file"
+                   :type "string"))
+           nil "filesystem" t nil)
+
+        #s(gptel-tool
+           llm-tc/glob "glob"
+           "File pattern matching"
+           ((:name "pattern" :description "Glob pattern to match files"
+                   :type "string")
+            (:name "path" :description "Directory to search in" :optional
+                   t :type "string"))
+           nil "filesystem" nil t)
+
+        #s(gptel-tool
+           llm-tc/edit-file "edit_file"
+           "Edit file by replacing exactly one match of OLD-STRING with NEW-STRING."
+           ((:name "file" :description
+                   "Absolute or relative path to the file to modify" :type
+                   "string")
+            (:name "old_string" :description
+                   "Text to replace (must match exactly)" :type "string")
+            (:name "new_string" :description
+                   "Text to replace old_string with" :type "string"))
+           nil "filesystem" t nil)
+
+        #s(gptel-tool
+           llm-tc/view-file "view_file"
+           "Read file contents with optional OFFSET and LIMIT."
+           ((:name "file" :description
+                   "Absolute or relative path to the file to read. Supports '~'."
+                   :type "string")
+            (:name "offset" :description
+                   "Line number to start reading from (0-based)."
+                   :optional t :type "integer")
+            (:name "limit" :description "Number of lines to read"
+                   :optional t :type "integer"))
+           nil "filesystem" nil t)
+
+        #s(gptel-tool
+           llm-tc/create-directory "create_directory"
+           "Create a new directory at the specified path if it does not already\nexist."
+           ((:name "path" :description
+                   "Path to the new directory. Supports relative paths and '~'."
+                   :type "string"))
+           nil "filesystem" t nil)
+
+        #s(gptel-tool
+           llm-tc/create-file "create_file"
+           "Create a new file with the specified content if it does not already exist."
+           ((:name "path" :description
+                   "Path to the new file. Supports relative paths and '~'."
+                   :type "string")
+            (:name "content" :description "Content to write to the file."
+                   :type "string"))
+           nil "filesystem" t nil)
+
+        #s(gptel-tool
+           llm-tc/list-directory "list_directory"
+           "List the contents of a specified directory."
+           ((:name "path" :description
+                   "Path to the directory. Supports relative paths and '~'."
+                   :type "string"))
+           nil "filesystem" t t)
+
+        #s(gptel-tool
+           llm-tc/read-file "read_file"
+           "Read the contents of a file and return its content as a string."
+           ((:name "path" :description
+                   "Path to the file to read. Supports relative paths and '~'."
+                   :type "string"))
+           nil "filesystem" t t))))
   #+end_src
