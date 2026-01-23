@@ -30,9 +30,12 @@ which aren't absolutely necessary, but are very important.
 
 ** Include timestamp in =*Warnings*= buffer
    #+begin_src elisp
+     (defface my/warning-timestamp-face '((t :inherit font-lock-comment-face))
+       "Face for warning timestamps.")
+
      (defun my/warning-prefix-function (severity warning-levels)
        (let ((timestamp (format-time-string "[%d/%m/%Y %H:%M:%S] ")))
-         (insert (propertize timestamp 'face 'org-date)))
+         (insert (propertize timestamp 'face 'my/warning-timestamp-face)))
        warning-levels)
 
      (customize-set-variable 'warning-prefix-function #'my/warning-prefix-function)
