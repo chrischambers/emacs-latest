@@ -175,7 +175,8 @@
 
        (defun my/notes-active-within-buffer? ()
          (interactive)
-         (s-starts-with? my/notes-directory (buffer-file-name) t))
+         (when-let ((f (buffer-file-name)))
+           (s-starts-with? my/notes-directory f t)))
 
        (defun my/possibly-launch-project-repl (expanded _params &optional cljs-p)
          "Evaluate EXPANDED code block using cider.
