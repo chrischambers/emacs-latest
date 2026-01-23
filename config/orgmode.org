@@ -572,9 +572,8 @@
    #+end_src
 
 * <<<org-protocol>>> ([[https://github.com/bastibe/org-journal][github]])
+  Requires server to be running.
   #+begin_src elisp
-    (load "server")
-    (unless (server-running-p) (server-start))
     (require 'org-protocol)
   #+end_src
 

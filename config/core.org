@@ -946,11 +946,16 @@ which aren't absolutely necessary, but are very important.
 
 * Start emacs server only if it's not currently running
   #+begin_src elisp
-    (load "server")
-    (unless (server-running-p)
-      (progn
-        (message "Server is being restarted!")
-        (server-start)))
+    (defun my/maybe-start-server ()
+      (interactive)
+      (require 'server)
+      (unless (daemonp)
+        (unless (server-running-p)
+          (progn
+            (message "Server is being restarted!")
+            (server-start)))))
+
+    (my/maybe-start-server)
   #+end_src
 
 * <<<bookmark.el>>>: Named bookmarks
