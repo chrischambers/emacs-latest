@@ -127,7 +127,7 @@
     (my/config-load "config/nix.org")
     #+end_src
 
-* [[./config/mail.org][Mail configuration]]
+* COMMENT [[./config/mail.org][Mail configuration]]
     #+begin_src elisp
     (my/config-load "config/mail.org")
     #+end_src
