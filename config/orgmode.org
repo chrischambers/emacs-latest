@@ -27,8 +27,8 @@
       (defun org-toggle-raw-view ()
         (interactive)
         (progn
-          (customize-set-variable 'my/raw-view-active (not my/raw-view-active))
-          (customize-set-variable 'org-hide-emphasis-markers (not org-hide-emphasis-markers))
+          (setq my/raw-view-active (not my/raw-view-active))
+          (setq-local org-hide-emphasis-markers (not org-hide-emphasis-markers))
           (org-toggle-inline-images)
           (org-toggle-link-display)
           (org-toggle-pretty-entities)))
