@@ -50,7 +50,7 @@
     (use-package beframe
       :preface
       (defun my/infer-frame-name (frame name)
-        (when-let (((frame-list))
+        (when-let ((frames (frame-list))
                    (buffer (car (frame-parameter frame 'buffer-list)))
                    (file-name (when (bufferp buffer) (buffer-file-name buffer)))
                    (buf-name (buffer-name buffer))
