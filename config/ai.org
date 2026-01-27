@@ -24,7 +24,19 @@
               (if (functionp secret)
                   (funcall secret)
                 secret)))))
-      :hook (gptel-mode . visual-line-mode)
+
+      (defun org-visual-line-and-indent ()
+        "Ensures org files display with visual wrapping and indentation.
+
+    This occurs even if the file itself doesn't hard wrap/indent.
+
+    To make this interoperate with 'evil' seamlessly, ensure you've set
+    `evil-respect-visual-line-mode' to `t' prior to loading `evil'.
+    "
+        (interactive)
+        (visual-line-mode 1)
+        (org-indent-mode 1))
+      :hook (gptel-mode . org-visual-line-and-indent)
       :config
       (gptel-make-anthropic "Claude"
         :stream t

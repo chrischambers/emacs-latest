@@ -248,6 +248,7 @@ you can work with.
       :init
       ;; Necessary for evil-collection
       (setq evil-want-keybinding nil)
+      (setq evil-respect-visual-line-mode t)
       :custom
       (evil-undo-system 'undo-redo)
       :config
