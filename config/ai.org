@@ -228,7 +228,8 @@
    #+end_src
 *** Personal
     #+begin_src elisp
-
+      (setq gptel-session-dir (expand-file-name "~/Dropbox/llm_sessions/"))
+      (setq gptel-session-name-function #'gptel-session-filename-nested)
     #+end_src
 * LLM Tools
   #+begin_src elisp
