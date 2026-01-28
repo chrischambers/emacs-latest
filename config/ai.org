@@ -108,109 +108,123 @@
 ** Add GPTel automatic save-session functionality
 *** Generic (potentially add as pull request)
    #+begin_src elisp
-          (with-eval-after-load 'gptel
-            (require 'subr-x)
-            (require 'gptel)
-            (require 'gptel-request)
+     (with-eval-after-load 'gptel
+       (require 'subr-x)
+       (require 'gptel)
+       (require 'gptel-request)
 
-            (defcustom gptel-session-dir (expand-file-name "~/llm_sessions/")
-              "Directory to store GPTel sessions."
-              :type 'directory)
+       (defcustom gptel-session-dir (expand-file-name "~/llm_sessions/")
+         "Directory to store GPTel sessions."
+         :type 'directory)
 
-            (defvar-local gptel--session-initialized nil)
+       (defun gptel-session-filename-flat (desc &optional date model)
+         "Return a session filename from DESC, DATE and MODEL.
 
-            (defun gptel--slugify (s &optional maxlen)
-              (let* ((s (downcase (string-trim (or s ""))))
-                     (s (replace-regexp-in-string "[^a-z0-9]+" "-" s))
-                     (s (replace-regexp-in-string "\\`-+\\|-+\\'" "" s))
-                     (maxlen (or maxlen 70)))
-                (cond
-                 ((string-empty-p s) "chat")
-                 ((> (length s) maxlen) (substring s 0 maxlen))
-                 (t s))))
+     DESC is slugified. DATE defaults to today (YYYY-MM-DD).
+     MODEL defaults to (gptel--model-tag)."
+         (let* ((desc (gptel--slugify desc 70))
+                (date (or date (format-time-string "%Y-%m-%d")))
+                (model (or model (gptel--model-tag))))
+           (format "%s-%s-%s.org" date desc model)))
 
-            (defun gptel--model-tag ()
-              (gptel--slugify
-               (format "%s-%s" (gptel-backend-name gptel-backend) gptel-model)
-               90))
+       (defun gptel-session-filename-nested (desc &optional date model)
+         "Return a nested session filename from DESC, DATE and MODEL.
 
-            (defun gptel--buffer-excerpt (&optional maxchars)
-              "Excerpt of the buffer to help the LLM infer a title."
-              (let ((maxchars (or maxchars 2200)))
-                (buffer-substring-no-properties
-                 (point-min)
-                 (min (point-max) (+ (point-min) maxchars)))))
+     DESC is slugified. DATE defaults to today (YYYY-MM-DD).
+     MODEL defaults to (gptel--model-tag)."
+         (let* ((desc (gptel--slugify desc 70))
+                (date (or date (format-time-string "%Y-%m-%d")))
+                (model (or model (gptel--model-tag))))
+           (format "%s/%s/%s.org" date desc model)))
 
-            (defun gptel-infer-title (&optional maxchars)
-              "Synchronously ask the LLM for a short title and return it.
+       (defcustom gptel-session-name-function #'gptel-session-filename-flat
+         "Function used for naming session files."
+         :type 'function)
 
-     Returns a *slug* suitable for filenames (via `gptel--slugify`).
+       (defvar-local gptel--session-initialized nil)
 
-     Notes:
-     - Uses `gptel-request` with `:stream nil` and blocks the current thread until
-       the response arrives.
-     - If the request fails or returns a non-string, returns nil."
-              (let* ((excerpt (gptel--buffer-excerpt maxchars))
-                     ;; Keep this request cheap and deterministic-ish.
-                     (system "You generate concise conversation titles.
+       (defun gptel--slugify (s &optional maxlen)
+         (let* ((s (downcase (string-trim (or s ""))))
+                (s (replace-regexp-in-string "[^a-z0-9]+" "-" s))
+                (s (replace-regexp-in-string "\\`-+\\|-+\\'" "" s))
+                (maxlen (or maxlen 70)))
+           (cond
+            ((string-empty-p s) "chat")
+            ((> (length s) maxlen) (substring s 0 maxlen))
+            (t s))))
+
+       (defun gptel--model-tag ()
+         (gptel--slugify
+          (format "%s-%s" (gptel-backend-name gptel-backend) gptel-model)
+          90))
+
+       (defun gptel--buffer-excerpt (&optional maxchars)
+         "Excerpt of the buffer to help the LLM infer a title."
+         (let ((maxchars (or maxchars 2200)))
+           (buffer-substring-no-properties
+            (point-min)
+            (min (point-max) (+ (point-min) maxchars)))))
+
+       (defun gptel-infer-title-async (excerpt callback)
+         "Infer a short conversation title from EXCERPT and call CALLBACK.
+
+     CALLBACK is called as (CALLBACK SUGGESTION), where SUGGESTION is a
+     slugified string suitable for use in filenames.
+
+     If inference fails, CALLBACK is called with nil.
+
+     This is asynchronous; it does not block Emacs."
+         (declare (indent 1))
+         (let* (;; Keep this request cheap and deterministic-ish.
+                (system "You generate concise conversation titles.
      Return a short title (2–5 words). No quotes. No punctuation at end. Title case.")
-                     (prompt (format "Generate a short title for this conversation:\n\n%s" excerpt))
-                     (result nil))
-                (gptel-request
-                    prompt
-                  :system system
-                  :stream nil
-                  :callback (lambda (response _info)
-                              (setq result
-                                    (when (stringp response)
-                                      (gptel--slugify (string-trim response) 70)))))
-                ;; `gptel-request` is async; wait for callback.
-                (while (and (null result)
-                            ;; Avoid infinite loop if something goes wrong.
-                            (not (input-pending-p)))
-                  (accept-process-output nil 0.05))
-                result))
+                (prompt (format "Generate a short title for this conversation:\n\n%s" excerpt)))
+           (gptel-request
+               prompt
+             :system system
+             :stream nil
+             :callback
+             (lambda (response _info)
+               (condition-case _err
+                   (let* ((raw (and (stringp response) (string-trim response)))
+                          (suggest (and raw (gptel--slugify raw 70))))
+                     (funcall callback suggest))
+                 (error (funcall callback nil)))))))
 
-            (defun gptel-session-filename (desc)
-              "Form a session filename from DESC.
+       (defun gptel-rename-session-file (&optional buffer)
+         "Infer a title for BUFFER (default: current), prompt user, then rename file."
+         (interactive)
+         (let* ((buffer (or buffer (current-buffer)))
+                (excerpt (with-current-buffer buffer (gptel--buffer-excerpt))))
+           (gptel-infer-title-async
+               excerpt
+             (lambda (suggest)
+               (when (buffer-live-p buffer)
+                 (with-current-buffer buffer
+                   (let* ((suggest (or suggest "chat"))
+                          ;; daemon-safe: prompt when Emacs is ready to read minibuffer
+                          (final-desc (read-string "gptel session description: " suggest))
+                          (new-name (funcall gptel-session-name-function final-desc))
+                          (new-path (expand-file-name new-name gptel-session-dir)))
+                     (set-visited-file-name new-path t t)
+                     (save-buffer))))))))
 
-     DESC is expected to be a short human label; it will be slugified."
-              (let* ((final-desc (gptel--slugify desc 70))
-                     (date (format-time-string "%Y-%m-%d"))
-                     (model (gptel--model-tag)))
-                (format "%s-%s-%s.org" date final-desc model)))
+       (defun gptel--init-session-on-first-send (&rest _)
+         "Hook/advice target: run once per GPTel chat buffer."
+         (when (and (bound-and-true-p gptel-mode)
+                    (not gptel--session-initialized)
+                    (not (buffer-file-name)))
+           (setq gptel--session-initialized t)
+           (gptel-rename-session-file (current-buffer))))
 
-            (defun gptel-rename-session-file (&optional desc)
-              "Rename current GPTel buffer to a session file in `gptel-session-dir`.
+       (defun gptel--save-buffer-for-gptel-session-dir (beg end)
+         (let ((buf-path (or (buffer-file-name (current-buffer)) "")))
+           (when (f-ancestor-of? gptel-session-dir buf-path)
+             (save-buffer))))
 
-     If DESC is nil, infer a suggestion via `gptel-infer-title`, prompt the user
-     (editable), then rename & save."
-              (interactive)
-              (let* ((suggest (or desc (gptel-infer-title)))
-                     (suggest (or suggest "chat"))
-                     ;; daemon-safe: prompt when Emacs is ready to read minibuffer
-                     (final-desc (read-string "gptel session description: " suggest))
-                     (new-name (gptel-session-filename final-desc))
-                     (new-path (expand-file-name new-name gptel-session-dir)))
-                (set-visited-file-name new-path t t)
-                (save-buffer)))
-
-            (defun gptel--init-session-on-first-send (&rest _)
-              "Hook/advice target: run once per GPTel chat buffer."
-              (when (and (bound-and-true-p gptel-mode)
-                         (not gptel--session-initialized)
-                         (not (buffer-file-name)))
-                (setq gptel--session-initialized t)
-                (gptel-rename-session-file)))
-
-            (defun gptel--save-buffer-for-gptel-session-dir (beg end)
-              (let ((buf-path (or (buffer-file-name (current-buffer)) "")))
-                (when (f-ancestor-of? gptel-session-dir buf-path)
-                  (save-buffer))))
-
-            (advice-add 'gptel-send :after #'gptel--init-session-on-first-send)
-            (add-hook 'gptel-post-response-functions #'gptel--save-buffer-for-gptel-session-dir)
-            )
+       (advice-add 'gptel-send :after #'gptel--init-session-on-first-send)
+       (add-hook 'gptel-post-response-functions #'gptel--save-buffer-for-gptel-session-dir)
+       )
    #+end_src
 *** Personal
     #+begin_src elisp
