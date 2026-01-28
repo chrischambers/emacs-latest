@@ -205,7 +205,9 @@
                           ;; daemon-safe: prompt when Emacs is ready to read minibuffer
                           (final-desc (read-string "gptel session description: " suggest))
                           (new-name (funcall gptel-session-name-function final-desc))
-                          (new-path (expand-file-name new-name gptel-session-dir)))
+                          (new-path (expand-file-name new-name gptel-session-dir))
+                          (parent (f-parent new-path)))
+                     (make-directory parent t)
                      (set-visited-file-name new-path t t)
                      (save-buffer))))))))
 
