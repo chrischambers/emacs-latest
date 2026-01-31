@@ -119,18 +119,28 @@
          "Directory to store GPTel sessions."
          :type 'directory)
 
-       (defun gptel-session-filename-flat (desc &optional date model)
-         "Return a session filename from DESC, DATE and MODEL.
+       (defun gptel-session-filename-date-desc-model (desc &optional date model)
+         "Return session filename as 2026-31-01::something-i-asked::chatgpt-gpt-5-2.org
 
      DESC is slugified. DATE defaults to today (YYYY-MM-DD).
      MODEL defaults to (gptel--model-tag)."
          (let* ((desc (gptel--slugify desc 70))
                 (date (or date (format-time-string "%Y-%m-%d")))
                 (model (or model (gptel--model-tag))))
-           (format "%s-%s-%s.org" date desc model)))
+           (format "%s::%s::%s.org" date desc model)))
 
-       (defun gptel-session-filename-nested (desc &optional date model)
-         "Return a nested session filename from DESC, DATE and MODEL.
+       (defun gptel-session-filename-date/desc::model (desc &optional date model)
+         "Return session filename as 2026-31-01/something-i-asked::chatgpt-gpt-5-2.org
+
+     DESC is slugified. DATE defaults to today (YYYY-MM-DD).
+     MODEL defaults to (gptel--model-tag)."
+         (let* ((desc (gptel--slugify desc 70))
+                (date (or date (format-time-string "%Y-%m-%d")))
+                (model (or model (gptel--model-tag))))
+           (format "%s/%s::%s.org" date desc model)))
+
+       (defun gptel-session-filename-date/desc/model (desc &optional date model)
+         "Return session filename as 2026-31-01/something-i-asked/chatgpt-gpt-5-2.org
 
      DESC is slugified. DATE defaults to today (YYYY-MM-DD).
      MODEL defaults to (gptel--model-tag)."
@@ -139,7 +149,7 @@
                 (model (or model (gptel--model-tag))))
            (format "%s/%s/%s.org" date desc model)))
 
-       (defcustom gptel-session-name-function #'gptel-session-filename-flat
+       (defcustom gptel-session-name-function #'gptel-session-filename-date-desc-model
          "Function used for naming session files."
          :type 'function)
 
@@ -227,13 +237,12 @@
              (save-buffer))))
 
        (advice-add 'gptel-send :after #'gptel--init-session-on-first-send)
-       (add-hook 'gptel-post-response-functions #'gptel--save-buffer-for-gptel-session-dir)
-       )
+       (add-hook 'gptel-post-response-functions #'gptel--save-buffer-for-gptel-session-dir))
    #+end_src
 *** Personal
     #+begin_src elisp
       (setq gptel-session-dir (expand-file-name "~/Dropbox/llm_sessions/"))
-      (setq gptel-session-name-function #'gptel-session-filename-nested)
+      (setq gptel-session-name-function #'gptel-session-filename-date/desc::model)
     #+end_src
 * LLM Tools
   #+begin_src elisp
