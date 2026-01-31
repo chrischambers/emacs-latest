@@ -211,39 +211,42 @@
                 (launchpad-exists? (f-exists? launchpad-path)))
            launchpad-exists?))
 
-       (defun my/launchpad-nrepl ()
-         "Start an nREPL session via ./bin/launchpad"
+       (defun my/cider-nrepl ()
+         "Connect (or start) an nREPL session (using .bin/launchpad if it exists."
          (interactive)
          (let* ((project-name (projectile-project-name))
                 (project-root (projectile-project-root))
                 (buffer-name (format "*Launchpad: %s*" project-name)))
-           (when (my/launchpad-project?)
-             (if (get-buffer buffer-name)
-                 (let* ((port (f-read (f-join project-root ".nrepl-port")))
-                        (params `(:host "localhost" :port ,port :project-dir ,project-root)))
-                   (cider-connect params))
+           (if (and (my/launchpad-project?) (not (get-buffer buffer-name)))
                (save-window-excursion
                  (vterm buffer-name)
                  (vterm-send-string
                   (format "cd %s && ./bin/launchpad"
                           (projectile-project-root)))
                  (vterm-send-return)
-                 (message "Activating launchpad for '%s'..." project-name))))))
+                 (message "Activating launchpad for '%s'..." project-name))
+             (progn
+               (if-let ((port (f-read (f-join project-root ".nrepl-port"))))
+                   (cider-connect `(:host "localhost"
+                                          :port ,port
+                                          :project-dir ,project-root))
+                 (cider-jack-in `(:project-dir ,project-root)))
+               (cider-drink-a-sip)))))
 
-       (defun my/cider-startup ()
-         "Jack in, set current ns and provide a handy cider usage tip as well."
-         (setq my/cider-current-ns (cider-current-ns))
-         (add-hook 'cider-repl-mode-hook #'my/cider-set-ns)
-         (let* ((project-root (projectile-project-root))
-                (params `(:project-dir ,project-root)))
-           (and (cider-jack-in params)
-                (cider-drink-a-sip))))
+       ;; (defun my/cider-startup ()
+       ;;   "Jack in, set current ns and provide a handy cider usage tip as well."
+       ;;   (setq my/cider-current-ns (cider-current-ns))
+       ;;   (add-hook 'cider-repl-mode-hook #'my/cider-set-ns)
+       ;;   (let* ((project-root (projectile-project-root))
+       ;;          (params `(:project-dir ,project-root)))
+       ;;     (and (cider-jack-in params)
+       ;;          (cider-drink-a-sip))))
 
        (defun my/clojure-repl ()
          (interactive)
          (if (cider-current-repl)
              (cider-switch-to-repl-buffer)
-           (my/cider-startup)))
+           (my/cider-nrepl)))
 
        (defvar python-repl-source-buffer nil)
 
