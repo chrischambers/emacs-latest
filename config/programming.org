@@ -204,13 +204,38 @@
 
        (advice-add 'ob-clojure-eval-with-cider :override #'my/possibly-launch-project-repl)
 
+       (defun my/launchpad-project? ()
+         (let* ((project-name (projectile-project-name))
+                (project-root (projectile-project-root))
+                (launchpad-path (f-join project-root "bin" "launchpad"))
+                (launchpad-exists? (f-exists? launchpad-path)))
+           launchpad-exists?))
+
+       (defun my/launchpad-nrepl ()
+         "Start an nREPL session via ./bin/launchpad"
+         (interactive)
+         (let* ((project-name (projectile-project-name))
+                (project-root (projectile-project-root))
+                (buffer-name (format "*Launchpad: %s*" project-name)))
+           (when (my/launchpad-project?)
+             (if (get-buffer buffer-name)
+                 (let* ((port (f-read (f-join project-root ".nrepl-port")))
+                        (params `(:host "localhost" :port ,port :project-dir ,project-root)))
+                   (cider-connect params))
+               (save-window-excursion
+                 (vterm buffer-name)
+                 (vterm-send-string
+                  (format "cd %s && ./bin/launchpad"
+                          (projectile-project-root)))
+                 (vterm-send-return)
+                 (message "Activating launchpad for '%s'..." project-name))))))
+
        (defun my/cider-startup ()
          "Jack in, set current ns and provide a handy cider usage tip as well."
          (setq my/cider-current-ns (cider-current-ns))
          (add-hook 'cider-repl-mode-hook #'my/cider-set-ns)
-         (let ((params (if (my/notes-active-within-buffer?)
-                           `(:project-dir ,my/notes-directory)
-                         nil)))
+         (let* ((project-root (projectile-project-root))
+                (params `(:project-dir ,project-root)))
            (and (cider-jack-in params)
                 (cider-drink-a-sip))))
 
@@ -220,14 +245,14 @@
              (cider-switch-to-repl-buffer)
            (my/cider-startup)))
 
-      (defvar python-repl-source-buffer nil)
+       (defvar python-repl-source-buffer nil)
 
-      (defun my/python-repl ()
-        (interactive)
-        (progn
-          (when (derived-mode-p 'python-mode)
-            (setq python-repl-source-buffer (current-buffer)))
-          (call-interactively 'run-python)))
+       (defun my/python-repl ()
+         (interactive)
+         (progn
+           (when (derived-mode-p 'python-mode)
+             (setq python-repl-source-buffer (current-buffer)))
+           (call-interactively 'run-python)))
 
        (defun python-switch-to-last-python-buffer ()
          (interactive)

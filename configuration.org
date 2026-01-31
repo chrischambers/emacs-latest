@@ -386,16 +386,3 @@
     (with-eval-after-load 'transient
       (transient-bind-q-to-quit))
   #+end_src
-** WIP Launchpad autolaunch
-   #+begin_src elisp
-     (defun my/activate-launchpad-if-appropriate ()
-       (interactive)
-       (when (eq 'clojure-cli (projectile-project-type))
-         (save-window-excursion
-           (vterm (format "*Launchpad: %s*" (projectile-project-name)))
-           (vterm-send-string
-            (format "cd %s && ./bin/launchpad"
-                    (projectile-project-root)))
-           (vterm-send-return))
-         (message "Activating launchpad for %s ..." (projectile-project-name))))
-   #+end_src
