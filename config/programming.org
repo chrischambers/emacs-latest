@@ -212,9 +212,10 @@
            launchpad-exists?))
 
        (defun my/cider-nrepl ()
-         "Connect (or start) an nREPL session (using .bin/launchpad if it exists.
+         "Connect (or start) an nREPL session (using .bin/launchpad if it exists).
 
-     As a bonus, if activated from a Clojure buffer, updates the REPL ns to match.
+     As a bonus, if activated from a Clojure buffer, updates the REPL
+     namespace to match.
      "
          (interactive)
          (when-let ((current-ns (cider-current-ns)))
@@ -769,6 +770,7 @@
         (cider-repl-wrap-history t)
 
         (cider-auto-select-test-report-buffer nil)
+        (cider-connect-default-params '((:host . "localhost")))
 
         :general
         (local-leader '(clojure-mode-map clojure-ts-mode-map cider-repl-mode-map)

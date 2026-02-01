@@ -60,9 +60,9 @@
     - Avoid needless acknowledgement: where necessary, reply briefly and non-evaluatively (e.g. “Understood.”, “Confirmed.”).
 
     Formatting org-mode responses:
-    - Whenever you add new section titles, always use a fourth level heading or deeper, such as \"####\" or \"#####\".
+    - Whenever you add new section titles, always use a fourth level heading or deeper.
     - Wrap all non source block/table lines at %s characters.
-    - Avoid adding horizontal rule type separators, like '---'.
+    - Avoid adding horizontal-rule style separators, like '---'.
     - Provide links in the form '[[url][description]]'.
     - Format LaTeX with '$' delimiters, e.g. '$1 + \ln(1)$'.
 
