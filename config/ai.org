@@ -35,7 +35,8 @@
     "
         (interactive)
         (visual-line-mode 1)
-        (org-indent-mode 1))
+        ;; (org-indent-mode 1)
+        )
       :hook (gptel-mode . org-visual-line-and-indent)
       :config
       (gptel-make-anthropic "Claude"
@@ -59,12 +60,15 @@
     - Separate facts from interpretation or opinion.
     - Avoid needless acknowledgement: where necessary, reply briefly and non-evaluatively (e.g. “Understood.”, “Confirmed.”).
 
-    Formatting org-mode responses:
-    - Whenever you add new section titles, always use a fourth level heading or deeper, such as \"####\" or \"#####\".
+    Formatting responses:
+    - Favour org-mode over markdown markup in responses.
+    - Whenever you add new section titles, always use a fourth level heading or deeper, such as =##### or =#####=.
     - Avoid inserting empty lines after titles.
-    - Wrap all non source block/table lines at %s characters, including heading/list etc. indetation.
+    - Use a hanging indent 2 spaces right of the preceding title's indentation (e.g. for =#####=, a 7 space indent).
+    - Wrap all non source block/table lines at %s characters, including heading/list etc. indentation.
+    - Provide org hyperlinks in the form '[[url][description]]'.
+    - When calculating wrapping for org hyperlinks with descriptions, use the description length rather than the full URL length.
     - Avoid adding horizontal-rule style separators, like '---'.
-    - Provide links in the form '[[url][description]]'.
     - Format LaTeX with '$' delimiters, e.g. '$1 + \ln(1)$'.
 
     Sources and evidence:
@@ -89,7 +93,7 @@
     - Interests extend beyond technology: philosopher, writer, autodidact.
     - Uses Emacs + GPTel for research, design, and technical thinking.
     - UK-based: assume UK context unless stated otherwise. Prefer British English spelling.
-    " (- fill-column 5))
+    " fill-column)
        gptel-directives)
       (setq gptel--system-message (alist-get 'default gptel-directives))
 
@@ -102,6 +106,8 @@
       ;;                  :protocol "http"
       ;;                  :host "localhost:11434"
       ;;                  :models '(local-llama)))
+      (evil-collection-gptel-want-ret-to-send nil)
+      :bind (("s-<return>" . gptel-send))
       :general
       (leader "A" '(gptel :which-key "AI"))
       (local-leader gptel-mode-map
@@ -116,8 +122,16 @@
        (require 'gptel)
        (require 'gptel-request)
 
+       (defcustom gptel-session-automatic-save nil
+         "Whether to automatically save new GPTel sessions to disk."
+         :type 'boolean)
+
+       (defcustom gptel-session-automatic-save-on-response nil
+         "Whether to automatically save after LLM responses."
+         :type 'boolean)
+
        (defcustom gptel-session-dir (expand-file-name "~/llm_sessions/")
-         "Directory to store GPTel sessions."
+         "Directory to save GPTel sessions to."
          :type 'directory)
 
        (defun gptel-session-filename-date-desc-model (desc &optional date model)
@@ -125,9 +139,9 @@
 
      DESC is slugified. DATE defaults to today (YYYY-MM-DD).
      MODEL defaults to (gptel--model-tag)."
-         (let* ((desc (gptel--slugify desc 70))
-                (date (or date (format-time-string "%Y-%m-%d")))
-                (model (or model (gptel--model-tag))))
+         (let ((desc (gptel--slugify desc 70))
+               (date (or date (format-time-string "%Y-%m-%d")))
+               (model (or model (gptel--model-tag))))
            (format "%s::%s::%s.org" date desc model)))
 
        (defun gptel-session-filename-date/desc::model (desc &optional date model)
@@ -135,9 +149,9 @@
 
      DESC is slugified. DATE defaults to today (YYYY-MM-DD).
      MODEL defaults to (gptel--model-tag)."
-         (let* ((desc (gptel--slugify desc 70))
-                (date (or date (format-time-string "%Y-%m-%d")))
-                (model (or model (gptel--model-tag))))
+         (let ((desc (gptel--slugify desc 70))
+               (date (or date (format-time-string "%Y-%m-%d")))
+               (model (or model (gptel--model-tag))))
            (format "%s/%s::%s.org" date desc model)))
 
        (defun gptel-session-filename-date/desc/model (desc &optional date model)
@@ -145,9 +159,9 @@
 
      DESC is slugified. DATE defaults to today (YYYY-MM-DD).
      MODEL defaults to (gptel--model-tag)."
-         (let* ((desc (gptel--slugify desc 70))
-                (date (or date (format-time-string "%Y-%m-%d")))
-                (model (or model (gptel--model-tag))))
+         (let ((desc (gptel--slugify desc 70))
+               (date (or date (format-time-string "%Y-%m-%d")))
+               (model (or model (gptel--model-tag))))
            (format "%s/%s/%s.org" date desc model)))
 
        (defcustom gptel-session-name-function #'gptel-session-filename-date-desc-model
@@ -157,7 +171,7 @@
        (defvar-local gptel--session-initialized nil)
 
        (defun gptel--slugify (s &optional maxlen)
-         (let* ((s (downcase (string-trim (or s ""))))
+         (let* ((s (downcase (string-trim s)))
                 (s (replace-regexp-in-string "[^a-z0-9]+" "-" s))
                 (s (replace-regexp-in-string "\\`-+\\|-+\\'" "" s))
                 (maxlen (or maxlen 70)))
@@ -199,12 +213,12 @@
              :callback
              (lambda (response _info)
                (condition-case _err
-                   (let* ((raw (and (stringp response) (string-trim response)))
-                          (suggest (and raw (gptel--slugify raw 70))))
+                   (let* ((title (and (stringp response) response))
+                          (suggest (gptel--slugify title 70)))
                      (funcall callback suggest))
                  (error (funcall callback nil)))))))
 
-       (defun gptel-rename-session-file (&optional buffer)
+       (defun gptel-session-rename-file (&optional buffer)
          "Infer a title for BUFFER (default: current), prompt user, then rename file."
          (interactive)
          (let* ((buffer (or buffer (current-buffer)))
@@ -224,26 +238,31 @@
                      (set-visited-file-name new-path t t)
                      (save-buffer))))))))
 
-       (defun gptel--init-session-on-first-send (&rest _)
+       (defun gptel-session--init-on-first-send (&rest _)
          "Hook/advice target: run once per GPTel chat buffer."
-         (when (and (bound-and-true-p gptel-mode)
+         (when (and gptel-session-automatic-save
+                    (bound-and-true-p gptel-mode)
                     (not gptel--session-initialized)
                     (not (buffer-file-name)))
            (setq gptel--session-initialized t)
-           (gptel-rename-session-file (current-buffer))))
+           (gptel-session-rename-file (current-buffer))))
 
-       (defun gptel--save-buffer-for-gptel-session-dir (beg end)
-         (let ((buf-path (or (buffer-file-name (current-buffer)) "")))
-           (when (f-ancestor-of? gptel-session-dir buf-path)
-             (save-buffer))))
+       (defun gptel-session--save-buffer-on-response (beg end)
+         (when gptel-session-automatic-save-on-response
+           (let ((buf-path (or (buffer-file-name (current-buffer)) "")))
+             (when (f-ancestor-of? gptel-session-dir buf-path)
+               (save-buffer)))))
 
-       (advice-add 'gptel-send :after #'gptel--init-session-on-first-send)
-       (add-hook 'gptel-post-response-functions #'gptel--save-buffer-for-gptel-session-dir))
+       (advice-add 'gptel-send :after #'gptel-session--init-on-first-send)
+       (add-hook 'gptel-post-response-functions #'gptel-session--save-buffer-on-response))
    #+end_src
-*** Personal
+*** Personal Adjustments
     #+begin_src elisp
       (setq gptel-session-dir (expand-file-name "~/Dropbox/llm_sessions/"))
       (setq gptel-session-name-function #'gptel-session-filename-date/desc::model)
+
+      (setq gptel-session-automatic-save t)
+      (setq gptel-session-automatic-save-on-response t)
     #+end_src
 * LLM Tools
   #+begin_src elisp
