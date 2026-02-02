@@ -1,0 +1,8 @@
+# key: checking
+# name: checking
+# --
+(require '[com.gfredericks.test.chuck.clojure-test :refer [checking]])
+
+(checking "${1:text-description}"
+    [${2:var-name} ${3:generator}]
+    (is ${4:test}))
