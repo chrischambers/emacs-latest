@@ -1,0 +1,9 @@
+# key: repl
+# name: repl
+# --
+(clojure.core/require '[clojure.core :refer :all]
+                      '[clojure.repl :refer :all]
+                      '[clojure.repl.deps :as deps]
+                      '[clojure.tools.namespace.repl
+                        :refer [refresh]
+                        :rename {refresh ns-refresh}])$0
