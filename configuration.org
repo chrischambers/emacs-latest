@@ -61,10 +61,17 @@
 * Variables to make =safe-local-variable=
   #+begin_src elisp
     (put 'smie-indent-basic 'safe-local-variable #'integerp)
+
     (put 'projectile-project-name 'safe-local-variable #'stringp)     ; projectile
+
     (put 'jinx-local-words 'safe-local-variable #'stringp)            ; jinx
+
     (put 'cider-preferred-build-tool 'safe-local-variable #'symbolp)  ; cider
     (put 'cider-clojure-cli-aliases 'safe-local-variable #'stringp)   ; cider
+
+    (put 'web-mode-style-padding 'safe-local-variable #'integerp)     ; web-mode
+    (put 'web-mode-block-padding 'safe-local-variable #'integerp)     ; web-mode
+    (put 'web-mode-script-padding 'safe-local-variable #'integerp)    ; web-mode
   #+end_src
 
 * [[./config/minimal.org][Minimal configuration]]
