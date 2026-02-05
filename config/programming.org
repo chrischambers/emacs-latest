@@ -1309,6 +1309,8 @@
 *** RJSX-Mode
     #+begin_src elisp
       (use-package rjsx-mode
+        :mode
+        ("\\.jsx?\\'" . rjsx-mode)
         :hook (rjsx-mode . eglot-ensure))
     #+end_src
 
