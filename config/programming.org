@@ -404,13 +404,14 @@
 
       :hook ((prog-mode . my/eglot-ensure)
              (eglot-managed-mode . my/setup-less-annoying-eldoc))
-       :bind (:map prog-mode-map
-               ([remap eldoc-doc-buffer] . my/eldoc-show))
+      :bind (:map prog-mode-map
+                  ([remap eldoc-doc-buffer] . my/eldoc-show))
       :custom
       ;; Don't prompt when code-actions/refactorings change buffers
       (eglot-confirm-server-initiated-edits nil)
       (eglot-extend-to-xref t)
       :general
+      ('normal prog-mode-map "gK" 'eldoc)
       (local-leader prog-mode-map
         "a"    '(eglot-code-actions :which-key "action")
         "f"    '(:ignore t :which-key "find")
