@@ -393,3 +393,23 @@
     (with-eval-after-load 'transient
       (transient-bind-q-to-quit))
   #+end_src
+
+* Optional filter for Cider Debugger locals
+  This also sorts the =locals=, which are currently in an arbitrary order.
+  #+begin_src elisp
+    (defcustom my/cider-debug-local-exclude-regexes '("^argspec" "^retspec" "^guardrails-wrapper")
+      "Patterns to exclude from cider-debug-locals"
+      :type '(list regexp))
+
+    (defun my/blacklisted-local? (word)
+      (s-matches-any? my/cider-debug-local-exclude-regexes word))
+
+    (defun my/cider-debug-filter-locals (f locals)
+      (funcall f (-remove
+                  (-compose #'my/blacklisted-local? #'-first-item)
+                  (sort locals :key #'-first-item ))))
+
+    (advice-add #'cider--debug-format-locals-list
+                :around
+                #'my/cider-debug-filter-locals)
+  #+end_src
