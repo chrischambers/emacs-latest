@@ -791,6 +791,7 @@
           "d"    '(:ignore t :major-modes (clojure-mode clojure-ts-mode cider-repl-mode)
                            :which-key "debug")
           "db"   '(cider-browse-instrumented-defs :which-key "browse instrumented")
+          "dc"   '(my/cider-insert-conditional-breakpoint :which-key "insert debug conditional")
           "dd"   '(my/debug-clojure-expression :which-key "debug expression")
           "de"   '(cider-enlighten-mode :which-key "enlighten on/off")
 
