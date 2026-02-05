@@ -231,6 +231,7 @@
                   (format "cd %s && ./bin/launchpad"
                           (projectile-project-root)))
                  (vterm-send-return)
+                 (evil-normal-state 1)
                  (message "Activating launchpad for '%s'..." project-name))
              (progn
                (if-let* ((path (f-join project-root ".nrepl-port"))
