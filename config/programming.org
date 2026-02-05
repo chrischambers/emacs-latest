@@ -1430,8 +1430,8 @@
     #+begin_src elisp
       (use-package python
         :mode
-        ("\\.py\\'" . python-mode)
-        ("\\.wsgi$" . python-mode)
+        (("\\.py\\'" . python-mode)
+        ("\\.wsgi$" . python-mode))
 
         :init
         (setq-default indent-tabs-mode nil)
