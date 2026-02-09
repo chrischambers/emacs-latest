@@ -41,9 +41,10 @@
        :after apheleia
        :config
        (unless (assoc 'uv-ruff apheleia-formatters)
-         (push '(uv-ruff . ("uvx" "ruff" "format" "--stdin-filename" filepath))
+         (push '(uv-ruff . ("uvx" "ruff" "format" "--stdin-filename" filepath "-"))
                apheleia-formatters)
-         (add-to-list 'apheleia-mode-alist '(python-mode . uv-ruff))))
+         (add-to-list 'apheleia-mode-alist '(python-mode . (uv-ruff isort)))
+         (add-to-list 'apheleia-mode-alist '(python-ts-mode . (uv-ruff isort)))))
    #+end_src
 
 ** Clojure Formatting Config
