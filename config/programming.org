@@ -18,6 +18,8 @@
 * Auto-Format Code: Apheleia ([[https://github.com/radian-software/apheleia][github]])
   #+begin_src elisp
     (use-package apheleia
+      :custom
+      (apheleia-formatters-respect-fill-column t)
       :config
       (apheleia-global-mode +1))
   #+end_src
@@ -41,7 +43,9 @@
        :after apheleia
        :config
        (unless (assoc 'uv-ruff apheleia-formatters)
-         (push '(uv-ruff . ("uvx" "ruff" "format" "--stdin-filename" filepath "-"))
+         (push '(uv-ruff . ("uvx" "ruff" "format"
+                            (apheleia-formatters-fill-column "--line-length")
+                            "--stdin-filename" filepath "-"))
                apheleia-formatters)
          (add-to-list 'apheleia-mode-alist '(python-mode . (uv-ruff isort)))
          (add-to-list 'apheleia-mode-alist '(python-ts-mode . (uv-ruff isort)))))
