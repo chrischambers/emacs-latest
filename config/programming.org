@@ -502,6 +502,7 @@
         :hook (prog-mode  . smartparens-mode)
         :config
         (require 'smartparens-config)
+        ;; Manually activate for lisp REPL modes:
         (dolist (mode lisp-repl-modes)
           (add-hook (my/mode->hook-symbol mode) 'smartparens-mode)))
     #+end_src
@@ -519,10 +520,13 @@
         :custom
         (evil-move-beyond-eol t)
         (evil-cleverparens-use-s-and-S nil)
-        :hook (prog-mode . evil-cleverparens-mode)
         :config
+        ;; Only enable cleverparens in lisp-like modes:
+        (dolist (mode lisp-modes)
+          (add-hook (my/mode->hook-symbol mode) 'evil-cleverparens-mode))
         (dolist (mode lisp-repl-modes)
           (add-hook (my/mode->hook-symbol mode) 'evil-cleverparens-mode))
+
         (let* ((lispy-maps (append lisp-mode-maps lisp-repl-mode-maps))
                (programming-maps (cons 'prog-mode-map lispy-maps)))
           (general-define-key
