@@ -2,6 +2,7 @@ config/*.el
 config/ltximg
 configuration.el
 
+etc/transient
 var
 straight
 
