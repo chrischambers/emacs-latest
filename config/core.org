@@ -496,6 +496,27 @@ which aren't absolutely necessary, but are very important.
         "pr"  '(project-forget-project :which-key "remove")
         "p/"  '(project-find-regexp :which-key "search")))
    #+end_src
+** Automatically trust =dir-locals.el= in known projects
+   #+begin_src elisp
+     (with-eval-after-load 'projectile
+       (defun my/projectile-trust-project-root ()
+         "Add current Projectile project root to `safe-local-variable-directories'."
+         (let ((root (ignore-errors (projectile-project-root))))
+           (when (and root (file-directory-p root))
+             ;; Canonicalise; helps avoid duplicates via symlinks/../ etc.
+             (setq root (file-truename root))
+             (unless (member root safe-local-variable-directories)
+               (message "Trusting dir-locals.el for project %s" root)
+               (setq safe-local-variable-directories
+                (cons root safe-local-variable-directories))))))
+
+       (advice-add #'project-switch-project
+                   :after
+                   (lambda (&rest r) (run-hooks 'projectile-after-switch-project-hook)))
+       (add-hook 'projectile-after-switch-project-hook
+                 #'my/projectile-trust-project-root))
+   #+end_src
+
 
 * <<<all-the-icons>>> ([[https://github.com/domtronn/all-the-icons.el][source]])
     #+begin_src elisp
