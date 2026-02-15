@@ -2,4 +2,4 @@
 # name: mulog (log)
 # key: log
 # --
-(mulog/log ::${1:category})
+(μ/log ::${1:event-name} :${2:key} ${3:"interesting value"} $4)$0
