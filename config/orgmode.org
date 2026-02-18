@@ -223,6 +223,10 @@
 **** <<<alert>>> ([[https://github.com/jwiegley/alert][github]]): Use various growl-like notifiers
      #+begin_src elisp
        (use-package alert
+         :straight (alert :type git
+                             :host github
+                             :repo "jwiegley/alert"
+                             :fork t)
          :config
          (if IS-MAC (customize-set-variable 'alert-default-style 'osx-notifier)))
      #+end_src
