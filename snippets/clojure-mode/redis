@@ -1,0 +1,11 @@
+# key: redis
+# name: redis
+# --
+(require '[taoensso.carmine :as redis])
+
+(defonce redis-conn-pool (redis/connection-pool {}))
+(def redis-conn-spec {:uri "http://localhost:${1:6379}"})
+(def redis-options {:pool redis-conn-pool :spec redis-conn-spec})
+(defmacro redis [& body] `(redis/wcar redis-options ~@body))
+
+(redis (redis/ping))
