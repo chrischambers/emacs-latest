@@ -363,6 +363,12 @@
      (use-package ob-nix
        :straight (ob-nix :type git :host github :repo "emacsmirror/ob-nix"))
    #+end_src
+*** Add redis as an available language
+    #+begin_src elisp
+      (use-package ob-redis
+        :straight (ob-redis :type git :host github :repo "nekifirus/ob-redis"))
+    #+end_src
+
 *** Set desired =src= block / babel languages (see complete list [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][here]])
     #+begin_src elisp
       (org-babel-do-load-languages
@@ -380,6 +386,7 @@
          (oz . t)
          (plantuml . t)
          (python . t)
+         (redis . t)
          (scala . t)
          (scheme . t)
          (shell . t)
