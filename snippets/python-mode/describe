@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: describe
+# key: desc
+# --
+from ${1:namespace} import ${2:function_under_test}
+from pytest import mark
+
+def describe_$2():
+    expectations = [
+      ($3),
+    ]
+    @mark.parametrize("input, expected", expectactions)
+    def it_returns_expected_values(input, expected):
+        assert $2(input) == expected

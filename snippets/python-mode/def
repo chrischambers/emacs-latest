@@ -1,0 +1,5 @@
+# key: def
+# name: def
+# --
+def ${1:fname}(${2:arg}: ${3:type}) -> ${4:returnType}:
+    ${5:pass}

@@ -1,0 +1,6 @@
+# key: tv
+# name: typevar
+# --
+from typing import TypeVar
+
+${1:A} = TypeVar("$1"$2)$0
