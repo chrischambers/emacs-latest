@@ -429,7 +429,9 @@
         "rr"   '(eglot-rename :which-key "rename")
 
         "t"    '(:ignore t :which-key "test")
-        "tj"   '(projectile-toggle-between-implementation-and-test :which-key "jump"))
+        "tj"   '(projectile-toggle-between-implementation-and-test :which-key "jump")
+        "v"    '(:ignore t :which-key "view")
+        "vh"   '(eglot-inlay-hints-mode :which-key "hints"))
       ('(insert motion) prog-mode-map
        "C-a"  'eglot-code-actions))
   #+end_src
