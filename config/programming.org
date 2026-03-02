@@ -1519,17 +1519,23 @@
       ;; Source: https://docs.projectile.mx/projectile/projects.html#test-dirsrc-dir-vs-related-files-fn
 
       (with-eval-after-load 'projectile
-        (defun my-get-python-test-file (impl-file-path)
+      (defvar projectile-python-test-directories
+        '("specs" "spec" "tests" "test")
+        "A list (in preference order) of names for python test directories")
+
+        (defun my/get-python-test-file (impl-file-path)
           "Return the corresponding test file directory for IMPL-FILE-PATH"
           (let* ((rel-path (f-relative impl-file-path (projectile-project-root)))
                  (src-dir (car (f-split rel-path))))
-            (cond ((f-exists? (f-join (projectile-project-root) "test"))
-                   (projectile-complementary-dir impl-file-path src-dir "test"))
-                  ((f-exists? (f-join (projectile-project-root) "tests"))
-                   (projectile-complementary-dir impl-file-path src-dir "tests"))
-                  (t (error "Could not locate a test file for %s!" impl-file-path)))))
+            (catch 'done
+              (dolist (test-dir projectile-python-test-directories)
+                (when (f-exists? (f-join (projectile-project-root) test-dir))
+                  (throw 'done (projectile-complementary-dir impl-file-path src-dir test-dir))))
+              (if done
+                  (message "Test directory: %s" done)
+                (error "Could not locate a test file for %s!" impl-file-path)))))
 
-        (defun my-get-python-impl-file (test-file-path)
+        (defun my/get-python-impl-file (test-file-path)
           "Return the corresponding impl file directory for TEST-FILE-PATH"
           (if-let* ((root (projectile-project-root))
                     (rel-path (f-relative test-file-path root))
@@ -1539,10 +1545,20 @@
               (projectile-complementary-dir test-file-path "tests?" src-dir)
             (error "Could not locate a impl file for %s!" test-file-path)))
 
-        (projectile-update-project-type
-         'python-pkg
-         :src-dir #'my-get-python-impl-dir
-         :test-dir #'my-get-python-test-dir))
+        (defvar projectile-python-project-types
+          '(python-toml
+            python-poetry
+            python-pipenv
+            python-tox
+            python-pkg
+            python-pip
+            django))
+
+        (dolist (p projectile-python-project-types)
+          (projectile-update-project-type
+           p
+           :src-dir (symbol-function #'my/get-python-impl-file)
+           :test-dir (symbol-function #'my/get-python-test-file))))
     #+end_src
 *** REPL
     #+begin_src elisp
