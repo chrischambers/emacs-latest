@@ -466,6 +466,7 @@ which aren't absolutely necessary, but are very important.
       :defer 1
       :custom
       (projectile-create-missing-test-files t)
+      (projectile-default-test-directory "tests/")
       :config
       ;; The following is required for `project-list-buffers':
       (setq Buffer-menu-show-internal t)
@@ -516,7 +517,6 @@ which aren't absolutely necessary, but are very important.
        (add-hook 'projectile-after-switch-project-hook
                  #'my/projectile-trust-project-root))
    #+end_src
-
 
 * <<<all-the-icons>>> ([[https://github.com/domtronn/all-the-icons.el][source]])
     #+begin_src elisp
