@@ -413,3 +413,22 @@
                 :around
                 #'my/cider-debug-filter-locals)
   #+end_src
+* Misc
+  #+begin_src elisp
+    (defun my/get-org-property-from-header (name)
+      "Return a pair `NAME . VALUE' matching file-level #+PROPERTY NAME, or nil."
+      (let ((props (org-collect-keywords '("PROPERTY"))))
+        (car (-map (lambda (p) (cons (s-chop-prefix "PROPERTY:" (car p)) (cdr p))) props))))
+
+    (defun my/get-org-property (name)
+      "Returns the value of the property matching `name'.
+
+    This will preferentially use the value of the property matching `name'
+    in the nearest drawer, but it will fall back to the file level
+    `#+property:name' value. "
+      (org-with-wide-buffer
+       (let* ((header-property (my/get-org-property-from-header name))
+              (properties (org-entry-properties nil 'standard))
+              (drawer-property (assoc-string name properties t)))
+         (or (cdr drawer-property) (cdr header-property)))))
+  #+end_src
