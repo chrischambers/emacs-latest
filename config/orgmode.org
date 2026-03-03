@@ -912,18 +912,19 @@
       :straight (org-noter :type git
                            :host github
                            :repo "org-noter/org-noter"
-                           :fork t)
+                           :fork t
+                           :files ("*.el" "modules/*.el"))
       :custom
       (org-noter-default-notes-file-names nil)
       (org-noter-notes-search-path (list my/book-notes-directory))
       (org-noter-prefer-root-as-file-level t)
       (org-noter-always-create-frame nil)
       (org-noter-use-indirect-buffer nil)
-      (org-noter-doc-property-in-notes t)
+      ;; (org-noter-doc-property-in-notes t)
       (org-noter-highlight-selected-text t)
+      (org-noter-auto-save-last-location t)
 
       :preface
-
       (defun my/notes-file-for-ebook (path)
         (f-join my/book-notes-directory (f-swap-ext (f-filename path) "org")))
 
@@ -949,14 +950,15 @@
                         (throw 'break t))))))))))
       :config
       (require 'org-noter)
+      ;; (org-noter-enable-org-roam-integration)
 
-      ;; (remove-hook
-      ;;  'org-noter-create-session-from-document-hook
-      ;;  #'org-noter--create-session-from-document-file-default)
+      (remove-hook
+       'org-noter-create-session-from-document-hook
+       #'org-noter--create-session-from-document-file-default)
 
-      ;; (add-hook
-      ;;  'org-noter-create-session-from-document-hook
-      ;;  #'my/org-noter-session-from-document-file)
+      (add-hook
+       'org-noter-create-session-from-document-hook
+       #'my/org-noter-session-from-document-file)
 
       ;; :preface
       ;; (defun my/org-noter-precise-note ()
@@ -1015,33 +1017,33 @@
        :config
        ;; Add a function to ensure precise note is inserted
        (defun org-noter-pdftools-insert-precise-note (&optional toggle-no-questions)
-	 (interactive "P")
-	 (org-noter--with-valid-session
-	  (let ((org-noter-insert-note-no-questions (if toggle-no-questions
-							(not org-noter-insert-note-no-questions)
-						      org-noter-insert-note-no-questions))
-		(org-pdftools-use-isearch-link t)
-		(org-pdftools-use-freepointer-annot t))
-	    (org-noter-insert-note (org-noter--get-precise-info)))))
+         (interactive "P")
+         (org-noter--with-valid-session
+          (let ((org-noter-insert-note-no-questions (if toggle-no-questions
+                                                        (not org-noter-insert-note-no-questions)
+                                                      org-noter-insert-note-no-questions))
+                (org-pdftools-use-isearch-link t)
+                (org-pdftools-use-freepointer-annot t))
+            (org-noter-insert-note (org-noter--get-precise-info)))))
 
        ;; fix https://github.com/weirdNox/org-noter/pull/93/commits/f8349ae7575e599f375de1be6be2d0d5de4e6cbf
        (defun org-noter-set-start-location (&optional arg)
-	 "When opening a session with this document, go to the current location.
+         "When opening a session with this document, go to the current location.
      With a prefix ARG, remove start location."
-	 (interactive "P")
-	 (org-noter--with-valid-session
-	  (let ((inhibit-read-only t)
-		(ast (org-noter--parse-root))
-		(location (org-noter--doc-approx-location (when (called-interactively-p 'any) 'interactive))))
-	    (with-current-buffer (org-noter--session-notes-buffer session)
-	      (org-with-wide-buffer
-	       (goto-char (org-element-property :begin ast))
-	       (if arg
-		   (org-entry-delete nil org-noter-property-note-location)
-		 (org-entry-put nil org-noter-property-note-location
-				(org-noter--pretty-print-location location))))))))
+         (interactive "P")
+         (org-noter--with-valid-session
+          (let ((inhibit-read-only t)
+                (ast (org-noter--parse-root))
+                (location (org-noter--doc-approx-location (when (called-interactively-p 'any) 'interactive))))
+            (with-current-buffer (org-noter--session-notes-buffer session)
+              (org-with-wide-buffer
+               (goto-char (org-element-property :begin ast))
+               (if arg
+                   (org-entry-delete nil org-noter-property-note-location)
+                 (org-entry-put nil org-noter-property-note-location
+                                (org-noter--pretty-print-location location))))))))
        (with-eval-after-load 'pdf-annot
-	 (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+         (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
    #+end_src
 
 * <<<org-drill>>> ([[https://gitlab.com/phillord/org-drill/][gitlab]])

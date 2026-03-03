@@ -414,21 +414,89 @@
                 #'my/cider-debug-filter-locals)
   #+end_src
 * Misc
-  #+begin_src elisp
-    (defun my/get-org-property-from-header (name)
-      "Return a pair `NAME . VALUE' matching file-level #+PROPERTY NAME, or nil."
-      (let ((props (org-collect-keywords '("PROPERTY"))))
-        (car (-map (lambda (p) (cons (s-chop-prefix "PROPERTY:" (car p)) (cdr p))) props))))
+** Utilities
+   #+begin_src elisp
+     (defun my/get-org-property-from-header (name)
+       "Return a pair `NAME . VALUE' matching file-level #+PROPERTY NAME, or nil."
+       (let ((props (org-collect-keywords '("PROPERTY"))))
+         (car (-map (lambda (p) (cons (s-chop-prefix "PROPERTY:" (car p)) (cdr p))) props))))
 
-    (defun my/get-org-property (name)
-      "Returns the value of the property matching `name'.
+     (defun my/get-org-property (name)
+       "Returns the value of the property matching `name'.
 
-    This will preferentially use the value of the property matching `name'
-    in the nearest drawer, but it will fall back to the file level
-    `#+property:name' value. "
-      (org-with-wide-buffer
-       (let* ((header-property (my/get-org-property-from-header name))
-              (properties (org-entry-properties nil 'standard))
-              (drawer-property (assoc-string name properties t)))
-         (or (cdr drawer-property) (cdr header-property)))))
-  #+end_src
+     This will preferentially use the value of the property matching `name'
+     in the nearest drawer, but it will fall back to the file level
+     `#+property:name' value. "
+       (org-with-wide-buffer
+        (let* ((header-property (my/get-org-property-from-header name))
+               (properties (org-entry-properties nil 'standard))
+               (drawer-property (assoc-string name properties t)))
+          (or (cdr drawer-property) (cdr header-property)))))
+   #+end_src
+** More Utilities
+   #+begin_src elisp
+     (defun my/pdf-get-file-title (&optional file-or-buffer)
+       (let* ((alist (pdf-info-metadata file-or-buffer))
+              (title (alist-get 'title alist))
+              (author (alist-get 'author alist)))
+         (format "Book Notes: %s - %s" title author)))
+
+     (defun my/pdf-get-file-slug (&optional file-or-buffer)
+       (let* ((alist (pdf-info-metadata file-or-buffer))
+              (title (alist-get 'title alist)))
+         (format "%s.org" (slugify title))))
+   #+end_src
+
+   #+begin_src elisp
+     (defun my/existing-org-noter-notes? (path)
+     (with-current-buffer (find-file-noselect path)
+       (org-with-point-at (point-min)
+         (my/get-org-property "NOTER_DOCUMENT"))))
+
+     (defun my/activate-existing-org-noter-notes (path)
+      (with-current-buffer (find-file-noselect path)
+        (org-with-point-at (point-min)
+          (catch 'break
+            (while (re-search-forward (org-re-property org-noter-property-doc-file) nil)
+              (if-let ((saved-location (org-entry-get nil org-noter-property-note-location)))
+                  (setq document-location (cons (string-to-number saved-location) 0)))
+              (let ((org-noter--start-location-override (org-noter--doc-approx-location)))
+                (org-noter arg))
+              (throw 'break t))))))
+
+     (defun my/create-org-noter-notes (book-path target-path title)
+       (let ((buffer (find-file-noselect target-path)))
+         (with-current-buffer buffer
+           (goto-char (point-max))
+           (insert (if (save-excursion (beginning-of-line) (looking-at "[[:space:]]*$")) "" "\n")
+                   "** "
+                   org-noter-headline-title-decoration
+                   title
+                   org-noter-headline-title-decoration)
+           (org-entry-put nil org-noter-property-doc-file book-path))
+         (switch-to-buffer buffer)))
+
+     (defun my/new-org-noter-make (&optional arg document-path)
+       (let ((document-path
+              (or (run-hook-with-args-until-success
+                   'org-noter-get-buffer-file-name-hook major-mode)
+                  document-path)))
+         (when (f-ancestor-of? my/ebooks-directory document-path)
+           (let ((target (f-join my/book-notes-directory (my/pdf-get-file-slug document-path))))
+             (message target)
+             (if (my/existing-org-noter-notes? target)
+                 (my/activate-existing-org-noter-notes target)
+               ;;(message "No notes!")
+               (my/create-org-noter-notes document-path target (my/pdf-get-file-title document-path)))))))
+
+      (remove-hook
+       'org-noter-create-session-from-document-hook
+       #'org-noter--create-session-from-document-file-default)
+      (remove-hook
+       'org-noter-create-session-from-document-hook
+       #'my/org-noter-session-from-document-file)
+
+     (add-hook
+      'org-noter-create-session-from-document-hook
+      #'my/new-org-noter-make)
+   #+end_src
