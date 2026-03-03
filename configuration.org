@@ -439,7 +439,7 @@
        (let* ((alist (pdf-info-metadata file-or-buffer))
               (title (alist-get 'title alist))
               (author (alist-get 'author alist)))
-         (format "Book Notes: %s - %s" title author)))
+         (format "%s - %s" title author)))
 
      (defun my/pdf-get-file-slug (&optional file-or-buffer)
        (let* ((alist (pdf-info-metadata file-or-buffer))
@@ -449,27 +449,36 @@
 
    #+begin_src elisp
      (defun my/existing-org-noter-notes? (path)
-     (with-current-buffer (find-file-noselect path)
-       (org-with-point-at (point-min)
-         (my/get-org-property "NOTER_DOCUMENT"))))
+       (with-current-buffer (find-file-noselect path)
+         (org-with-point-at (point-min)
+           (my/get-org-property "NOTER_DOCUMENT"))))
 
      (defun my/activate-existing-org-noter-notes (path)
-      (with-current-buffer (find-file-noselect path)
-        (org-with-point-at (point-min)
-          (catch 'break
-            (while (re-search-forward (org-re-property org-noter-property-doc-file) nil)
-              (if-let ((saved-location (org-entry-get nil org-noter-property-note-location)))
-                  (setq document-location (cons (string-to-number saved-location) 0)))
-              (let ((org-noter--start-location-override (org-noter--doc-approx-location)))
-                (org-noter arg))
-              (throw 'break t))))))
+       (with-current-buffer (find-file-noselect path)
+         (org-with-point-at (point-min)
+           (catch 'break
+             (while (re-search-forward (org-re-property org-noter-property-doc-file) nil)
+               (if-let ((saved-location (org-entry-get nil org-noter-property-note-location)))
+                   (setq document-location (cons (string-to-number saved-location) 0)))
+               (let ((org-noter--start-location-override (org-noter--doc-approx-location)))
+                 (org-noter))
+               (throw 'break t))))))
 
      (defun my/create-org-noter-notes (book-path target-path title)
-       (let ((buffer (find-file-noselect target-path)))
+       (let* ((my/captured-title title)
+              (org-capture-templates `(("b" "Book Notes" plain
+                                        (file ,target-path)
+                                        (file ,(expand-file-name "book-notes-org-noter.org" my/org-capture-templates))
+                                        :immediate-finish t
+                                        :jump-to-captured t)))
+              (_ (org-capture nil "b"))
+              (buffer (find-file-noselect target-path)))
          (with-current-buffer buffer
+           (goto-char (point-min))
+           (org-entry-put nil org-noter-property-doc-file book-path)
            (goto-char (point-max))
            (insert (if (save-excursion (beginning-of-line) (looking-at "[[:space:]]*$")) "" "\n")
-                   "** "
+                   "\n* "
                    org-noter-headline-title-decoration
                    title
                    org-noter-headline-title-decoration)
@@ -489,14 +498,15 @@
                ;;(message "No notes!")
                (my/create-org-noter-notes document-path target (my/pdf-get-file-title document-path)))))))
 
-      (remove-hook
-       'org-noter-create-session-from-document-hook
-       #'org-noter--create-session-from-document-file-default)
-      (remove-hook
-       'org-noter-create-session-from-document-hook
-       #'my/org-noter-session-from-document-file)
+     (remove-hook
+      'org-noter-create-session-from-document-hook
+      #'org-noter--create-session-from-document-file-default)
+     (remove-hook
+      'org-noter-create-session-from-document-hook
+      #'my/org-noter-session-from-document-file)
 
      (add-hook
       'org-noter-create-session-from-document-hook
       #'my/new-org-noter-make)
+
    #+end_src

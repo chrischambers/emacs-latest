@@ -823,14 +823,13 @@
 
 ** Convenience function when capturing: set =ROAM-ALIASES= to sensible default
    #+begin_src elisp
-     (with-eval-after-load 'org 's
-       (defun my/roam-alias-default ()
-         "Sets the org-roam alias to a sensible default."
-         (let* ((title (my/captured-title))
-                (title (if (s-matches? "\s" title)
-                           (s-format "\"{$0}\"" (list title))
-                         title)))
-               title)))
+     (defun my/roam-alias-default ()
+       "Sets the org-roam alias to a sensible default."
+       (let* ((title (or my/captured-title ""))
+              (title (if (s-matches? "\s" title)
+                         (s-format "\"$0\"" 'elt (list title))
+                       title)))
+         title))
    #+end_src
 
 ** After capturing, automatically sync with roam DB
