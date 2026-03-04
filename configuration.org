@@ -434,6 +434,11 @@
           (or (cdr drawer-property) (cdr header-property)))))
    #+end_src
 ** More Utilities
+** DONE Incorporate the org-roam lookup as another potential mechanism, in case the slug has been modified
+   CLOSED: [2026-03-04 Wed 10:50]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"          [2026-03-04 Wed 10:50]
+   :END:
    #+begin_src elisp
      (defun my/pdf-get-file-title (&optional file-or-buffer)
        (let* ((alist (pdf-info-metadata file-or-buffer))
@@ -448,10 +453,26 @@
    #+end_src
 
    #+begin_src elisp
-     (defun my/existing-org-noter-notes? (path)
-       (with-current-buffer (find-file-noselect path)
-         (org-with-point-at (point-min)
-           (my/get-org-property "NOTER_DOCUMENT"))))
+     (defun my--create-org-noter-notes-path (book-path)
+       (f-join my/book-notes-directory (my/pdf-get-file-slug book-path)))
+
+     (defun my/existing-org-noter-notes-for (book-path)
+       "Tries to find the corresponding notes file for a book.
+
+     - If `org-roam' is active, it will first try to inspect the cache and
+       see if there's a matching entry for the current book.
+     - failing that, it will build the corresponding path via
+       `my--create-org-noter-notes-path'
+     - if a path exists, return it; otherwise, return nil."
+       (let* ((org-roam? (require 'org-roam nil t))
+              (org-path (my--create-org-noter-notes-path book-path))
+              (org-roam-path (and
+                              org-roam?
+                              (car (org-noter--find-existing-node-for-document book-path)))))
+         (cond
+          ((and org-roam-path (f-exists? org-roam-path)) org-roam-path)
+          ((f-exists? org-path) org-path)
+          t nil)))
 
      (defun my/activate-existing-org-noter-notes (path)
        (with-current-buffer (find-file-noselect path)
@@ -464,8 +485,9 @@
                  (org-noter))
                (throw 'break t))))))
 
-     (defun my/create-org-noter-notes (book-path target-path title)
-       (let* ((my/captured-title title)
+     (defun my/create-org-noter-notes (book-path)
+       (let* ((target-path (my--create-org-noter-notes-path book-path))
+              (my/captured-title (my/pdf-get-file-title book-path))
               (org-capture-templates `(("b" "Book Notes" plain
                                         (file ,target-path)
                                         (file ,(expand-file-name "book-notes-org-noter.org" my/org-capture-templates))
@@ -485,18 +507,18 @@
            (org-entry-put nil org-noter-property-doc-file book-path))
          (switch-to-buffer buffer)))
 
-     (defun my/new-org-noter-make (&optional arg document-path)
-       (let ((document-path
+     (defun my/new-org-noter-make (&optional arg book-path)
+       (let ((book-path
               (or (run-hook-with-args-until-success
                    'org-noter-get-buffer-file-name-hook major-mode)
-                  document-path)))
-         (when (f-ancestor-of? my/ebooks-directory document-path)
-           (let ((target (f-join my/book-notes-directory (my/pdf-get-file-slug document-path))))
+                  book-path)))
+         (when (f-ancestor-of? my/ebooks-directory book-path)
+           (let ((target (my/existing-org-noter-notes-for book-path)))
              (message target)
-             (if (my/existing-org-noter-notes? target)
+             (if target
                  (my/activate-existing-org-noter-notes target)
                ;;(message "No notes!")
-               (my/create-org-noter-notes document-path target (my/pdf-get-file-title document-path)))))))
+               (my/create-org-noter-notes book-path ))))))
 
      (remove-hook
       'org-noter-create-session-from-document-hook

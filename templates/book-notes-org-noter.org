@@ -1,0 +1,15 @@
+:PROPERTIES:
+:ID:           %(my/new-node-id)
+:ROAM_ALIASES: %(my/roam-alias-default)
+:ROAM_REFS:    %(format "[[cite:&%s]]" (org-ref-read-key))
+:END:
+#+title: Book Notes: %(my/captured-title)
+#+author: %n
+#+email: %(message-user-mail-address)
+#+date: %<[%Y-%m-%d]>
+#+language: en-gb
+#+startup: align shrink inlineimages latexpreview content
+#+filetags: :book-notes:
+
+
+%?
