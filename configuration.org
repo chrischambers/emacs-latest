@@ -29,8 +29,12 @@
   #+begin_src elisp
     (setq my/resources-directory (expand-file-name "resources" user-emacs-directory)
           my/notes-directory (file-truename "~/Dropbox/notes")
+          my/archive-directory (expand-file-name "archive" my/notes-directory)
+          my/var-directory (expand-file-name "var" my/notes-directory)
+          my/recipe-directory (expand-file-name "reference/recipes" my/notes-directory)
           my/ebooks-directory (file-truename "~/Ebooks")
-          my/book-notes-directory (expand-file-name "sources" my/notes-directory))
+          my/sources-directory (expand-file-name "sources" my/notes-directory)
+          my/book-notes-directory (expand-file-name "ebooks" my/sources-directory))
   #+end_src
 
 * Bootstrap config-related functions

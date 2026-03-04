@@ -51,11 +51,11 @@
       (org-directory my/notes-directory)
       (org-archive-location
        (concat
-        (expand-file-name "#archives/completed_tasks.org" org-directory)
+        (expand-file-name "completed_tasks.org" my/archive-directory)
         "::* From %s"))
       (org-log-done 'time)
       ;; (org-log-reschedule 'note)
-      (org-preview-latex-image-directory (expand-file-name "latex-images/" org-directory))
+      (org-preview-latex-image-directory (expand-file-name "latex-images" my/var-directory))
       (org-preview-latex-default-process 'dvisvgm)
       (org-format-latex-options
        '(
@@ -493,9 +493,8 @@
      (require 'dash)
 
      (defcustom org-agenda-blacklist
-       '(
-         "#old"
-         "#archives/completed_tasks.org$")
+       `("#sort"
+         ,(expand-file-name "completed_tasks.org" my/archive-directory))
        "patterns to exclude from org-agenda path names")
 
      (defvar org-todo-states (-map (lambda (s) (car (s-split "(" s)))
@@ -883,17 +882,13 @@
       (org-drill-add-random-noise-to-intervals-p t)
       (org-default-properties (append org-default-properties '("DRIlL_CARD_TYPE")))
       :config
-      (setq org-drill-blacklist
-            (--map (expand-file-name (concat org-directory "/" it))
-                   '("#old"
-                     "#archives/completed_tasks.org")))
-
+      (setq org-drill-blacklist org-agenda-blacklist)
       (defun my/org-drill-files ()
         "Returns all org files containing :drill: (except those whose
     prefixes match org-drill-blacklist)"
         (interactive)
         (let*
-            ((-compare-fn (-flip #'s-prefix?))
+            ((-compare-fn (-flip #'s-contains?))
              (all-files (s-lines (shell-command-to-string
                                   (format "rg ':drill:' %s -l" org-directory))))
              (files (-difference all-files org-drill-blacklist))
@@ -941,7 +936,7 @@
         (let* ((URL (read-string "Recipe URL: "))
                (recipe (org-chef-fetch-recipe URL))
                (slug (my/recipe-to-slug recipe))
-               (file-path (concat org-directory "/recipes/" slug ".org")))
+               (file-path (f-join my/recipe-directory (concat slug ".org"))))
           (customize-set-variable 'my/current-recipe recipe)
           file-path))
 
@@ -1272,7 +1267,7 @@
    #+begin_src elisp
      (setq my/projects-directory (f-join my/notes-directory "projects"))
      (setq my/completed-projects-directory
-           (f-join my/notes-directory "#archives" "projects" "completed" ))
+           (f-join my/archive-directory "projects" "completed"))
 
      (defun my/fob->file (file-or-buffer)
        "Returns a `file' when a `file-or-buffer' object is provided."
