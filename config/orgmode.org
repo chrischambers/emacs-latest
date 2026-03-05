@@ -55,7 +55,7 @@
         "::* From %s"))
       (org-log-done 'time)
       ;; (org-log-reschedule 'note)
-      (org-preview-latex-image-directory (expand-file-name "latex-images" my/var-directory))
+      (org-preview-latex-image-directory my/latex-image-directory)
       (org-preview-latex-default-process 'dvisvgm)
       (org-format-latex-options
        '(
@@ -494,7 +494,8 @@
 
      (defcustom org-agenda-blacklist
        `("#sort"
-         ,(expand-file-name "completed_tasks.org" my/archive-directory))
+         "#processing"
+         ,my/archive-directory)
        "patterns to exclude from org-agenda path names")
 
      (defvar org-todo-states (-map (lambda (s) (car (s-split "(" s)))
@@ -750,7 +751,7 @@
           (org-id-new)))
 
       :custom
-      (org-default-notes-file (expand-file-name "todo.org" org-directory))
+      (org-default-notes-file my/notes-file)
 
       (org-capture-templates
        `(("t" "Task" entry
