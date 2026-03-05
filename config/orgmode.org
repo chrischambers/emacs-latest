@@ -274,7 +274,7 @@
      (with-eval-after-load 'org 'general
       (local-leader org-mode-map
         "+" '(org-attach :which-key "attachments..."))
-      (customize-set-variable 'org-attach-id-dir (expand-file-name "#attachments" org-directory)))
+      (customize-set-variable 'org-attach-id-dir my/attachments-directory))
    #+end_src
 
 ** <<<org-cliplink>>> ([[https://github.com/rexim/org-cliplink][github]]): Insert link using page-title as description automatically via
@@ -612,7 +612,7 @@
                                '("ROAM_ALIASES" "ROAM_EXCLUDE" "filetags")))
       (org-roam-completion-everywhere t)
       (org-roam-file-exclude-regexp
-       (list "^#attachments/" "^\\.direnv/"))
+       (list "^var/" "^\\.direnv/"))
       :config
       ;; (if IS-MAC
       ;;   ;; gapplin = 'open -a Gapplin "$@"') (with shebang)
@@ -852,7 +852,7 @@
   #+begin_src elisp
     (use-package org-journal
       :custom
-      (org-journal-dir (expand-file-name "journals" org-directory))
+      (org-journal-dir my/journals-directory)
       (org-journal-file-format "%Y-%m-%d.org")
       (org-journal-carryover-items "/!-DONE-CANCELLED")
       ;; Don't hide other entries when jumping to journal:
