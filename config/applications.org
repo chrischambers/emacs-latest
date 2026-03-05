@@ -181,6 +181,7 @@
       :preface
       (defvar treemacs-ignored-regexes nil
         "A list of regexes that Treemacs should not display.")
+
       (defun my/inject-dir-locals (&rest _)
         (message "Injecting dir-locals.el")
         (hack-dir-local-variables-non-file-buffer))
@@ -208,29 +209,29 @@
       (treemacs-filewatch-mode t)
       (treemacs-fringe-indicator-mode 'always)
 
-      (defun my/treemacs-ignored (filename absolute-path)
-        ;; (message "my/treemacs-ignored: %s %s" absolute-path filename)
+      (defun my/treemacs-ignored (absolute-path git-info)
+        "Filters any buttons whose paths match regexes in`treemacs-ignored-regexes'."
         (-some (lambda (re) (s-matches? re absolute-path)) treemacs-ignored-regexes))
-      (push 'my/treemacs-ignored treemacs-ignored-file-predicates)
+
+      (dolist (f '(treemacs-is-file-git-ignored? my/treemacs-ignored))
+        (add-to-list 'treemacs-pre-file-insert-predicates f))
 
       (require 'treemacs-project-follow-mode)
       (defun my/treemacs-jump-to-buffer ()
+        "Navigate treemacs to root of current buffer.
+
+    This will also:
+    - inject any local dir-locals.el variables into the treemacs buffer, and
+    - trigger a `treemacs-refresh'."
         (interactive)
         (treemacs--do-follow-project)
-        (with-current-buffer (treemacs-get-local-buffer)
-          (setq treemacs-ignored-regexes nil)
-          (setq file-local-variables-alist nil)
-          (setq dir-local-variables-alist nil)
+        (with-selected-window (treemacs-get-local-window)
+          (setq treemacs-ignored-regexes nil
+                file-local-variables-alist nil
+                dir-local-variables-alist nil)
           (hack-dir-local-variables-non-file-buffer)
           (treemacs-refresh)))
 
-      (defun my/treemacs-ignored2 (absolute-path _)
-        ;; (message "my/treemacs-ignored: %s %s" absolute-path filename)
-        (-some (lambda (re) (s-matches? re absolute-path)) treemacs-ignored-regexes))
-      (add-to-list 'treemacs-pre-file-insert-predicates
-                   #'treemacs-is-file-git-ignored?)
-      (add-to-list 'treemacs-pre-file-insert-predicates
-                   #'my/treemacs-ignored2)
       :general
       (local-leader
         "*" '(my/treemacs-jump-to-buffer :which-key "treemacs update"))
