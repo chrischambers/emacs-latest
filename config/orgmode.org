@@ -853,7 +853,7 @@
   #+begin_src elisp
     (use-package org-journal
       :custom
-      (org-journal-dir my/journals-directory)
+      (org-journal-dir my/inbox-directory)
       (org-journal-file-format "%Y-%m-%d.org")
       (org-journal-carryover-items "/!-DONE-CANCELLED")
       ;; Don't hide other entries when jumping to journal:

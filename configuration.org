@@ -35,7 +35,7 @@
           my/reference-directory (expand-file-name "reference/" my/notes-directory)
           my/recipe-directory (expand-file-name "recipes/" my/reference-directory)
           my/personal-directory (expand-file-name "personal/" my/notes-directory)
-          my/journals-directory (expand-file-name "#sort/journals/" my/notes-directory)
+          my/inbox-directory (expand-file-name "#inbox/" my/notes-directory)
 
           my/notes-file  (expand-file-name "todo.org" my/personal-directory)
           my/habits-file (expand-file-name "habits.org" my/personal-directory)
