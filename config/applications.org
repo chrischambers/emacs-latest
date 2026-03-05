@@ -178,57 +178,65 @@
 * <<<treemacs>>> ([[https://github.com/Alexander-Miller/treemacs][github]]): file drawer
   #+begin_src elisp
     (use-package treemacs
+      :preface
+      (defvar treemacs-ignored-regexes nil
+        "A list of regexes that Treemacs should not display.")
+      (defun my/inject-dir-locals (&rest _)
+        (message "Injecting dir-locals.el")
+        (hack-dir-local-variables-non-file-buffer))
+
+      :hook ((after-init . treemacs-hide-gitignored-files-mode)
+             (treemacs-follow-mode . my/inject-dir-locals)
+             (treemacs-project-follow-mode . my/inject-dir-locals)
+             (treemacs-select . my/inject-dir-locals)
+             (treemacs-pre-refresh . my/inject-dir-locals))
       :custom
       (treemacs-width 30)
       ;; (treemacs-tag-follow-delay 0.5)
-      (treemacs-hide-gitignored-files-mode t)
       :config
       ;; (treemacs-project-follow-mode)
 
       ;; slightly lower the size of treemacs icons
-      (treemacs-resize-icons 18)
+      (treemacs-resize-icons 16)
+
+      ;; Doesn't work when set via :custom
+      (setq treemacs-collapse-dirs 0)
+
+      (treemacs-git-mode 'deferred)
 
       ;; (treemacs-tag-follow-mode t)
       (treemacs-filewatch-mode t)
       (treemacs-fringe-indicator-mode 'always)
 
-      (pcase (cons (not (null (executable-find "git")))
-                   (not (null treemacs-python-executable)))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
-
-      (define-inline my/treemacs-ignore-pycache (file _)
-        (declare (side-effect-free t) (pure t))
-        (inline-letevals (file)
-          (inline-quote
-           (string-equal ,file "__pycache__"))))
-      (push 'my/treemacs-ignore-pycache treemacs-ignored-file-predicates)
-
       (defun my/treemacs-ignored (filename absolute-path)
-        (or
-         (s-equals? filename "latex-images")
-         (s-equals? filename "ltximg")
-         (s-contains? ".lsp" filename)
-         (s-contains? ".clj-kondo" filename)))
+        ;; (message "my/treemacs-ignored: %s %s" absolute-path filename)
+        (-some (lambda (re) (s-matches? re absolute-path)) treemacs-ignored-regexes))
       (push 'my/treemacs-ignored treemacs-ignored-file-predicates)
 
       (require 'treemacs-project-follow-mode)
       (defun my/treemacs-jump-to-buffer ()
         (interactive)
-        (treemacs--do-follow-project))
+        (treemacs--do-follow-project)
+        (with-current-buffer (treemacs-get-local-buffer)
+          (setq treemacs-ignored-regexes nil)
+          (setq file-local-variables-alist nil)
+          (setq dir-local-variables-alist nil)
+          (hack-dir-local-variables-non-file-buffer)
+          (treemacs-refresh)))
+
+      (defun my/treemacs-ignored2 (absolute-path _)
+        ;; (message "my/treemacs-ignored: %s %s" absolute-path filename)
+        (-some (lambda (re) (s-matches? re absolute-path)) treemacs-ignored-regexes))
+      (add-to-list 'treemacs-pre-file-insert-predicates
+                   #'treemacs-is-file-git-ignored?)
+      (add-to-list 'treemacs-pre-file-insert-predicates
+                   #'my/treemacs-ignored2)
       :general
       (local-leader
         "*" '(my/treemacs-jump-to-buffer :which-key "treemacs update"))
       (leader
         "fd"  '(treemacs :which-key "file-drawer")
         "fD"  '(treemacs-bookmark :which-key "file-drawer (from bookmark)")))
-  #+end_src
-
-  #+begin_src elisp
-    (with-eval-after-load 'treemacs
-      (add-to-list 'treemacs-pre-file-insert-predicates #'treemacs-is-file-git-ignored?))
   #+end_src
 
   #+begin_src elisp
