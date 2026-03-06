@@ -756,12 +756,10 @@
           (org-id-new)))
 
       :custom
-      (org-default-notes-file my/notes-file)
+      (org-default-notes-file my/todo-file)
 
       (org-capture-templates
-       `(("t" "Task" entry
-          (file+headline "todo.org" "Inbox")
-          "* TODO %?")
+       `(("t" "Task" entry (file+headline my/todo-file "Inbox") "* TODO %?")
          ("a" "Algorithm" plain
           (file (lambda () (my/get-filepath-from-title "memex/algorithms")))
           (file ,(expand-file-name "algorithm.org" my/org-capture-templates))
