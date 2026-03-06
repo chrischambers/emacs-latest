@@ -456,6 +456,12 @@
       (org-agenda-span 12)
       (org-agenda-start-day "-6d")
       (org-agenda-restore-windows-after-quit t)
+      (org-agenda-inhibit-startup t)
+      :bind (:map org-agenda-mode-map
+                  ([remap org-agenda-quit] . org-agenda-exit))
+      :config
+      ;; Hugely important performance optimisation:
+      (advice-add 'org-get-agenda-file-buffer :around #'cheap-find-file-advice)
       :general
       ;; org-super-agenda copies the org-agenda-mode-map for its headings - you
       ;; need to manually override the emacs bindings with nicer evil equivalents.
@@ -493,7 +499,8 @@
      (require 'dash)
 
      (defcustom org-agenda-blacklist
-       `("#sort"
+       `("^$"
+         "#sort"
          "#processing"
          ,my/archive-directory)
        "patterns to exclude from org-agenda path names")
@@ -504,7 +511,7 @@
 
      (defvar org-agenda-todo-regex
        (let* ((prepend-star (lambda (entry) (concat "\\* " entry)))
-              (interpolate-|-char (lambda (cur acc) (concat acc "\\|" cur)))
+              (interpolate-|-char (lambda (cur acc) (concat acc "|" cur)))
               (headlines (-map prepend-star org-todo-states))
               (pattern (-reduce interpolate-|-char headlines)))
          pattern)
@@ -514,11 +521,9 @@
        "Yields a fresh array with all files containing todos which match REGEX.
 
      Uses grep to discover all files containing anything stored in org-agenda-todo-regex."
-       (-reject #'file-directory-p
-                (split-string
-                 (shell-command-to-string
-                  (concat "grep --include=\"*.org\" -rl -e '" regex (concat "' " org-directory)))
-                 "\n")))
+       (let* ((command (format "rg -0lt org '%s' %s" regex org-directory))
+              (files (-> command shell-command-to-string (split-string "\0"))))
+         files))
 
      (defun s-matches-any? (regexes s)
        "True if any of the patterns match s"
@@ -541,9 +546,9 @@
        (let ((files (-reject #'my/org-agenda-blacklist-match files)))
         (pcase-let*
             ((`(,root-files ,files)
-              (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/" "[^/]*\.org$")) f)) files))
+              (-separate (lambda (f) (s-match (f-canonical (f-join org-directory "[^/]*\.org$")) f)) files))
              (`(,project-files ,files)
-              (-separate (lambda (f) (s-match (f-canonical (concat org-directory "/projects/" ".*\.org$")) f)) files)))
+              (-separate (lambda (f) (s-match (f-canonical (f-join org-directory "projects" ".*\.org$")) f)) files)))
           (-flatten (-map #'my/org-agenda-sort (list root-files project-files files))))))
 
      (setq org-agenda-files
@@ -675,7 +680,7 @@
 	 "Moves the file for the selected node from the old hierarchy into
      the current memex."
 	 (interactive)
-	 (let* ((old-root (concat org-roam-directory "/#old/"))
+	 (let* ((old-root (concat org-roam-directory "/#sort/"))
 		(matches? (lambda (node)
 			    (f-descendant-of? (org-roam-node-file node) old-root)))
 		(node (org-roam-node-read "" matches?))
@@ -688,7 +693,7 @@
 	 "Moves the file for the selected buffer from the old hierarchy
      into the current memex."
 	 (interactive "b")
-	 (let* ((old-root (concat org-roam-directory "/#old/"))
+	 (let* ((old-root (concat org-roam-directory "/#sort/"))
 		(new-root (concat org-roam-directory "/memex/"))
 		(buffer (get-buffer buffer-name))
 		(buffer-path (buffer-file-name buffer)))
@@ -758,7 +763,7 @@
           (file+headline "todo.org" "Inbox")
           "* TODO %?")
          ("a" "Algorithm" plain
-          (file (lambda () (my/get-filepath-from-title "memex/#algorithms")))
+          (file (lambda () (my/get-filepath-from-title "memex/algorithms")))
           (file ,(expand-file-name "algorithm.org" my/org-capture-templates))
           :auto-id t
           :jump-to-captured t)
@@ -771,11 +776,11 @@
           (file ,(expand-file-name "project.org" my/org-capture-templates))
           :auto-id t
           :jump-to-captured t)
-         ("Q" "Quote" plain (file (lambda () (my/get-filepath-from-title "memex/#quotes")))
+         ("Q" "Quote" plain (file (lambda () (my/get-filepath-from-title "memex/quotes")))
           (file ,(expand-file-name "quote.org" my/org-capture-templates))
           :auto-id t)
          ("w" "Word" plain
-          (file (lambda () (my/get-filepath-from-title "memex/#words")))
+          (file (lambda () (my/get-filepath-from-title "memex/words")))
           (file ,(expand-file-name "word.org" my/org-capture-templates)))))
 
       (org-roam-capture-templates
@@ -783,38 +788,38 @@
           :if-new (file+head "memex/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("q" "quote" plain (file ,(expand-file-name "quote.org" my/org-capture-templates))
-          :if-new (file+head "memex/#quotes/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/quotes/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("p" "person" plain (file ,(expand-file-name "default.org" my/org-capture-templates))
-          :if-new (file+head "memex/#people/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/people/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("a" "algorithm" plain (file ,(expand-file-name "algorithm.org" my/org-capture-templates))
-          :if-new (file+head "memex/#algorithms/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/algorithms/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("c" "category theory" plain (file ,(expand-file-name "category_theory.org" my/org-capture-templates))
-          :if-new (file+head "memex/#math/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/math/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("e" "exercise" plain (file ,(expand-file-name "exercise.org" my/org-capture-templates))
-          :if-new (file+head "memex/#exercises/${slug}.org" "#+title: Exercise: ${title}\n")
+          :if-new (file+head "memex/exercises/${slug}.org" "#+title: Exercise: ${title}\n")
           :unnarrowed t)
          ("l" "language")
          ("ln" "natural language" plain (file ,(expand-file-name "default.org" my/org-capture-templates))
-          :if-new (file+head "memex/#languages/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/languages/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("lp" "programming language" plain (file ,(expand-file-name "programming_language.org" my/org-capture-templates))
-          :if-new (file+head "memex/#programming_languages/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/programming_languages/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("m" "math" plain (file ,(expand-file-name "math.org" my/org-capture-templates))
-          :if-new (file+head "memex/#math/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/math/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("n" "nutrient" plain (file ,(expand-file-name "nutrient.org" my/org-capture-templates))
-          :if-new (file+head "memex/#nutrients/${slug}.org" "#+title: Nutrient: ${title}\n")
+          :if-new (file+head "memex/nutrients/${slug}.org" "#+title: Nutrient: ${title}\n")
           :unnarrowed t)
          ("t" "trail" plain (file ,(expand-file-name "trail.org" my/org-capture-templates))
-          :if-new (file+head "memex/##trails/${slug}.org" "#+title: ${title}\n")
+          :if-new (file+head "memex/#trails/${slug}.org" "#+title: ${title}\n")
           :unnarrowed t)
          ("w" "word" plain (file ,(expand-file-name "word.org" my/org-capture-templates))
-          :if-new (file (lambda () (my/get-filepath-from-title "memex/#words")))
+          :if-new (file (lambda () (my/get-filepath-from-title "memex/words")))
           :unnarrowed t :disable-auto-id t)
          ("b" "book" plain (file ,(expand-file-name my/org-capture-templates "book-notes.org"))
           :if-new (file+head ,(expand-file-name "${slug}.org" my/book-notes-directory) "#+title: ${title}\n")
@@ -956,6 +961,10 @@
               "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n") org-capture-templates))
   #+end_src
 
+* <<<org-ql>>>([[https://github.com/alphapapa/org-ql][github]])
+  #+begin_src elisp
+    (use-package org-ql)
+  #+end_src
 * =table.el= ([[https://www.emacswiki.org/emacs/TableMode][emacswiki]])
   #+begin_src elisp
     (require 'table)

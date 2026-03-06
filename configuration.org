@@ -28,9 +28,10 @@
 * Set file paths
   #+begin_src elisp
     (setq my/resources-directory (expand-file-name "resources/" user-emacs-directory)
-          my/ebooks-directory (file-truename "~/Ebooks")
 
+          my/ebooks-directory (file-truename "~/Ebooks")
           my/notes-directory (file-truename "~/Dropbox/notes/")
+
           my/archive-directory (expand-file-name "archive/" my/notes-directory)
           my/reference-directory (expand-file-name "reference/" my/notes-directory)
           my/recipe-directory (expand-file-name "recipes/" my/reference-directory)
@@ -94,6 +95,11 @@
 * [[./config/minimal.org][Minimal configuration]]
     #+begin_src elisp
     (my/config-load "config/minimal.org")
+    #+end_src
+
+* [[./config/core.org][Elisp configuration]]
+    #+begin_src elisp
+    (my/config-load "config/elisp.org")
     #+end_src
 
 * [[./config/core.org][Core configuration]]
@@ -404,41 +410,28 @@
        (add-hook 'org-mode-hook 'org-xournalpp-mode))
    #+end_src
 
+** Optional filter for Cider Debugger locals
+   This also sorts the =locals=, which are currently in an arbitrary order.
+   #+begin_src elisp
+     (defcustom my/cider-debug-local-exclude-regexes '("^argspec" "^retspec" "^guardrails-wrapper")
+       "Patterns to exclude from cider-debug-locals"
+       :type '(list regexp))
+
+     (defun my/blacklisted-local? (word)
+       (s-matches-any? my/cider-debug-local-exclude-regexes word))
+
+     (defun my/cider-debug-filter-locals (f locals)
+       (funcall f (-remove
+                   (-compose #'my/blacklisted-local? #'-first-item)
+                   (sort locals :key #'-first-item ))))
+
+     (advice-add #'cider--debug-format-locals-list
+                 :around
+                 #'my/cider-debug-filter-locals)
+   #+end_src
 * Config which should come last
 ** Update all =transient= menus to use =q= to quit
   #+begin_src elisp
     (with-eval-after-load 'transient
       (transient-bind-q-to-quit))
-  #+end_src
-
-* Optional filter for Cider Debugger locals
-  This also sorts the =locals=, which are currently in an arbitrary order.
-  #+begin_src elisp
-    (defcustom my/cider-debug-local-exclude-regexes '("^argspec" "^retspec" "^guardrails-wrapper")
-      "Patterns to exclude from cider-debug-locals"
-      :type '(list regexp))
-
-    (defun my/blacklisted-local? (word)
-      (s-matches-any? my/cider-debug-local-exclude-regexes word))
-
-    (defun my/cider-debug-filter-locals (f locals)
-      (funcall f (-remove
-                  (-compose #'my/blacklisted-local? #'-first-item)
-                  (sort locals :key #'-first-item ))))
-
-    (advice-add #'cider--debug-format-locals-list
-                :around
-                #'my/cider-debug-filter-locals)
-  #+end_src
-* Misc
-  #+begin_src elisp
-    (defun my/treemacs-root ()
-      (when-let ((buffer (treemacs-get-local-buffer)))
-        (with-current-buffer buffer
-          (let* ((btn (treemacs-current-button))
-                 (parent (treemacs-button-get btn :parent)))
-            (while parent
-              (setq btn parent)
-              (setq parent (treemacs-button-get btn :parent)))
-            (treemacs-button-get btn :path)))))
   #+end_src

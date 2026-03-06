@@ -186,6 +186,16 @@
         (message "Injecting dir-locals.el")
         (hack-dir-local-variables-non-file-buffer))
 
+      (defun my/treemacs-root ()
+        (when-let ((buffer (treemacs-get-local-buffer)))
+          (with-current-buffer buffer
+            (let* ((btn (treemacs-current-button))
+                   (parent (treemacs-button-get btn :parent)))
+              (while parent
+                (setq btn parent)
+                (setq parent (treemacs-button-get btn :parent)))
+              (treemacs-button-get btn :path)))))
+
       :hook ((after-init . treemacs-hide-gitignored-files-mode)
              (treemacs-follow-mode . my/inject-dir-locals)
              (treemacs-project-follow-mode . my/inject-dir-locals)
