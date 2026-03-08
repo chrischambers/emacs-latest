@@ -1084,7 +1084,7 @@
            (cond
             ((and org-roam-path (f-exists? org-roam-path)) org-roam-path)
             ((f-exists? org-path) org-path)
-            t nil)))
+            (t nil))))
 
        (defun my/activate-existing-org-noter-notes (path)
          (with-current-buffer (find-file-noselect path)
