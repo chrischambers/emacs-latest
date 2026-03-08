@@ -759,7 +759,8 @@
       (org-default-notes-file my/todo-file)
 
       (org-capture-templates
-       `(("t" "Task" entry (file+headline my/todo-file "Inbox") "* TODO %?")
+       `(("t" "Todo" entry (file+headline my/todo-file "Inbox") "* TODO %?"
+          :prepend t :kill-buffer t)
          ("h" "Habit" entry (file+headline my/habits-file "Habits")
           "* TODO %?\nSCHEDULED: %T\n:PROPERTIES:\n:STYLE: habit\n:END:")
          ("a" "Algorithm" plain
