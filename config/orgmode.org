@@ -1100,6 +1100,7 @@
 
        (defun my/create-org-noter-notes (book-path)
          (let* ((target-path (my--create-org-noter-notes-path book-path))
+                (target-path (read-from-minibuffer "Notes Location: " target-path))
                 (my/captured-title (my/pdf-get-file-title book-path))
                 (org-capture-templates `(("b" "Book Notes" plain
                                           (file ,target-path)
