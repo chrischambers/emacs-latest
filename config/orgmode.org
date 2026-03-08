@@ -760,6 +760,8 @@
 
       (org-capture-templates
        `(("t" "Task" entry (file+headline my/todo-file "Inbox") "* TODO %?")
+         ("h" "Habit" entry (file+headline my/habits-file "Habits")
+          "* TODO %?\nSCHEDULED: %T\n:PROPERTIES:\n:STYLE: habit\n:END:")
          ("a" "Algorithm" plain
           (file (lambda () (my/get-filepath-from-title "memex/algorithms")))
           (file ,(expand-file-name "algorithm.org" my/org-capture-templates))
