@@ -39,6 +39,12 @@
         )
       :hook (gptel-mode . org-visual-line-and-indent)
       :config
+      ;; Default LLM: ChatGPT
+      (setopt gptel-backend
+              '(gptel-openai "OpenAI"
+                             :key gptel-api-key-from-auth-source
+                             :stream t))
+
       (gptel-make-anthropic "Claude"
         :stream t
         :key #'my/anthropic-api-key)
