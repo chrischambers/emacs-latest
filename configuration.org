@@ -76,20 +76,31 @@
 
 * Variables to make =safe-local-variable=
   #+begin_src elisp
-    (put 'smie-indent-basic 'safe-local-variable #'integerp)
+    (let ((mapping
+           '((smie-indent-basic . integerp)                     ; basic indentation
+             (projectile-project-name . stringp)                ; projectile
 
-    (put 'projectile-project-name 'safe-local-variable #'stringp)     ; projectile
+             (jinx-local-words . stringp)                       ; jinx
 
-    (put 'jinx-local-words 'safe-local-variable #'stringp)            ; jinx
+             (cider-preferred-build-tool . symbolp)             ; cider
+             (cider-clojure-cli-aliases . stringp)              ; cider
 
-    (put 'cider-preferred-build-tool 'safe-local-variable #'symbolp)  ; cider
-    (put 'cider-clojure-cli-aliases 'safe-local-variable #'stringp)   ; cider
+             (web-mode-style-padding . integerp)                ; web-mode
+             (web-mode-block-padding . integerp)                ; web-mode
+             (web-mode-script-padding . integerp)               ; web-mode
 
-    (put 'web-mode-style-padding 'safe-local-variable #'integerp)     ; web-mode
-    (put 'web-mode-block-padding 'safe-local-variable #'integerp)     ; web-mode
-    (put 'web-mode-script-padding 'safe-local-variable #'integerp)    ; web-mode
+             (treemacs-ignored-regexes . listp)                 ; mine (treemacs)
 
-    (put 'treemacs-ignored-regexes 'safe-local-variable #'listp)      ; mine, for treemacs
+             (haskell-indentation-where-pre-offset . integerp)  ; haskell-mode
+             (haskell-indentation-where-post-offset . integerp) ; haskell-mode
+             (haskell-indentation-starter-offset . integerp)    ; haskell-mode
+             (haskell-indentation-left-offset . integerp)       ; haskell-mode
+             (haskell-indentation-layout-offset . integerp)     ; haskell-mode
+             )))
+      (dolist (pair mapping)
+        (let ((var (car pair))
+              (predicate (cdr pair)))
+          (put var 'safe-local-variable predicate))))
   #+end_src
 
 * [[./config/minimal.org][Minimal configuration]]
