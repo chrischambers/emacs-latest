@@ -1270,15 +1270,6 @@
     #+end_src
 
 *** Bindings
-**** COMMENT Format buffer via ormolu
-    #+begin_src elisp
-      (use-package ormolu
-        :hook (haskell-mode . ormolu-format-on-save-mode)
-        :general
-        (local-leader haskell-mode-map
-          "f" '(ormolu-format-buffer :which-key "format-buffer")))
-    #+end_src
-
 **** Jump back from REPL to main buffer
     #+begin_src elisp
       (use-package inferior-haskell
