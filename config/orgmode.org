@@ -1010,6 +1010,7 @@
 ** <<<org-roam-bibtex>>> ([[https://github.com/org-roam/org-roam-bibtex][github]])
    #+begin_src elisp
      (use-package org-roam-bibtex
+       :if (file-exists-p my/ebooks-directory)
        :after org-roam
        :defer 2
        :custom
