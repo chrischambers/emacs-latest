@@ -398,6 +398,10 @@
         (eldoc-mode -1)
         (eldoc-box-hover-mode -1))
 
+      (defun my/initialise-with-no-hints ()
+        (interactive)
+        (eglot-inlay-hints-mode -1))
+
       (defvar eglot-disabled-major-modes
         '(emacs-lisp-mode lisp-mode))
 
@@ -408,13 +412,15 @@
           (eglot-ensure)))
 
       :hook ((prog-mode . my/eglot-ensure)
-             (eglot-managed-mode . my/setup-less-annoying-eldoc))
+             (eglot-managed-mode . my/setup-less-annoying-eldoc)
+             (eglot-managed-mode . my/initialise-with-no-hints))
       :bind (:map prog-mode-map
                   ([remap eldoc-doc-buffer] . my/eldoc-show))
       :custom
       ;; Don't prompt when code-actions/refactorings change buffers
       (eglot-confirm-server-initiated-edits nil)
       (eglot-extend-to-xref t)
+      ;; (eglot-ignored-server-capabilities '(:semanticTokensProvider :inlayHintProvider))
       :general
       ('normal prog-mode-map "gK" 'eldoc)
       (local-leader prog-mode-map
