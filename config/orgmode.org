@@ -358,6 +358,12 @@
    #+end_src
 
 ** Org babel / =src= block configuration
+*** Add mermaid as an available language
+    #+begin_src elisp
+      (use-package ob-mermaid
+        :config
+        (setq ob-mermaid-cli-path "mmdc"))
+    #+end_src
 *** Add nix as an available language
    #+begin_src elisp
      (use-package ob-nix
@@ -381,6 +387,7 @@
          (js . t)
          (julia . t)
          (latex . t)
+         (mermaid . t)
          (nix . t)
          (org . t)
          (oz . t)
