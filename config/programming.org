@@ -352,6 +352,7 @@
        :general
        (leader
          "g"   '(:ignore t :which-key "git")
+         "gb"  '(magit-blame :which-key "blame")
          "gd"  '(vc-diff :which-key "diff (quick)")
          "gf"  '(magit-file-dispatch :which-key "file...")
          "gs"  'magit-status
