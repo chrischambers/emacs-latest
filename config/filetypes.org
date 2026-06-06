@@ -211,3 +211,8 @@
        :config
        (setq csv-separators '("," ";" ":" " ")))
    #+end_src
+* [[https://hurl.dev/][Hurl]] ([[https://github.com/JasZhe/hurl-mode][github]])
+  #+begin_src elisp
+    (use-package hurl-mode
+      :straight (hurl-mode :type git :host github :repo "JasZhe/hurl-mode"))
+  #+end_src
