@@ -343,6 +343,14 @@
 
    #+begin_src elisp
      (use-package magit
+       :preface
+       (defun my/magit-blame ()
+         "If magit-blame is not active, instantly show line additions.
+     If it is already active, open the magit-blame transient menu."
+         (interactive)
+         (if (bound-and-true-p magit-blame-mode)
+             (call-interactively #'magit-blame)
+           (call-interactively #'magit-blame-addition)))
        :commands (magit-status magit-refresh-all)
        ;; start in insert-mode for commit messages
        :hook (git-commit-mode . evil-insert-state)
@@ -352,7 +360,7 @@
        :general
        (leader
          "g"   '(:ignore t :which-key "git")
-         "gb"  '(magit-blame :which-key "blame")
+         "gb"  '(my/magit-blame :which-key "blame")
          "gd"  '(vc-diff :which-key "diff (quick)")
          "gf"  '(magit-file-dispatch :which-key "file...")
          "gs"  'magit-status
@@ -1313,9 +1321,13 @@
     #+begin_src elisp
       (with-eval-after-load 'eglot
         (add-to-list 'eglot-server-programs
-                     '(((jsx-mode :language-id "javascriptreact"))
-                       "typescript-language-server"
-                       "--stdio")))
+                     '(((rjsx-mode :language-id "javascriptreact")
+                        (jsx-mode :language-id "javascriptreact")
+                        (js-jsx-mode :language-id "javascriptreact")
+                        (tsx-ts-mode :language-id "typescriptreact")
+                        typescript-ts-mode
+                        typescript-mode)
+                       . ("tsgo" "--lsp" "--stdio"))))
     #+end_src
 
 *** RJSX-Mode
@@ -1399,26 +1411,6 @@
           "?"  '(:ignore t :major-modes (javascript-mode rjsx-mode js2-mode)
                          :which-key "documentation")
           "?j" '(my/mozilla-js-documentation-search :which-key "javascript")))
-    #+end_src
-
-*** Import-js
-    #+begin_src elisp
-      (setq js-modes '(js2-mode rjsx-mode javascript-mode))
-    #+end_src
-
-    #+begin_src elisp
-      (use-package import-js
-        :preface
-        (defun my/import-js-fix ()
-          (interactive)
-          (when (-contains? js-modes major-mode)
-            (import-js-fix)))
-        (defun my/import-js-setup ()
-          (add-hook 'after-save-hook #'my/import-js-fix nil t)) ; t => buffer-local
-        :init
-        (dolist (mode js-modes)
-          (add-hook (intern (format "%s-hook" mode)) #'my/import-js-setup)
-          (add-hook (intern (format "%s-hook" mode)) #'run-import-js)))
     #+end_src
 
 ** Julia

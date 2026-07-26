@@ -134,7 +134,7 @@
         :straight (emacs-ansible
                    :host gitlab
                    :repo "emacs-ansible/emacs-ansible"
-                   :files ("snippets" "*.el")))
+                   :files ("*.el")))
     #+end_src
 
 *** poly-ansible ([[https://gitlab.com/mavit/poly-ansible][gitlab]])

@@ -44,6 +44,7 @@
           my/sources-directory (expand-file-name "sources/" my/notes-directory)
           my/book-notes-directory (expand-file-name "ebooks/" my/sources-directory)
 
+          my/snippets-directory (expand-file-name "snippets" user-emacs-directory)
           my/var-directory (expand-file-name "var" my/notes-directory)
           my/attachments-directory (expand-file-name "attachments/" my/var-directory)
           my/latex-image-directory (expand-file-name "latex-images/" my/var-directory))
